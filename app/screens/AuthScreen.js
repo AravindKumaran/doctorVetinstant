@@ -1,38 +1,26 @@
 import React from "react";
+import { StyleSheet, View, Text } from "react-native";
 
-import { StyleSheet, View, Text, Button } from "react-native";
+import AppButton from "../components/AppButton";
 
-const AuthScreen = ({ route }) => {
+const AuthScreen = ({ route, navigation }) => {
+  const { title } = route.params;
+
+  const handlePress = () => {
+    navigation.navigate(`${title}`);
+  };
   return (
     <View style={styles.container}>
       <View>
         <Text style={styles.text}>VetInstant</Text>
-        <Text style={styles.title}>{route.params.title}</Text>
+        <Text style={styles.title}>{title}</Text>
       </View>
 
-      <View style={styles.btnWrapper}>
-        <Button
-          style={styles.button}
-          title='Continue With EmailID'
-          //   onPress={() => navigation.navigate("Auth", { title: "Login" })}
-        />
-      </View>
+      <AppButton title='Continue with Email ID' onPress={handlePress} />
 
-      <View style={styles.btnWrapper}>
-        <Button
-          style={styles.button}
-          title='Continue With Google'
-          //   onPress={() => navigation.navigate("Auth", { title: "Login" })}
-        />
-      </View>
+      <AppButton title='Continue with Google' onPress={handlePress} />
 
-      <View style={styles.btnWrapper}>
-        <Button
-          style={styles.button}
-          title={route.params.title}
-          //   onPress={() => navigation.navigate("Auth", { title: "Login" })}
-        />
-      </View>
+      <AppButton title={title} />
     </View>
   );
 };
@@ -42,6 +30,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 15,
   },
   text: {
     fontSize: 25,
@@ -49,15 +38,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     alignSelf: "center",
-  },
-  button: {
-    marginVertical: 10,
-    backgroundColor: "#fff",
-  },
-
-  btnWrapper: {
-    marginVertical: 10,
-    width: "80%",
   },
 });
 

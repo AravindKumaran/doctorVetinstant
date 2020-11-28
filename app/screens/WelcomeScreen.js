@@ -1,26 +1,21 @@
 import React from "react";
+import { StyleSheet, View } from "react-native";
 
-import { Button, StyleSheet, Text, View } from "react-native";
+import AppButton from "../components/AppButton";
+import AppText from "../components/AppText";
 
 const WelcomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>VetInstant</Text>
-      <View style={styles.btnWrapper}>
-        <Button
-          style={styles.button}
-          title='Sign Up'
-          onPress={() => navigation.navigate("Auth", { title: "Register" })}
-        />
-      </View>
-
-      <View style={styles.btnWrapper}>
-        <Button
-          style={styles.button}
-          title='Login'
-          onPress={() => navigation.navigate("Auth", { title: "Login" })}
-        />
-      </View>
+      <AppText>VetInstant</AppText>
+      <AppButton
+        title='Signup'
+        onPress={() => navigation.navigate("Auth", { title: "Register" })}
+      />
+      <AppButton
+        title='Login'
+        onPress={() => navigation.navigate("Auth", { title: "Login" })}
+      />
     </View>
   );
 };
@@ -30,19 +25,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  text: {
-    fontSize: 18,
-    marginBottom: 30,
-  },
-  button: {
-    marginVertical: 10,
-    backgroundColor: "#fff",
-  },
-
-  btnWrapper: {
-    marginVertical: 10,
-    width: "80%",
+    padding: 15,
   },
 });
 
