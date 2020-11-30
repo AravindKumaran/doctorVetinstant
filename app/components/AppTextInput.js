@@ -13,7 +13,7 @@ const AppTextInput = ({ icon, ...rest }) => {
           style={styles.icon}
         />
       )}
-      <TextInput style={styles.textInput} {...rest} />
+      <TextInput style={styles.textInput} numberOfLines={1} {...rest} />
     </View>
   );
 };
@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 15,
     marginVertical: 10,
+    overflow: "hidden",
   },
   icon: {
     marginRight: 10,
@@ -34,6 +35,7 @@ const styles = StyleSheet.create({
   textInput: {
     fontSize: 18,
     color: "#0c0c0c",
+    padding: 3,
   },
 });
 

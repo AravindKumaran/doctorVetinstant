@@ -19,8 +19,6 @@ const AuthScreen = ({ route, navigation }) => {
       <AppButton title='Continue with Email ID' onPress={handlePress} />
 
       <AppButton title='Continue with Google' onPress={handlePress} />
-
-      <AppButton title={title} />
     </View>
   );
 };
