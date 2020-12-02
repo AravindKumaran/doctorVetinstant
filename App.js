@@ -13,6 +13,7 @@ import AuthContext from "./app/context/authContext";
 import authStorage from "./app/components/utils/authStorage";
 
 import usersApi from "./app/api/users";
+import { getGoggleLoggedInUser } from "./app/api/googleAuth";
 
 const Stack = createStackNavigator();
 
@@ -22,8 +23,13 @@ const App = () => {
   const restoreToken = async () => {
     const token = await authStorage.getToken();
     if (!token) return;
-    const userRes = await usersApi.getLoggedInUser();
-    setUser(userRes.data.user);
+    if (token.length === 171) {
+      const userRes = await usersApi.getLoggedInUser();
+      setUser(userRes.data.user);
+    } else if (token.length === 178) {
+      const userRes = await getGoggleLoggedInUser(token);
+      setUser(userRes.data);
+    }
   };
 
   useEffect(() => {

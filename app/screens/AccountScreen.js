@@ -17,7 +17,7 @@ const AccountScrren = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <AppText>{user ? user.emailID : ""}</AppText>
+      <AppText>{user ? user.emailID || user.email : ""}</AppText>
       <AppButton title='Logout' onPress={handleLogout} />
     </View>
   );
