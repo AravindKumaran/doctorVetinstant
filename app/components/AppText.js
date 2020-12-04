@@ -3,7 +3,7 @@ import React from "react";
 import { StyleSheet, View, Text } from "react-native";
 
 const AppText = ({ children, style }) => {
-  return <Text style={[styles.text, style]}> {children} </Text>;
+  return <Text style={(styles.text, style)}> {children} </Text>;
 };
 
 const styles = StyleSheet.create({
@@ -11,7 +11,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: "Roboto",
     margin: 5,
-    fontWeight: "400",
   },
 });
 
