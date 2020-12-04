@@ -7,7 +7,8 @@ import WelcomeScreen from "./app/screens/WelcomeScreen";
 import AuthScreen from "./app/screens/AuthScreen";
 import LoginScreen from "./app/screens/LoginScreen";
 import RegisterScreen from "./app/screens/RegisterScreen";
-import AccountScrren from "./app/screens/AccountScreen";
+import HomeScreen from "./app/screens/HomeScreen";
+import AddPetScreen from "./app/screens/AddPetScreen";
 
 import AuthContext from "./app/context/authContext";
 import authStorage from "./app/components/utils/authStorage";
@@ -46,7 +47,10 @@ const App = () => {
       <NavigationContainer>
         <Stack.Navigator>
           {user ? (
-            <Stack.Screen name='Account' component={AccountScrren} />
+            <>
+              <Stack.Screen name='Home' component={HomeScreen} />
+              <Stack.Screen name='AddPet' component={AddPetScreen} />
+            </>
           ) : (
             <>
               <Stack.Screen name='Welcome' component={WelcomeScreen} />

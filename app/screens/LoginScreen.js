@@ -4,9 +4,9 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 
 import AppText from "../components/AppText";
-import AppFormField from "../components/AppFormField";
-import SubmitButton from "../components/SubmitButton";
-import ErrorMessage from "../components/ErrorMessage";
+import AppFormField from "../components/forms/AppFormField";
+import SubmitButton from "../components/forms/SubmitButton";
+import ErrorMessage from "../components/forms/ErrorMessage";
 
 import authApi from "../api/auth";
 import AuthContext from "../context/authContext";
@@ -30,7 +30,6 @@ const LoginScreen = () => {
     const res = await authApi.login(email, password);
     setLoading(false);
     if (!res.ok) {
-      console.log(res.data.msg);
       setError(res.data.msg);
       return;
     }

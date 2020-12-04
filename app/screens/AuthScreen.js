@@ -28,7 +28,6 @@ const AuthScreen = ({ route, navigation }) => {
   const signInWithGoogle = async () => {
     try {
       const result = await Google.logInAsync(config);
-      console.log(result);
       if (result.type === "success") {
         const password = result.user.email + result.user.id;
         await authApi.saveGoogleUser(result.user.email, password);
