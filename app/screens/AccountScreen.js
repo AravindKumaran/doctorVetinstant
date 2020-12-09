@@ -17,8 +17,16 @@ const AccountScrren = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <AppText>{user ? user.emailID || user.email : ""}</AppText>
+      <AppText>Welcome Doctor {user ? user.name.split(" ")[0] : ""}</AppText>
       <AppButton title='Logout' onPress={handleLogout} />
+      {/* <AppButton
+        title='Add Doctor Details'
+        onPress={() => navigation.navigate("Doctor")}
+      /> */}
+      <AppButton
+        title='View Doctor Details'
+        onPress={() => navigation.navigate("DoctorDetails")}
+      />
     </View>
   );
 };

@@ -7,7 +7,9 @@ import WelcomeScreen from "./app/screens/WelcomeScreen";
 import AuthScreen from "./app/screens/AuthScreen";
 import LoginScreen from "./app/screens/LoginScreen";
 import RegisterScreen from "./app/screens/RegisterScreen";
-import AccountScrren from "./app/screens/AccountScreen";
+import AccountScreen from "./app/screens/AccountScreen";
+import DoctorScreen from "./app/screens/DoctorScreen";
+import DoctorDetailsScreen from "./app/screens/DoctorDetailsScreen";
 
 import AuthContext from "./app/context/authContext";
 import authStorage from "./app/components/utils/authStorage";
@@ -45,8 +47,15 @@ const App = () => {
     >
       <NavigationContainer>
         <Stack.Navigator>
-          {user ? (
-            <Stack.Screen name='Account' component={AccountScrren} />
+          {user && user.role === "doctor" ? (
+            <>
+              <Stack.Screen name='Account' component={AccountScreen} />
+              <Stack.Screen name='Doctor' component={DoctorScreen} />
+              <Stack.Screen
+                name='DoctorDetails'
+                component={DoctorDetailsScreen}
+              />
+            </>
           ) : (
             <>
               <Stack.Screen name='Welcome' component={WelcomeScreen} />
