@@ -16,7 +16,7 @@ const DoctorDetailsScreen = ({ navigation }) => {
 
   const getDoctorDetails = async () => {
     setLoading(true)
-    const res = await doctorsApi.getSingleDoctor(user._id)
+    const res = await doctorsApi.getLoggedInDoctor(user._id)
     if (!res.ok) {
       setLoading(false)
       // console.log(res);
@@ -57,7 +57,13 @@ const DoctorDetailsScreen = ({ navigation }) => {
                 <AppText style={{ fontSize: 14, color: '#606770' }}>
                   Hospital/Clinic Name :
                 </AppText>
-                <AppText>{doctor.hospname}</AppText>
+                <AppText>{doctor.hospital.name}</AppText>
+              </View>
+              <View style={styles.card}>
+                <AppText style={{ fontSize: 14, color: '#606770' }}>
+                  Consultation Fees :
+                </AppText>
+                <AppText>₹ {doctor.fee}</AppText>
               </View>
               <View style={styles.card}>
                 <AppText style={{ fontSize: 14, color: '#606770' }}>
