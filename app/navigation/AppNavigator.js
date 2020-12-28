@@ -1,32 +1,33 @@
-import React from "react";
-import { TouchableOpacity } from "react-native";
-import { createStackNavigator } from "@react-navigation/stack";
+import React from 'react'
+import { TouchableOpacity } from 'react-native'
+import { createStackNavigator } from '@react-navigation/stack'
 
-import HomeScreen from "../screens/HomeScreen";
-import DoctorScreen from "../screens/DoctorScreen";
-import DoctorDetailsScreen from "../screens/DoctorDetailsScreen";
+import HomeScreen from '../screens/HomeScreen'
+import DoctorScreen from '../screens/DoctorScreen'
+import DoctorDetailsScreen from '../screens/DoctorDetailsScreen'
+import PatientScreen from '../screens/PatientScreen'
 
-import { Feather } from "@expo/vector-icons";
+import { Feather } from '@expo/vector-icons'
 
-const Stack = createStackNavigator();
+const Stack = createStackNavigator()
 
 const AuthNavigator = ({ navigation }) => {
   return (
     <Stack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: "#d8d8d8", //Set Header color
+          backgroundColor: '#d8d8d8', //Set Header color
         },
-        headerTitleAlign: "center",
+        headerTitleAlign: 'center',
       }}
     >
       <Stack.Screen
         name='Home'
         component={HomeScreen}
         options={{
-          title: "Home", //Set Header Title
+          title: 'Home', //Set Header Title
 
-          headerTintColor: "black", //Set Header text color
+          headerTintColor: 'black', //Set Header text color
           headerTitleStyle: {
             fontSize: 22,
           },
@@ -48,8 +49,9 @@ const AuthNavigator = ({ navigation }) => {
       />
       <Stack.Screen name='Doctor' component={DoctorScreen} />
       <Stack.Screen name='DoctorDetails' component={DoctorDetailsScreen} />
+      <Stack.Screen name='Patient' component={PatientScreen} />
     </Stack.Navigator>
-  );
-};
+  )
+}
 
-export default AuthNavigator;
+export default AuthNavigator

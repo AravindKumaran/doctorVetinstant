@@ -1,33 +1,32 @@
-import React from "react";
-import { createStackNavigator } from "@react-navigation/stack";
-import { createDrawerNavigator } from "@react-navigation/drawer";
+import React from 'react'
+import { createStackNavigator } from '@react-navigation/stack'
+import { createDrawerNavigator } from '@react-navigation/drawer'
 
-import HomeScreen from "../screens/HomeScreen";
-import DoctorScreen from "../screens/DoctorScreen";
+import DoctorScreen from '../screens/DoctorScreen'
+import PrescriptionScreen from '../screens/PrescriptionScreen'
+import AppNavigator from './AppNavigator'
 
-import AppNavigator from "./AppNavigator";
+import DrawerContent from '../components/DrawerContent'
 
-import DrawerContent from "../components/DrawerContent";
-
-import { Feather } from "@expo/vector-icons";
+import { Feather } from '@expo/vector-icons'
 
 // const Stack = createStackNavigator();
-const Drawer = createDrawerNavigator();
+const Drawer = createDrawerNavigator()
 
 const DrawerNavigator = () => (
   <Drawer.Navigator
     screenOptions={{
       headerStyle: {
-        backgroundColor: "#d8d8d8",
+        backgroundColor: '#d8d8d8',
         paddingLeft: 20,
       },
-      headerTitleAlign: "center",
+      headerTitleAlign: 'center',
     }}
-    backBehavior={"order"}
+    backBehavior={'order'}
     // drawerType={"slide"}
     drawerContentOptions={{
-      activeBackgroundColor: "#f2f2f2",
-      activeTintColor: "#000000",
+      activeBackgroundColor: '#f2f2f2',
+      activeTintColor: '#000000',
       labelStyle: { fontSize: 18 },
       itemStyle: {
         borderTopRightRadius: 30,
@@ -62,12 +61,14 @@ const DrawerNavigator = () => (
       }}
     />
     <Drawer.Screen
-      name='Payments'
-      component={AppNavigator}
+      name='Prescription'
+      component={PrescriptionScreen}
       options={{
         drawerIcon: ({ color, size }) => (
           <Feather name='dollar-sign' size={size} color={color} />
         ),
+        headerShown: true,
+        unmountOnBlur: true,
       }}
     />
     <Drawer.Screen
@@ -80,6 +81,6 @@ const DrawerNavigator = () => (
       }}
     />
   </Drawer.Navigator>
-);
+)
 
-export default DrawerNavigator;
+export default DrawerNavigator

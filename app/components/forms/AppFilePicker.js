@@ -1,35 +1,35 @@
-import React, { useState } from "react";
-import * as DocumentPicker from "expo-document-picker";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import React, { useState } from 'react'
+import * as DocumentPicker from 'expo-document-picker'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 
-import { StyleSheet, View, TouchableOpacity } from "react-native";
+import { StyleSheet, View, TouchableOpacity } from 'react-native'
 
-import AppText from "../AppText";
+import AppText from '../AppText'
 
 const AppFilePicker = ({ onChangeUri }) => {
-  const [fileName, setFileName] = useState(null);
+  const [fileName, setFileName] = useState(null)
 
   const selectFile = async () => {
     try {
       const file = await DocumentPicker.getDocumentAsync({
-        type: "application/pdf",
-      });
+        type: 'application/pdf',
+      })
 
-      if (file.type === "success") {
-        const fileExt = file.name.split(".")[1];
-        if (fileExt === "pdf" && file.size < 1000000) {
-          onChangeUri(file.uri);
-          setFileName(file.name);
+      if (file.type === 'success') {
+        const fileExt = file.name.split('.')[1]
+        if (fileExt === 'pdf' && file.size < 1000000) {
+          onChangeUri(file.uri)
+          setFileName(file.name)
         } else {
-          setFileName(null);
-          onChangeUri(null);
-          throw new Error("Please select .pdf file below 1mb");
+          setFileName(null)
+          onChangeUri(null)
+          throw new Error('Please select .pdf file below 1mb')
         }
       }
     } catch (error) {
-      console.log("Error in picking file", error);
+      console.log('Error in picking file', error)
     }
-  };
+  }
 
   return (
     <View style={styles.container}>
@@ -41,22 +41,22 @@ const AppFilePicker = ({ onChangeUri }) => {
       </TouchableOpacity>
       {fileName && <AppText>{fileName}</AppText>}
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
     borderWidth: 2,
-    borderColor: "#000",
+    borderColor: '#000',
     borderRadius: 15,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   container: {
     marginBottom: 10,
   },
-});
+})
 
-export default AppFilePicker;
+export default AppFilePicker
