@@ -31,91 +31,89 @@ const DoctorDetailsScreen = ({ navigation }) => {
   }, [])
   return (
     <ScrollView>
-      {loading ? (
-        <LoadingIndicator visible={loading} />
-      ) : (
-        <View style={styles.container}>
-          {doctor ? (
-            <View style={styles.details}>
-              <AppText
-                style={{
-                  fontSize: 25,
-                  fontWeight: '600',
-                  textAlign: 'center',
-                  marginBottom: 30,
-                }}
-              >
-                Your Details
+      <LoadingIndicator visible={loading} />
+
+      <View style={styles.container}>
+        {doctor ? (
+          <View style={styles.details}>
+            <AppText
+              style={{
+                fontSize: 25,
+                fontWeight: '600',
+                textAlign: 'center',
+                marginBottom: 30,
+              }}
+            >
+              Your Details
+            </AppText>
+            <View style={styles.card}>
+              <AppText style={{ fontSize: 14, color: '#606770' }}>
+                Phone Number :
               </AppText>
-              <View style={styles.card}>
-                <AppText style={{ fontSize: 14, color: '#606770' }}>
-                  Phone Number :
-                </AppText>
-                <AppText>{doctor.phone}</AppText>
-              </View>
-              <View style={styles.card}>
-                <AppText style={{ fontSize: 14, color: '#606770' }}>
-                  Hospital/Clinic Name :
-                </AppText>
-                <AppText>{doctor.hospital.name}</AppText>
-              </View>
-              <View style={styles.card}>
-                <AppText style={{ fontSize: 14, color: '#606770' }}>
-                  Consultation Fees :
-                </AppText>
-                <AppText>₹ {doctor.fee}</AppText>
-              </View>
-              <View style={styles.card}>
-                <AppText style={{ fontSize: 14, color: '#606770' }}>
-                  Account Number :
-                </AppText>
-                <AppText>{doctor.accno}</AppText>
-              </View>
-              <View style={styles.card}>
-                <AppText style={{ fontSize: 14, color: '#606770' }}>
-                  Name On Card :
-                </AppText>
-                <AppText>{doctor.accname}</AppText>
-              </View>
-              <View style={styles.card}>
-                <AppText style={{ fontSize: 14, color: '#606770' }}>
-                  Account Type :
-                </AppText>
-                <AppText>{doctor.acctype}</AppText>
-              </View>
-              <View style={styles.card}>
-                <AppText style={{ fontSize: 14, color: '#606770' }}>
-                  IFSC Code :
-                </AppText>
-                <AppText>{doctor.ifsc}</AppText>
-              </View>
-              <View style={[styles.card, { marginBottom: 30 }]}>
-                <AppText style={{ fontSize: 14, color: '#606770' }}>
-                  Your Form File :
-                </AppText>
-                <AppText>{doctor.file}</AppText>
-              </View>
+              <AppText>{doctor.phone}</AppText>
             </View>
-          ) : (
-            <>
-              <AppText
-                style={{
-                  fontSize: 22,
-                  fontWeight: '600',
-                  textAlign: 'center',
-                  marginTop: 120,
-                }}
-              >
-                You haven't added your details
+            <View style={styles.card}>
+              <AppText style={{ fontSize: 14, color: '#606770' }}>
+                Hospital/Clinic Name :
               </AppText>
-              <AppButton
-                title='Add Doctor Details'
-                onPress={() => navigation.navigate('Doctor')}
-              />
-            </>
-          )}
-        </View>
-      )}
+              <AppText>{doctor.hospital.name}</AppText>
+            </View>
+            <View style={styles.card}>
+              <AppText style={{ fontSize: 14, color: '#606770' }}>
+                Consultation Fees :
+              </AppText>
+              <AppText>₹ {doctor.fee}</AppText>
+            </View>
+            <View style={styles.card}>
+              <AppText style={{ fontSize: 14, color: '#606770' }}>
+                Account Number :
+              </AppText>
+              <AppText>{doctor.accno}</AppText>
+            </View>
+            <View style={styles.card}>
+              <AppText style={{ fontSize: 14, color: '#606770' }}>
+                Name On Card :
+              </AppText>
+              <AppText>{doctor.accname}</AppText>
+            </View>
+            <View style={styles.card}>
+              <AppText style={{ fontSize: 14, color: '#606770' }}>
+                Account Type :
+              </AppText>
+              <AppText>{doctor.acctype}</AppText>
+            </View>
+            <View style={styles.card}>
+              <AppText style={{ fontSize: 14, color: '#606770' }}>
+                IFSC Code :
+              </AppText>
+              <AppText>{doctor.ifsc}</AppText>
+            </View>
+            <View style={[styles.card, { marginBottom: 30 }]}>
+              <AppText style={{ fontSize: 14, color: '#606770' }}>
+                Your Form File :
+              </AppText>
+              <AppText>{doctor.file}</AppText>
+            </View>
+          </View>
+        ) : (
+          <>
+            <AppText
+              style={{
+                fontSize: 22,
+                fontWeight: '600',
+                textAlign: 'center',
+                marginTop: 120,
+              }}
+            >
+              You haven't added your details
+            </AppText>
+            <AppButton
+              title='Add Doctor Details'
+              onPress={() => navigation.navigate('Doctor')}
+            />
+          </>
+        )}
+      </View>
     </ScrollView>
   )
 }
