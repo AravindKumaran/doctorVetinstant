@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { StyleSheet, View } from 'react-native'
 
 import AppButton from '../components/AppButton'
@@ -25,6 +25,10 @@ const HomeScrren = ({ navigation }) => {
       <AppButton
         title='View Doctor Details'
         onPress={() => navigation.navigate('DoctorDetails')}
+      />
+      <AppButton
+        title='Patient List'
+        onPress={() => navigation.navigate('PatientList')}
       />
     </View>
   )
