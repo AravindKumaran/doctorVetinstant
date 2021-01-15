@@ -8,6 +8,7 @@ import DoctorDetailsScreen from '../screens/DoctorDetailsScreen'
 import PatientScreen from '../screens/PatientScreen'
 import ChatScreen from '../screens/ChatScreen'
 import PatientListScreen from '../screens/PatientListScreen'
+import VideoCallScreen from '../screens/VideoCallScreen'
 
 import { Feather } from '@expo/vector-icons'
 
@@ -54,6 +55,7 @@ const AuthNavigator = ({ navigation }) => {
       <Stack.Screen name='Patient' component={PatientScreen} />
       <Stack.Screen name='Chat' component={ChatScreen} />
       <Stack.Screen name='PatientList' component={PatientListScreen} />
+      <Stack.Screen name='VideoCall' component={VideoCallScreen} />
     </Stack.Navigator>
   )
 }

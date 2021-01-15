@@ -6,6 +6,7 @@ import AppText from '../components/AppText'
 import AuthContext from '../context/authContext'
 import LoadingIndicator from '../components/LoadingIndicator'
 import roomsApi from '../api/room'
+import socket from '../components/utils/socket'
 
 function getRandColor(brightness) {
   var rgb = [Math.random() * 256, Math.random() * 256, Math.random() * 256]
@@ -37,6 +38,13 @@ const PatientListScreen = ({ navigation }) => {
       setLoading(false)
     }
     getPatients()
+  }, [])
+
+  useEffect(() => {
+    socket.on('pickCall', (data) => {
+      console.log('home', data)
+    })
+    // socket.emit('callStart', user)
   }, [])
 
   return (

@@ -10,7 +10,12 @@ const getLoggedInUser = () => {
   return client.patch(`${endPoint}/me`)
 }
 
+const getVideoToken = (username) => {
+  return client.get(`${endPoint}/getToken/?userName=${username}`)
+}
+
 export default {
   getUsers,
   getLoggedInUser,
+  getVideoToken,
 }
