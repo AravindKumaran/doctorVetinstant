@@ -16,7 +16,10 @@ const ChatScreen = ({ navigation, route }) => {
   useEffect(() => {
     const getAllChats = async () => {
       setLoading(true)
-      const chatRes = await chatsApi.getRoomAllChat(route.params?.pat.name)
+      const chatRes = await chatsApi.getRoomAllChat(
+        route.params?.pat.name,
+        route.params?.pat.petId
+      )
       if (!chatRes.ok) {
         console.log(chatRes)
         setLoading(false)
@@ -64,6 +67,7 @@ const ChatScreen = ({ navigation, route }) => {
 
   const onSend = async (newMsg) => {
     newMsg[0].roomName = route.params?.pat.name
+    newMsg[0].petId = route.params?.pat.petId
     setLoading(true)
     await chatsApi.createChat(newMsg[0])
     setLoading(false)

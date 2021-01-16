@@ -28,6 +28,7 @@ const PatientListScreen = ({ navigation }) => {
     const getPatients = async () => {
       setLoading(true)
       const res = await roomsApi.getReceiverRoom(user._id)
+      console.log(res.data.room)
       if (!res.ok) {
         setLoading(false)
         console.log(res)

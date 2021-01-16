@@ -1,60 +1,132 @@
-import React from 'react'
-import { StyleSheet, View } from 'react-native'
+import React, { useState, useContext, useEffect } from 'react'
+import { ScrollView, StyleSheet, View } from 'react-native'
 import { Formik } from 'formik'
 import * as Yup from 'yup'
 
 import AppText from '../components/AppText'
+import AuthContext from '../context/authContext'
+import LoadingIndicator from '../components/LoadingIndicator'
+import AppSelect from '../components/forms/AppSelect'
 import SubmitButton from '../components/SubmitButton'
 import AppFormField from '../components/AppFormField'
 import FormImagePicker from '../components/forms/FormImagePicker'
 
+import roomsApi from '../api/room'
+import petsApi from '../api/pets'
+
 const validationSchema = Yup.object().shape({
+  patientName: Yup.string()
+    .required('Please select a patient')
+    .nullable()
+    .label('Patient Name'),
   prescription: Yup.string().max(100).required().label('Prescription'),
   photo: Yup.string().nullable(),
 })
 
-const PrescriptionScreen = () => {
-  const handleSubmit = (values) => {
-    console.log(values)
+const PrescriptionScreen = ({ navigation }) => {
+  const { user } = useContext(AuthContext)
+  const [patients, setPatients] = useState([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const getPatients = async () => {
+      setLoading(true)
+      const res = await roomsApi.getReceiverRoom(user._id)
+      if (!res.ok) {
+        setLoading(false)
+        console.log(res)
+        return
+      }
+
+      let pateintss = res.data.room
+      let newPatients = pateintss.reduce((acc, item) => {
+        acc.push({
+          label:
+            item.senderName.charAt(0).toUpperCase() + item.senderName.slice(1),
+          value: item.petId,
+        })
+        return acc
+      }, [])
+
+      setPatients(newPatients)
+      setLoading(false)
+    }
+    getPatients()
+  }, [])
+
+  const handleSubmit = async (values) => {
+    const form = new FormData()
+    if (values.photo) {
+      form.append('photo', {
+        name: 'photo',
+        type: 'image/jpeg',
+        uri: values.photo,
+      })
+    }
+
+    form.append('prescription', values.prescription)
+    form.append('docname', user.name)
+    setLoading(true)
+    const petRes = await petsApi.sendPetPrescription(form, values.patientName)
+    if (!petRes.ok) {
+      setLoading(false)
+      console.log('Error', petRes)
+      return
+    }
+    // console.log(petRes)
+    alert('Prescription Send Successfully!')
+    setLoading(false)
+    navigation.navigate('Home')
   }
 
   return (
-    <View style={styles.container}>
-      <AppText
-        style={{ textAlign: 'center', fontSize: 20, marginVertical: 30 }}
-      >
-        Please Provide Your Prescription
-      </AppText>
-      <Formik
-        initialValues={{
-          prescription: '',
-          photo: null,
-        }}
-        onSubmit={handleSubmit}
-        validationSchema={validationSchema}
-      >
-        {() => (
-          <>
-            <AppFormField
-              //   label='Pet Problems'
-              autoCapitalize='none'
-              autoCorrect={false}
-              name='prescription'
-              numberOfLines={3}
-              placeholder='enter your prescription'
-            />
+    <>
+      <LoadingIndicator visible={loading} />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.container}>
+          <AppText
+            style={{ textAlign: 'center', fontSize: 20, marginVertical: 30 }}
+          >
+            Please Provide Your Prescription
+          </AppText>
+          <Formik
+            initialValues={{
+              patientName: '',
+              prescription: '',
+              photo: null,
+            }}
+            onSubmit={handleSubmit}
+            validationSchema={validationSchema}
+          >
+            {() => (
+              <>
+                <AppSelect
+                  items={patients}
+                  label='Select Patient Name'
+                  name='patientName'
+                />
+                <AppFormField
+                  label='Pet Problems'
+                  autoCapitalize='none'
+                  autoCorrect={false}
+                  name='prescription'
+                  numberOfLines={3}
+                  placeholder='enter your prescription'
+                />
 
-            <AppText style={{ marginVertical: 20 }}>
-              Select Image(optional)
-            </AppText>
+                <AppText style={{ marginVertical: 20 }}>
+                  Select Image(optional)
+                </AppText>
 
-            <FormImagePicker name='photo' />
+                <FormImagePicker name='photo' />
 
-            <SubmitButton title='Send' />
-          </>
-        )}
-      </Formik>
-    </View>
+                <SubmitButton title='Send' />
+              </>
+            )}
+          </Formik>
+        </View>
+      </ScrollView>
+    </>
   )
 }
 

@@ -81,28 +81,27 @@ const DetailsScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false)
   const [hospitals, setHopitals] = useState([])
 
-  const getAllHospitals = async () => {
-    setLoading(true)
-    const res = await hospitalsApi.getHospitals()
-    if (!res.ok) {
-      setLoading(false)
-      console.log(res)
-      return
-    }
-    let allHospitals = res.data.hospitals
-
-    let newHospitals = allHospitals.reduce((acc, item) => {
-      acc.push({
-        label: item.name.charAt(0).toUpperCase() + item.name.slice(1),
-        value: item._id,
-      })
-      return acc
-    }, [])
-    setHopitals(newHospitals)
-    setLoading(false)
-  }
-
   useEffect(() => {
+    const getAllHospitals = async () => {
+      setLoading(true)
+      const res = await hospitalsApi.getHospitals()
+      if (!res.ok) {
+        setLoading(false)
+        console.log(res)
+        return
+      }
+      let allHospitals = res.data.hospitals
+
+      let newHospitals = allHospitals.reduce((acc, item) => {
+        acc.push({
+          label: item.name.charAt(0).toUpperCase() + item.name.slice(1),
+          value: item._id,
+        })
+        return acc
+      }, [])
+      setHopitals(newHospitals)
+      setLoading(false)
+    }
     getAllHospitals()
   }, [])
 
