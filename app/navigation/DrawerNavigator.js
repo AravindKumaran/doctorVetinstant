@@ -9,6 +9,7 @@ import AppNavigator from './AppNavigator'
 import DrawerContent from '../components/DrawerContent'
 
 import { Feather } from '@expo/vector-icons'
+import CallLogScreen from '../screens/CallLogScreen'
 
 // const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator()
@@ -66,6 +67,17 @@ const DrawerNavigator = () => (
       options={{
         drawerIcon: ({ color, size }) => (
           <Feather name='dollar-sign' size={size} color={color} />
+        ),
+        headerShown: true,
+        unmountOnBlur: true,
+      }}
+    />
+    <Drawer.Screen
+      name='CallLog'
+      component={CallLogScreen}
+      options={{
+        drawerIcon: ({ color, size }) => (
+          <Feather name='phone' size={size} color={color} />
         ),
         headerShown: true,
         unmountOnBlur: true,

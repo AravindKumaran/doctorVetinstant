@@ -9,6 +9,8 @@ import authStorage from '../components/utils/authStorage'
 import LoadingIndicator from '../components/LoadingIndicator'
 import usersApi from '../api/users'
 
+import socket from '../components/utils/socket'
+
 const HomeScrren = ({ navigation }) => {
   const { user, setUser } = useContext(AuthContext)
   const [loading, setLoading] = useState(false)
@@ -20,7 +22,7 @@ const HomeScrren = ({ navigation }) => {
 
   const handleVideoPress = async () => {
     const tokenRes = await usersApi.getVideoToken(user.name)
-    console.log('Video Token', tokenRes)
+    // console.log('Video Token', tokenRes)
     if (!tokenRes.ok) {
       setLoading(false)
       console.log('Error', tokenRes)
@@ -32,7 +34,6 @@ const HomeScrren = ({ navigation }) => {
       token: tokenRes.data,
     })
   }
-
   return (
     <View style={styles.container}>
       <LoadingIndicator visible={loading} />

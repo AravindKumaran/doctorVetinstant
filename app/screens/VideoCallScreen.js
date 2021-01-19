@@ -18,6 +18,8 @@ import {
   TwilioVideo,
 } from 'react-native-twilio-video-webrtc'
 
+import socket from '../components/utils/socket'
+
 const VideoCallScreen = ({ navigation, route }) => {
   const [isAudioEnabled, setIsAudioEnabled] = useState(true)
   const [isVideoEnabled, setIsVideoEnabled] = useState(true)
@@ -25,10 +27,14 @@ const VideoCallScreen = ({ navigation, route }) => {
   const [participants, setParticipants] = useState(new Map())
   const [videoTracks, setVideoTracks] = useState(new Map())
   const [token, setToken] = useState(route.params?.token)
+  // const [token, setToken] = useState()
   const twilioVideo = useRef(null)
 
   useEffect(() => {
     console.log('Inside Effect')
+    socket.on('incomingCall', (data) => {
+      console.log('Incoming Call', data)
+    })
     const _onConnectButtonPress = async () => {
       // console.log(token)
       if (Platform.OS === 'android') {
@@ -37,7 +43,7 @@ const VideoCallScreen = ({ navigation, route }) => {
       }
       twilioVideo.current.connect({
         accessToken: token,
-        enableNetworkQualityReporting: true,
+        // enableNetworkQualityReporting: true,
       })
       setStatus('connecting')
       console.log('Connecting')
@@ -72,7 +78,7 @@ const VideoCallScreen = ({ navigation, route }) => {
   }
 
   const _onRoomDidConnect = (events) => {
-    console.log(events)
+    // console.log(events)
     console.log('Room')
     setStatus('connected')
   }
