@@ -66,6 +66,18 @@ const DoctorDetailsScreen = ({ navigation }) => {
             </View>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
+                Qualifications :
+              </AppText>
+              <AppText>{doctor.qlf}</AppText>
+            </View>
+            <View style={styles.card}>
+              <AppText style={{ fontSize: 14, color: '#606770' }}>
+                Registration Number :
+              </AppText>
+              <AppText>{doctor.regNo}</AppText>
+            </View>
+            <View style={styles.card}>
+              <AppText style={{ fontSize: 14, color: '#606770' }}>
                 Account Number :
               </AppText>
               <AppText>{doctor.accno}</AppText>
@@ -88,11 +100,17 @@ const DoctorDetailsScreen = ({ navigation }) => {
               </AppText>
               <AppText>{doctor.ifsc}</AppText>
             </View>
-            <View style={[styles.card, { marginBottom: 30 }]}>
+            <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
                 Your Form File :
               </AppText>
               <AppText>{doctor.file}</AppText>
+            </View>
+            <View style={[styles.card, { marginBottom: 30 }]}>
+              <AppText style={{ fontSize: 14, color: '#606770' }}>
+                Your Profile File :
+              </AppText>
+              <AppText>{doctor.profile}</AppText>
             </View>
           </View>
         ) : (

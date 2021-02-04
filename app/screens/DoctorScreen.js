@@ -21,6 +21,13 @@ const accType = [
   { label: 'Current', value: 'current' },
 ]
 
+const qualifs = [
+  { label: 'BVSc', value: 'BVSc' },
+  { label: 'BVSc& AH', value: 'BVSc& AH' },
+  { label: 'MVSc', value: 'MVSc' },
+  { label: 'PhD', value: 'PhD' },
+]
+
 const phoneRegExp = /^[6-9]\d{9}$/
 const ifscRegExp = /^[A-Z]{4}0[A-Z0-9]{6}$/
 const accRegExp = /^[0-9]{9,18}$/
@@ -59,7 +66,11 @@ const validationSchema = Yup.object().shape({
   file: Yup.string()
     .required('Please select a .pdf file of size less than 1 Mb')
     .nullable()
-    .label('File'),
+    .label('Document'),
+  profile: Yup.string()
+    .required('Please select a .pdf file of size less than 5 Mb')
+    .nullable()
+    .label('Profile'),
   acc: Yup.string()
     .matches(accRegExp, 'Account Number not valid!')
     .required()
@@ -69,11 +80,16 @@ const validationSchema = Yup.object().shape({
     .required('Please Pick Account Type')
     .nullable()
     .label('Account Type'),
+  qlf: Yup.string()
+    .required('Please Pick a Qualifications')
+    .nullable()
+    .label('Qualifications'),
   ifsc: Yup.string()
     .matches(ifscRegExp, 'IFSC code is not valid!')
     .required()
     .label('IFSC Code'),
   fee: Yup.string().required().label('Consultation Fee'),
+  regNo: Yup.string().required().label('Registration Number'),
 })
 
 const DetailsScreen = ({ navigation }) => {
@@ -125,12 +141,19 @@ const DetailsScreen = ({ navigation }) => {
       type: 'application/pdf',
       uri: values.file,
     })
+    data.append('profile', {
+      name: 'profile',
+      type: 'application/pdf',
+      uri: values.profile,
+    })
     data.append('phone', values.phone)
     data.append('accno', values.acc)
     data.append('accname', values.accname)
     data.append('acctype', values.type)
     data.append('ifsc', values.ifsc)
     data.append('fee', values.fee)
+    data.append('qlf', values.qlf)
+    data.append('regNo', values.regNo)
     setLoading(true)
     const res = await doctorsApi.saveDoctor(data)
     if (!res.ok) {
@@ -175,13 +198,16 @@ const DetailsScreen = ({ navigation }) => {
               type: '',
               ifsc: '',
               fee: '',
+              qlf: '',
+              regNo: '',
+              profile: '',
             }}
             onSubmit={handleSubmit}
             validationSchema={validationSchema}
           >
             {() => (
               <>
-                <FormFilePicker name='file' />
+                <FormFilePicker name='file' size={1} />
 
                 <AppFormField
                   label='Hospital/Clinic Name'
@@ -204,6 +230,22 @@ const DetailsScreen = ({ navigation }) => {
                 />
 
                 <AppFormField
+                  label='Registration Number'
+                  autoCapitalize='none'
+                  autoCorrect={false}
+                  name='regNo'
+                  keyboardType='numeric'
+                  placeholder='Enter your registration number'
+                  maxLength={10}
+                />
+
+                <AppSelect
+                  items={qualifs}
+                  label='Select Your Qualifications'
+                  name='qlf'
+                />
+
+                <AppFormField
                   label='Phone Number'
                   autoCapitalize='none'
                   autoCorrect={false}
@@ -221,6 +263,12 @@ const DetailsScreen = ({ navigation }) => {
                   keyboardType='numeric'
                   placeholder='consultation fee in ruppes (₹)'
                 />
+
+                <AppText style={{ marginVertical: 15 }}>
+                  Profile Document
+                </AppText>
+
+                <FormFilePicker name='profile' size={5} />
 
                 <AppText
                   style={{

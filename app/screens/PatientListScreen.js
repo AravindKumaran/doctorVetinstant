@@ -62,7 +62,7 @@ const PatientListScreen = ({ navigation }) => {
             <TouchableOpacity
               key={pat._id}
               style={styles.card}
-              onPress={() => navigation.navigate('Chat', { pat })}
+              onPress={() => navigation.navigate('PatientDetails', { pat })}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <AppText style={styles.cardImg}>{pat.senderName[0]}</AppText>

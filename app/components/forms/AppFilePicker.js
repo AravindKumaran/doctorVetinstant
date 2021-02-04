@@ -6,7 +6,7 @@ import { StyleSheet, View, TouchableOpacity } from 'react-native'
 
 import AppText from '../AppText'
 
-const AppFilePicker = ({ onChangeUri }) => {
+const AppFilePicker = ({ onChangeUri, size }) => {
   const [fileName, setFileName] = useState(null)
 
   const selectFile = async () => {
@@ -17,13 +17,13 @@ const AppFilePicker = ({ onChangeUri }) => {
 
       if (file.type === 'success') {
         const fileExt = file.name.split('.')[1]
-        if (fileExt === 'pdf' && file.size < 1000000) {
+        if (fileExt === 'pdf' && file.size < size * 1000000) {
           onChangeUri(file.uri)
           setFileName(file.name)
         } else {
           setFileName(null)
           onChangeUri(null)
-          throw new Error('Please select .pdf file below 1mb')
+          throw new Error(`Please select .pdf file below ${size}mb`)
         }
       }
     } catch (error) {
