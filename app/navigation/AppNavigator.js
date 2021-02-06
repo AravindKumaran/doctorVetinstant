@@ -15,7 +15,7 @@ import { Feather } from '@expo/vector-icons'
 
 const Stack = createStackNavigator()
 
-const AuthNavigator = ({ navigation }) => {
+const AppNavigator = ({ navigation }) => {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -62,4 +62,4 @@ const AuthNavigator = ({ navigation }) => {
   )
 }
 
-export default AuthNavigator
+export default AppNavigator

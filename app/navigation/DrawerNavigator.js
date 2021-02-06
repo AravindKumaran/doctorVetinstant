@@ -1,17 +1,62 @@
 import React from 'react'
+import { TouchableOpacity } from 'react-native'
+import { Feather } from '@expo/vector-icons'
+
 import { createStackNavigator } from '@react-navigation/stack'
 import { createDrawerNavigator } from '@react-navigation/drawer'
 
 import DoctorScreen from '../screens/DoctorScreen'
 import PrescriptionScreen from '../screens/PrescriptionScreen'
+import ScheduleCallScreen from '../screens/ScheduleCallScreen'
+import CallLogScreen from '../screens/CallLogScreen'
+
 import AppNavigator from './AppNavigator'
 
 import DrawerContent from '../components/DrawerContent'
 
-import { Feather } from '@expo/vector-icons'
-import CallLogScreen from '../screens/CallLogScreen'
+const Stack = createStackNavigator()
 
-// const Stack = createStackNavigator();
+const CallLogNavigator = ({ navigation }) => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#d8d8d8',
+        },
+        headerTitleAlign: 'center',
+      }}
+    >
+      <Stack.Screen
+        name='CallLog'
+        component={CallLogScreen}
+        options={{
+          title: 'Call Log',
+
+          headerTintColor: 'black',
+          headerTitleStyle: {
+            fontSize: 22,
+          },
+
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.openDrawer()}>
+              <Feather
+                name='menu'
+                size={25}
+                color='#000'
+                style={{
+                  marginLeft: 10,
+                  paddingLeft: 20,
+                }}
+              />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+      <Stack.Screen name='ScheduleCall' component={ScheduleCallScreen} />
+    </Stack.Navigator>
+  )
+}
+
 const Drawer = createDrawerNavigator()
 
 const DrawerNavigator = () => (
@@ -74,12 +119,12 @@ const DrawerNavigator = () => (
     />
     <Drawer.Screen
       name='CallLog'
-      component={CallLogScreen}
+      component={CallLogNavigator}
       options={{
         drawerIcon: ({ color, size }) => (
           <Feather name='phone' size={size} color={color} />
         ),
-        headerShown: true,
+        headerShown: false,
         unmountOnBlur: true,
       }}
     />

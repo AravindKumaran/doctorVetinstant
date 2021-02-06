@@ -3,11 +3,12 @@ import { ScrollView, StyleSheet, View } from 'react-native'
 import { Feather } from '@expo/vector-icons'
 
 import AppText from '../components/AppText'
+import AppButton from '../components/AppButton'
 import callLogsApi from '../api/callLog'
 import AuthContext from '../context/authContext'
 import LoadingIndicator from '../components/LoadingIndicator'
 
-const CallLogScreen = () => {
+const CallLogScreen = ({ navigation }) => {
   const { user } = useContext(AuthContext)
   const [missedCall, setMissedCall] = useState([])
   const [completedCall, setCompletedCall] = useState([])
@@ -52,15 +53,35 @@ const CallLogScreen = () => {
 
         {missedCall.map((call) => (
           <View style={styles.card} key={call._id}>
-            <AppText
+            <View
               style={{
-                textTransform: 'capitalize',
-                fontSize: 20,
-                color: '#344247',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
               }}
             >
-              {call.senderId.name}
-            </AppText>
+              <AppText
+                style={{
+                  textTransform: 'capitalize',
+                  fontSize: 20,
+                  color: '#344247',
+                }}
+              >
+                {call.senderId.name}
+              </AppText>
+              <AppButton
+                title='Schedule'
+                onPress={() => navigation.navigate('ScheduleCall', { call })}
+                style={{
+                  width: 150,
+                  marginTop: 5,
+                  borderRadius: 100,
+                  padding: 7,
+                }}
+              />
+            </View>
+
             <View
               style={{
                 flexDirection: 'row',
