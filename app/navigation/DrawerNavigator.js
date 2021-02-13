@@ -95,7 +95,7 @@ const DrawerNavigator = () => (
         ),
       }}
     />
-    <Drawer.Screen
+    {/* <Drawer.Screen
       name='Doctor'
       component={DoctorScreen}
       options={{
@@ -105,7 +105,7 @@ const DrawerNavigator = () => (
         headerShown: true,
         unmountOnBlur: true,
       }}
-    />
+    /> */}
     <Drawer.Screen
       name='Prescription'
       component={PrescriptionScreen}
@@ -128,7 +128,7 @@ const DrawerNavigator = () => (
         unmountOnBlur: true,
       }}
     />
-    <Drawer.Screen
+    {/* <Drawer.Screen
       name='Help'
       component={AppNavigator}
       options={{
@@ -136,7 +136,7 @@ const DrawerNavigator = () => (
           <Feather name='help-circle' size={size} color={color} />
         ),
       }}
-    />
+    /> */}
   </Drawer.Navigator>
 )
 

@@ -7,7 +7,7 @@ const createRoom = (room) => {
 }
 
 const getReceiverRoom = (id) => {
-  return client.get(`${endPoint}//receiver/${id}`)
+  return client.get(`${endPoint}/receiver/${id}`)
 }
 
 export default {

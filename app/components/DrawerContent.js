@@ -1,26 +1,34 @@
-import React from "react";
-import { StyleSheet, View, TouchableOpacity } from "react-native";
+import React, { useContext } from 'react'
+import { StyleSheet, View, TouchableOpacity } from 'react-native'
 import {
   DrawerContentScrollView,
   DrawerItem,
   DrawerItemList,
-} from "@react-navigation/drawer";
+} from '@react-navigation/drawer'
 
-import { Feather } from "@expo/vector-icons";
+import { Feather } from '@expo/vector-icons'
 
-import AppText from "./AppText";
+import AppText from './AppText'
+import AuthContext from '../context/authContext'
+import authStorage from './utils/authStorage'
 
 const DrawerContent = (props) => {
+  const { user, setUser } = useContext(AuthContext)
+
+  const handleLogout = () => {
+    setUser()
+    authStorage.removeToken()
+  }
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.rounded}
-          onPress={() => props.navigation.navigate("DoctorDetails")}
+          onPress={() => props.navigation.navigate('DoctorDetails')}
         >
           <Feather name='user-check' size={35} color='blue' />
         </TouchableOpacity>
-        <AppText style={{ marginBottom: 20 }}>Avinash</AppText>
+        <AppText style={{ marginBottom: 20 }}>{user.name}</AppText>
       </View>
       <DrawerContentScrollView {...props}>
         <DrawerItemList {...props} />
@@ -30,12 +38,12 @@ const DrawerContent = (props) => {
         icon={({ color, size }) => (
           <Feather name='log-out' color={color} size={size} />
         )}
-        onPress={() => console.log("Logout")}
+        onPress={handleLogout}
         style={styles.footer}
       />
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -50,18 +58,18 @@ const styles = StyleSheet.create({
     marginTop: 50,
     borderBottomWidth: 1,
     padding: 10,
-    borderBottomColor: "#D1D5DA",
-    alignItems: "center",
+    borderBottomColor: '#D1D5DA',
+    alignItems: 'center',
   },
   rounded: {
-    backgroundColor: "#f1f1f1",
+    backgroundColor: '#f1f1f1',
     width: 60,
     height: 60,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 30,
     marginBottom: 10,
   },
-});
+})
 
-export default DrawerContent;
+export default DrawerContent
