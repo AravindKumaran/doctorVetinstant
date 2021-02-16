@@ -52,7 +52,7 @@ const PatientDetailsScreen = ({ navigation, route }) => {
                     <View key={`${img}-${i}`} style={{ marginRight: 20 }}>
                       <Image
                         source={{
-                          uri: `http://192.168.43.242:8000/${img}`,
+                          uri: `https://vetinstantbe.azurewebsites.net/api/v1${img}`,
                         }}
                         style={{ width: 150, height: 150, borderRadius: 75 }}
                       />
