@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react'
-import { StyleSheet, View, TouchableOpacity } from 'react-native'
+import React, { useState } from 'react'
+import { StyleSheet, View } from 'react-native'
 import { Formik } from 'formik'
 import * as Yup from 'yup'
 
@@ -9,43 +9,33 @@ import SubmitButton from '../components/SubmitButton'
 import ErrorMessage from '../components/ErrorMessage'
 
 import authApi from '../api/auth'
-import usersApi from '../api/users'
-import AuthContext from '../context/authContext'
-import authStorage from '../components/utils/authStorage'
 import LoadingIndicator from '../components/LoadingIndicator'
-import socket from '../components/utils/socket'
 
 const validationSchema = Yup.object().shape({
-  email: Yup.string().required().email().label('Email'),
+  code: Yup.string().required().max(6).label('Code'),
   password: Yup.string().required().min(8).label('Password'),
 })
 
-const LoginScreen = ({ navigation }) => {
+const ResetPasswordScreen = ({ navigation }) => {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  const { setUser } = useContext(AuthContext)
-
-  const handleSubmit = async ({ email, password }) => {
+  const handleSubmit = async ({ code, password }) => {
+    // console.log('Values', code, password)
     setLoading(true)
-    const res = await authApi.login(email, password)
+    const res = await authApi.resetPassword(code, password)
+
     if (!res.ok) {
-      // console.log(res.data.msg)
-      setError(res.data.msg)
       setLoading(false)
+      setError(res?.data?.msg)
+      //   console.log('Error', res)
       return
     }
-    setError(null)
-    authStorage.storeToken(res.data.token)
-    const userRes = await usersApi.getLoggedInUser()
-    if (!userRes.ok) {
-      setLoading(false)
-      console.log(userRes)
-      return
-    }
-    socket.emit('online', userRes.data.user._id)
-    setUser(userRes.data.user)
+
     setLoading(false)
+    alert('Password Reset Successfully! Please Login Again')
+
+    navigation.navigate('Login')
   }
 
   return (
@@ -55,46 +45,38 @@ const LoginScreen = ({ navigation }) => {
         <AppText
           style={{ textAlign: 'center', fontSize: 25, marginVertical: 20 }}
         >
-          Login
+          Provide verification code sent to your email and new password
         </AppText>
 
         {error && <ErrorMessage error={error} visible={!loading} />}
 
         <Formik
-          initialValues={{ email: '', password: '' }}
+          initialValues={{ code: '', password: '' }}
           onSubmit={handleSubmit}
           validationSchema={validationSchema}
         >
           {() => (
             <>
               <AppFormField
-                icon='email'
                 autoCapitalize='none'
                 autoCorrect={false}
-                keyboardType='email-address'
-                name='email'
-                placeholder='Enter your email id'
+                icon='account-key'
+                name='code'
+                placeholder='Verification Code'
+                placeholder='Enter code!'
+                maxLength={6}
               />
-
               <AppFormField
                 autoCapitalize='none'
                 autoCorrect={false}
                 icon='lock'
                 name='password'
-                placeholder='Password'
+                placeholder='New Password'
                 secureTextEntry
                 placeholder='Enter your password'
               />
 
-              <TouchableOpacity
-                onPress={() => navigation.navigate('ForgotPassword')}
-              >
-                <AppText style={{ textAlign: 'right', fontSize: 20 }}>
-                  Forgot Password?
-                </AppText>
-              </TouchableOpacity>
-
-              <SubmitButton title='Login' />
+              <SubmitButton title='Submit' />
             </>
           )}
         </Formik>
@@ -107,8 +89,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginHorizontal: 30,
-    marginTop: 60,
+    marginTop: 80,
   },
 })
 
-export default LoginScreen
+export default ResetPasswordScreen

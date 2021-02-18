@@ -9,8 +9,16 @@ const register = (name, emailID, password, role = 'doctor') =>
 const saveGoogleUser = (name, emailID, password, role = 'doctor') =>
   client.post('/auth/saveGoogle', { name, emailID, password, role })
 
+const sendForgotPasswordMail = (emailID) =>
+  client.post('/auth/forgotpassword', { emailID, forMobilee: true })
+
+const resetPassword = (code, password) =>
+  client.post('/auth/resetpasswordmobile', { code, password })
+
 export default {
   login,
   register,
   saveGoogleUser,
+  sendForgotPasswordMail,
+  resetPassword,
 }
