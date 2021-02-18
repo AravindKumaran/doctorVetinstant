@@ -10,8 +10,8 @@ const getLoggedInUser = () => {
   return client.patch(`${endPoint}/me`)
 }
 
-const getVideoToken = (username) => {
-  return client.get(`${endPoint}/getToken/?userName=${username}`)
+const getVideoToken = (data) => {
+  return client.post(`${endPoint}/getToken`, data)
 }
 
 const createPushToken = (token) => {

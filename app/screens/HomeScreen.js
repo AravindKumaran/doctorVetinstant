@@ -156,20 +156,6 @@ const HomeScrren = ({ navigation }) => {
     }
   }, [])
 
-  const handleVideoPress = async () => {
-    const tokenRes = await usersApi.getVideoToken(user.name)
-    // console.log('Video Token', tokenRes)
-    if (!tokenRes.ok) {
-      setLoading(false)
-      console.log('Error', tokenRes)
-    }
-    setLoading(false)
-    // console.log(tokenRes)
-    navigation.navigate('VideoCall', {
-      name: user.name,
-      token: tokenRes.data,
-    })
-  }
   return (
     <View style={styles.container}>
       <LoadingIndicator visible={loading} />
@@ -187,7 +173,6 @@ const HomeScrren = ({ navigation }) => {
         title='Patient List'
         onPress={() => navigation.navigate('PatientList')}
       />
-      <AppButton title='Video Call' onPress={handleVideoPress} />
       {/* {userToken.current &&
         Alert.alert(
           'Incoming Call Request from PetOwner',

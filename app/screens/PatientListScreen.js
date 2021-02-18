@@ -94,8 +94,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cardImg: {
-    backgroundColor: `${getRandColor(1)}`,
-    color: `${getRandColor(5)}`,
+    backgroundColor: `${getRandColor(Math.random() * 10)}`,
+    color: `${getRandColor(Math.random() * 5)}`,
     width: 40,
     height: 40,
     borderRadius: 20,

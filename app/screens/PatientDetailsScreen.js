@@ -1,14 +1,21 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { StyleSheet, View, ScrollView, Image } from 'react-native'
 import AppButton from '../components/AppButton'
 
 import petsApi from '../api/pets'
+import roomsApi from '../api/room'
+import usersApi from '../api/users'
+
 import LoadingIndicator from '../components/LoadingIndicator'
 import AppText from '../components/AppText'
+import AuthContext from '../context/authContext'
 
 const PatientDetailsScreen = ({ navigation, route }) => {
   const [pet, setPet] = useState(null)
   const [loading, setLoading] = useState(false)
+  const { user } = useContext(AuthContext)
+
+  console.log('Routee', route.params.pat)
 
   const getPetById = async () => {
     setLoading(true)
@@ -26,8 +33,25 @@ const PatientDetailsScreen = ({ navigation, route }) => {
     getPetById()
   }, [])
 
+  const handleVideoCall = async () => {
+    const tokenRes = await usersApi.getVideoToken({
+      userName: user.name,
+      roomName: route.params.pat.name,
+    })
+    console.log('Video Token', tokenRes)
+    if (!tokenRes.ok) {
+      setLoading(false)
+      console.log('Error', tokenRes)
+    }
+    setLoading(false)
+    navigation.navigate('VideoCall', {
+      name: user.name,
+      token: tokenRes.data,
+    })
+  }
+
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <LoadingIndicator visible={loading} />
 
       <AppText>User Name: {route.params.pat.senderName}</AppText>
@@ -68,6 +92,7 @@ const PatientDetailsScreen = ({ navigation, route }) => {
               navigation.navigate('Chat', { pat: route.params.pat })
             }
           />
+          <AppButton title='Video Call' onPress={handleVideoCall} />
         </>
       )}
     </ScrollView>
@@ -77,7 +102,7 @@ const PatientDetailsScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginVertical: 30,
+    paddingVertical: 30,
     marginHorizontal: 30,
   },
   card: {
