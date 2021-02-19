@@ -34,14 +34,14 @@ const HomeScrren = ({ navigation }) => {
     authStorage.removeToken()
   }
 
-  const sendPushToken = async (token, message, customData) => {
+  const sendPushToken = async (token, message, status) => {
     setLoading(true)
 
     const pushRes = await usersApi.sendPushNotification({
       targetExpoPushToken: token,
       title: 'Doctor Response!',
       message: message,
-      data: customData,
+      datas: { token: user.token || null, status: status || null },
     })
     if (!pushRes.ok) {
       setLoading(false)
@@ -111,9 +111,9 @@ const HomeScrren = ({ navigation }) => {
                     sendPushToken(
                       userToken.current,
                       `Sorry! I'm not available. Please try with other available doctors`,
-                      { status: 'cancel' }
+                      'cancel'
                     )
-                    console.log('Data Send')
+                    // console.log('Data Send')
                     setDataSend(true)
                   }
                 },
@@ -126,12 +126,12 @@ const HomeScrren = ({ navigation }) => {
                     sendPushToken(
                       userToken.current,
                       `Yes I'm available. Complete the payment within 5-10 minutes`,
-                      { status: 'ok' }
+                      'ok'
                     )
-                    console.log('Data Send')
+                    // console.log('Data Send')
                     setDataSend(true)
                   }
-                  console.log('OK Pressed')
+                  // console.log('OK Pressed')
                   return
                 },
               },
