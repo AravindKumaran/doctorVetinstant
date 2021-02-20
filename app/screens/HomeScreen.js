@@ -173,44 +173,6 @@ const HomeScrren = ({ navigation }) => {
         title='Patient List'
         onPress={() => navigation.navigate('PatientList')}
       />
-      {/* {userToken.current &&
-        Alert.alert(
-          'Incoming Call Request from PetOwner',
-          `Are you available for next 15-30 minutes?\n** Don't close the app from background!!`,
-          [
-            {
-              text: 'Cancel',
-              onPress: () => {
-                console.log('Cancel Pressed')
-                if (!dataSend) {
-                  sendPushToken(
-                    userToken.current,
-                    `Sorry! I'm not available. Please try with other available doctors`
-                  )
-                  console.log('Data Send')
-                  setDataSend(true)
-                }
-              },
-              style: 'cancel',
-            },
-            {
-              text: 'Accept',
-              onPress: () => {
-                if (!dataSend) {
-                  sendPushToken(
-                    userToken.current,
-                    `Yes I'm available. Complete the payment within 5-10 minutes`
-                  )
-                  console.log('Data Send')
-                  setDataSend(true)
-                }
-                console.log('OK Pressed')
-                return
-              },
-            },
-          ],
-          { cancelable: false }
-        )} */}
     </View>
   )
 }

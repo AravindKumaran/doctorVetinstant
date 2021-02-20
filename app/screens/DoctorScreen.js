@@ -28,6 +28,11 @@ const qualifs = [
   { label: 'PhD', value: 'PhD' },
 ]
 
+const firstAv = [
+  { label: 'Yes', value: true },
+  { label: 'No', value: false },
+]
+
 const phoneRegExp = /^[6-9]\d{9}$/
 const ifscRegExp = /^[A-Z]{4}0[A-Z0-9]{6}$/
 const accRegExp = /^[0-9]{9,18}$/
@@ -90,6 +95,10 @@ const validationSchema = Yup.object().shape({
     .label('IFSC Code'),
   fee: Yup.string().required().label('Consultation Fee'),
   regNo: Yup.string().required().label('Registration Number'),
+  firstAvailaibeVet: Yup.string()
+    .nullable()
+    .required()
+    .label('First Available Vet'),
 })
 
 const DetailsScreen = ({ navigation }) => {
@@ -153,6 +162,7 @@ const DetailsScreen = ({ navigation }) => {
     data.append('ifsc', values.ifsc)
     data.append('fee', values.fee)
     data.append('qlf', values.qlf)
+    data.append('firstAvailaibeVet', values.firstAvailaibeVet)
     data.append('regNo', values.regNo)
     setLoading(true)
     const res = await doctorsApi.saveDoctor(data)
@@ -201,6 +211,7 @@ const DetailsScreen = ({ navigation }) => {
               qlf: '',
               regNo: '',
               profile: '',
+              firstAvailaibeVet: false,
             }}
             onSubmit={handleSubmit}
             validationSchema={validationSchema}
@@ -243,6 +254,12 @@ const DetailsScreen = ({ navigation }) => {
                   items={qualifs}
                   label='Select Your Qualifications'
                   name='qlf'
+                />
+
+                <AppSelect
+                  items={firstAv}
+                  label='Want to be first available vet?'
+                  name='firstAvailaibeVet'
                 />
 
                 <AppFormField
@@ -291,11 +308,11 @@ const DetailsScreen = ({ navigation }) => {
                   placeholder='xxxx xxxx xxxx xxxx'
                 />
                 <AppFormField
-                  label='Name Of Merchant'
+                  label='Name On Card'
                   autoCapitalize='none'
                   autoCorrect={false}
                   name='accname'
-                  placeholder='Name Of Merchant'
+                  placeholder='Name On Card'
                 />
 
                 <AppSelect items={accType} label='Account Type' name='type' />
