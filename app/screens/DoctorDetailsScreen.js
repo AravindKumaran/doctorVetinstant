@@ -48,6 +48,12 @@ const DoctorDetailsScreen = ({ navigation }) => {
             </AppText>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
+                Registration Number 
+              </AppText>
+              <AppText>{doctor.regNo}</AppText>
+            </View>
+            <View style={styles.card}>
+              <AppText style={{ fontSize: 14, color: '#606770' }}>
                 Phone Number 
               </AppText>
               <AppText>{doctor.phone}</AppText>
@@ -70,12 +76,17 @@ const DoctorDetailsScreen = ({ navigation }) => {
               </AppText>
               <AppText>{doctor.qlf}</AppText>
             </View>
-            <View style={styles.card}>
-              <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Registration Number 
-              </AppText>
-              <AppText>{doctor.regNo}</AppText>
-            </View>
+           
+            <AppText
+              style={{
+                fontSize: 25,
+                fontWeight: '600',
+                textAlign: 'center',
+                marginBottom: 30,
+              }}
+            >
+              Billing Details
+            </AppText>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
                 Bank Account Number 
