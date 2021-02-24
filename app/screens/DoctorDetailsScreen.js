@@ -44,78 +44,77 @@ const DoctorDetailsScreen = ({ navigation }) => {
                 marginBottom: 30,
               }}
             >
-              Your Details
+              Professional Details
             </AppText>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Phone Number :
+                Phone Number 
               </AppText>
               <AppText>{doctor.phone}</AppText>
             </View>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Hospital/Clinic Name :
+                Hospital/Clinic Name 
               </AppText>
               <AppText>{doctor.hospital.name}</AppText>
             </View>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Consultation Fees :
+                Consultation Fees 
               </AppText>
               <AppText>₹ {doctor.fee}</AppText>
             </View>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Qualifications :
+                Qualifications 
               </AppText>
               <AppText>{doctor.qlf}</AppText>
             </View>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Registration Number :
+                Registration Number 
               </AppText>
               <AppText>{doctor.regNo}</AppText>
             </View>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Account Number :
+                Bank Account Number 
               </AppText>
               <AppText>{doctor.accno}</AppText>
             </View>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Name On Card :
-              </AppText>
+              Account Holder's Name              </AppText>
               <AppText>{doctor.accname}</AppText>
             </View>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Account Type :
+                Account Type 
               </AppText>
               <AppText>{doctor.acctype}</AppText>
             </View>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
-                IFSC Code :
+                IFSC Code 
               </AppText>
               <AppText>{doctor.ifsc}</AppText>
             </View>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Your Form File :
+              Registration certificate 
               </AppText>
               <AppText>{doctor.file}</AppText>
             </View>
             <View style={[styles.card, { marginBottom: 30 }]}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Your Profile File :
+                Your Profile File 
               </AppText>
               <AppText>{doctor.profile}</AppText>
             </View>
           </View>
         ) : (
           <>
-            <AppText
+            {/* <AppText
               style={{
                 fontSize: 22,
                 fontWeight: '600',
@@ -124,7 +123,7 @@ const DoctorDetailsScreen = ({ navigation }) => {
               }}
             >
               You haven't added your details
-            </AppText>
+            </AppText> */}
             <AppButton
               title='Add Doctor Details'
               onPress={() => navigation.navigate('Doctor')}

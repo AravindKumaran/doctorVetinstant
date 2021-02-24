@@ -28,7 +28,7 @@ const DrawerContent = (props) => {
         >
           <Feather name='user-check' size={35} color='blue' />
         </TouchableOpacity>
-        <AppText style={{ marginBottom: 20 }}>{user.name}</AppText>
+        <AppText style={{ marginBottom: 20 }}>Dr.{user.name}</AppText>
       </View>
       <DrawerContentScrollView {...props}>
         <DrawerItemList {...props} />

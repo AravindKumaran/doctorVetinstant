@@ -160,19 +160,19 @@ const HomeScrren = ({ navigation }) => {
     <View style={styles.container}>
       <LoadingIndicator visible={loading} />
       <AppText>Welcome Doctor {user ? user.name.split(' ')[0] : ''}</AppText>
-      <AppButton title='Logout' onPress={handleLogout} />
-      <AppButton
+      {/* <AppButton
         title='View History'
         onPress={() => navigation.navigate('Patient')}
-      />
+      /> */}
       <AppButton
-        title='View Doctor Details'
+        title='My Details'
         onPress={() => navigation.navigate('DoctorDetails')}
       />
       <AppButton
         title='Patient List'
         onPress={() => navigation.navigate('PatientList')}
       />
+      <AppButton title='Logout' onPress={handleLogout} />
     </View>
   )
 }

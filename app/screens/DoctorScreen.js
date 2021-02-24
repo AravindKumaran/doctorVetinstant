@@ -23,7 +23,7 @@ const accType = [
 
 const qualifs = [
   { label: 'BVSc', value: 'BVSc' },
-  { label: 'BVSc& AH', value: 'BVSc& AH' },
+  { label: 'BVSc & AH', value: 'BVSc& AH' },
   { label: 'MVSc', value: 'MVSc' },
   { label: 'PhD', value: 'PhD' },
 ]
@@ -77,7 +77,7 @@ const validationSchema = Yup.object().shape({
     .nullable()
     .label('Profile'),
   acc: Yup.string()
-    .matches(accRegExp, 'Account Number not valid!')
+    .matches(accRegExp, 'Bank Account Number not valid!')
     .required()
     .label('Account No.'),
   accname: Yup.string().required().label('Name'),
@@ -186,13 +186,12 @@ const DetailsScreen = ({ navigation }) => {
           <AppText
             style={{
               marginBottom: 30,
-              textAlign: 'center',
               fontWeight: '600',
               fontSize: 22,
               marginTop: -22,
             }}
           >
-            Provide your details below
+            Registration Certificate
           </AppText>
 
           {error && <ErrorMessage error={error} visible={!loading} />}
@@ -219,6 +218,25 @@ const DetailsScreen = ({ navigation }) => {
             {() => (
               <>
                 <FormFilePicker name='file' size={1} />
+                <AppFormField
+                  label='Registration Number'
+                  autoCapitalize='none'
+                  autoCorrect={false}
+                  name='regNo'
+                  keyboardType='numeric'
+                  placeholder='Enter Your Registration Number'
+                  maxLength={10}
+                />
+                <AppSelect
+                  items={hospitals}
+                  label='Select Hospital From The List Below'
+                  name='selectHospName'
+                />
+                 <AppText
+                  style={{ textAlign: 'center', fontSize: 22, margin: 10 }}
+                >
+                  OR
+                </AppText>
 
                 <AppFormField
                   label='Hospital/Clinic Name'
@@ -227,29 +245,7 @@ const DetailsScreen = ({ navigation }) => {
                   name='hospname'
                   numberOfLines={2}
                   placeholder='Hospital/Clinic Name'
-                />
-                <AppText
-                  style={{ textAlign: 'center', fontSize: 22, margin: 10 }}
-                >
-                  OR
-                </AppText>
-
-                <AppSelect
-                  items={hospitals}
-                  label='Select Hospital Name If Exists!'
-                  name='selectHospName'
-                />
-
-                <AppFormField
-                  label='Registration Number'
-                  autoCapitalize='none'
-                  autoCorrect={false}
-                  name='regNo'
-                  keyboardType='numeric'
-                  placeholder='Enter your registration number'
-                  maxLength={10}
-                />
-
+                />  
                 <AppSelect
                   items={qualifs}
                   label='Select Your Qualifications'
@@ -258,7 +254,7 @@ const DetailsScreen = ({ navigation }) => {
 
                 <AppSelect
                   items={firstAv}
-                  label='Want to be first available vet?'
+                  label='Want To Be First Available Vet?'
                   name='firstAvailaibeVet'
                 />
 
@@ -268,7 +264,7 @@ const DetailsScreen = ({ navigation }) => {
                   autoCorrect={false}
                   name='phone'
                   keyboardType='numeric'
-                  placeholder='Enter your phone number'
+                  placeholder='Enter Your Phone Number'
                   maxLength={10}
                 />
 
@@ -278,7 +274,7 @@ const DetailsScreen = ({ navigation }) => {
                   autoCorrect={false}
                   name='fee'
                   keyboardType='numeric'
-                  placeholder='consultation fee in ruppes (₹)'
+                  placeholder='Consultation Fee In Rupees (₹)'
                 />
 
                 <AppText style={{ marginVertical: 15 }}>
@@ -299,7 +295,7 @@ const DetailsScreen = ({ navigation }) => {
                 </AppText>
 
                 <AppFormField
-                  label='Account Number'
+                  label='Bank Account Number'
                   autoCapitalize='none'
                   autoCorrect={false}
                   keyboardType='numeric'
@@ -308,11 +304,11 @@ const DetailsScreen = ({ navigation }) => {
                   placeholder='xxxx xxxx xxxx xxxx'
                 />
                 <AppFormField
-                  label='Name On Card'
+                  label='Account Holder Name'
                   autoCapitalize='none'
                   autoCorrect={false}
                   name='accname'
-                  placeholder='Name On Card'
+                  placeholder='Account Holder Name'
                 />
 
                 <AppSelect items={accType} label='Account Type' name='type' />
@@ -322,7 +318,7 @@ const DetailsScreen = ({ navigation }) => {
                   autoCapitalize='characters'
                   autoCorrect={false}
                   name='ifsc'
-                  placeholder='Enter your bank ifsc code'
+                  placeholder='Enter Your Bank IFSC Code'
                   maxLength={11}
                 />
 
