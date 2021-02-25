@@ -34,7 +34,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
     }
 
     setLoading(false)
-    alert('Email Sent! Please check your inbox')
+    alert('Email Sent! Please Check Your Inbox')
 
     navigation.navigate('ResetPassword')
   }
@@ -46,7 +46,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
         <AppText
           style={{ textAlign: 'center', fontSize: 25, marginVertical: 20 }}
         >
-          Provide your email address below
+          Provide Your Email Address Below
         </AppText>
 
         {error && <ErrorMessage error={error} visible={!loading} />}

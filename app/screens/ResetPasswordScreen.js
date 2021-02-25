@@ -45,7 +45,7 @@ const ResetPasswordScreen = ({ navigation }) => {
         <AppText
           style={{ textAlign: 'center', fontSize: 25, marginVertical: 20 }}
         >
-          Provide verification code sent to your email and new password
+          Enter Verification And New Password
         </AppText>
 
         {error && <ErrorMessage error={error} visible={!loading} />}
@@ -63,7 +63,7 @@ const ResetPasswordScreen = ({ navigation }) => {
                 icon='account-key'
                 name='code'
                 placeholder='Verification Code'
-                placeholder='Enter code!'
+                placeholder='Enter Code'
                 maxLength={6}
               />
               <AppFormField
@@ -73,7 +73,7 @@ const ResetPasswordScreen = ({ navigation }) => {
                 name='password'
                 placeholder='New Password'
                 secureTextEntry
-                placeholder='Enter your password'
+                placeholder='Enter Your Password'
               />
 
               <SubmitButton title='Submit' />

@@ -48,65 +48,76 @@ const DoctorDetailsScreen = ({ navigation }) => {
                 marginBottom: 30,
               }}
             >
-              Your Details
+              Professional Details
             </AppText> */}
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Phone Number :
-              </AppText>
-              <AppText>{doctor.phone}</AppText>
-            </View>
-            <View style={styles.card}>
-              <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Hospital/Clinic Name :
-              </AppText>
-              <AppText>{doctor.hospital.name}</AppText>
-            </View>
-            <View style={styles.card}>
-              <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Consultation Fees :
-              </AppText>
-              <AppText>₹ {doctor.fee}</AppText>
-            </View>
-            <View style={styles.card}>
-              <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Qualifications :
-              </AppText>
-              <AppText>{doctor.qlf}</AppText>
-            </View>
-            <View style={styles.card}>
-              <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Registration Number :
+                Registration Number
               </AppText>
               <AppText>{doctor.regNo}</AppText>
             </View>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Account Number :
+                Phone Number
+              </AppText>
+              <AppText>{doctor.phone}</AppText>
+            </View>
+            <View style={styles.card}>
+              <AppText style={{ fontSize: 14, color: '#606770' }}>
+                Hospital/Clinic Name
+              </AppText>
+              <AppText>{doctor.hospital.name}</AppText>
+            </View>
+            <View style={styles.card}>
+              <AppText style={{ fontSize: 14, color: '#606770' }}>
+                Consultation Fees
+              </AppText>
+              <AppText>₹ {doctor.fee}</AppText>
+            </View>
+            <View style={styles.card}>
+              <AppText style={{ fontSize: 14, color: '#606770' }}>
+                Qualifications
+              </AppText>
+              <AppText>{doctor.qlf}</AppText>
+            </View>
+
+            <AppText
+              style={{
+                fontSize: 25,
+                fontWeight: '600',
+                textAlign: 'center',
+                marginBottom: 30,
+              }}
+            >
+              Billing Details
+            </AppText>
+            <View style={styles.card}>
+              <AppText style={{ fontSize: 14, color: '#606770' }}>
+                Bank Account Number
               </AppText>
               <AppText>{doctor.accno}</AppText>
             </View>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Name On Card :
+                Account Holder's Name{' '}
               </AppText>
               <AppText>{doctor.accname}</AppText>
             </View>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Account Type :
+                Account Type
               </AppText>
               <AppText>{doctor.acctype}</AppText>
             </View>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
-                IFSC Code :
+                IFSC Code
               </AppText>
               <AppText>{doctor.ifsc}</AppText>
             </View>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Your Form File :
+                Registration certificate
               </AppText>
               <AppText>{doctor.file}</AppText>
             </View>

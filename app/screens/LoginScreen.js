@@ -73,7 +73,7 @@ const LoginScreen = ({ navigation }) => {
                 autoCorrect={false}
                 keyboardType='email-address'
                 name='email'
-                placeholder='Enter your email id'
+                placeholder='Enter Your Email ID'
               />
 
               <AppFormField
@@ -83,7 +83,7 @@ const LoginScreen = ({ navigation }) => {
                 name='password'
                 placeholder='Password'
                 secureTextEntry
-                placeholder='Enter your password'
+                placeholder='Enter Your Password'
               />
 
               <TouchableOpacity

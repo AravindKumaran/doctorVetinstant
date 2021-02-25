@@ -103,15 +103,16 @@ const PrescriptionScreen = ({ navigation }) => {
                 <AppSelect
                   items={patients}
                   label='Select Patient Name'
+                  
                   name='patientName'
                 />
                 <AppFormField
-                  label='Pet Problems'
+                  label='Doctor Comments'
                   autoCapitalize='none'
                   autoCorrect={false}
                   name='prescription'
                   numberOfLines={3}
-                  placeholder='enter your prescription'
+                  placeholder='Enter Your Comments'
                 />
 
                 <AppText style={{ marginVertical: 20 }}>

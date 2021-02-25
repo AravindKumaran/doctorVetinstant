@@ -29,7 +29,7 @@ const AppNavigator = ({ navigation }) => {
         name='Home'
         component={HomeScreen}
         options={{
-          title: 'Home', //Set Header Title
+          title: 'VETINSTANT', //Set Header Title
 
           headerTintColor: 'black', //Set Header text color
           headerTitleStyle: {
