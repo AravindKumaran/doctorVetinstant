@@ -72,10 +72,6 @@ const validationSchema = Yup.object().shape({
     .required('Please select a .pdf file of size less than 1 Mb')
     .nullable()
     .label('Document'),
-  profile: Yup.string()
-    .required('Please select a .pdf file of size less than 5 Mb')
-    .nullable()
-    .label('Profile'),
   acc: Yup.string()
     .matches(accRegExp, 'Account Number not valid!')
     .required()
@@ -150,11 +146,6 @@ const DetailsScreen = ({ navigation }) => {
       type: 'application/pdf',
       uri: values.file,
     })
-    data.append('profile', {
-      name: 'profile',
-      type: 'application/pdf',
-      uri: values.profile,
-    })
     data.append('phone', values.phone)
     data.append('accno', values.acc)
     data.append('accname', values.accname)
@@ -210,7 +201,6 @@ const DetailsScreen = ({ navigation }) => {
               fee: '',
               qlf: '',
               regNo: '',
-              profile: '',
               firstAvailaibeVet: false,
             }}
             onSubmit={handleSubmit}
@@ -280,12 +270,6 @@ const DetailsScreen = ({ navigation }) => {
                   keyboardType='numeric'
                   placeholder='consultation fee in ruppes (₹)'
                 />
-
-                <AppText style={{ marginVertical: 15 }}>
-                  Profile Document
-                </AppText>
-
-                <FormFilePicker name='profile' size={5} />
 
                 <AppText
                   style={{

@@ -18,6 +18,11 @@ const AppSelect = ({ label, items, name, placeholder }) => {
         useNativeAndroidPickerStyle={false}
         onValueChange={(value) => setFieldValue(name, value)}
         style={pickerSelectStyles}
+        placeholder={{
+          label: 'Select one option',
+          value: null,
+          color: '#beb8b8',
+        }}
         items={items}
         Icon={() => (
           <MaterialCommunityIcons name='chevron-down' size={24} color='#000' />

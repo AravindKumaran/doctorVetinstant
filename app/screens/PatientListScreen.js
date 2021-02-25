@@ -25,6 +25,10 @@ const PatientListScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    navigation.setOptions({ title: 'Patient List' })
+  }, [])
+
+  useEffect(() => {
     const getPatients = async () => {
       setLoading(true)
       const res = await roomsApi.getReceiverRoom(user._id)

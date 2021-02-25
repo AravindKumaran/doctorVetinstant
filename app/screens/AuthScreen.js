@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { StyleSheet, View, Text } from 'react-native'
 import {
   GoogleSignin,
@@ -24,6 +24,10 @@ const AuthScreen = ({ route, navigation }) => {
   const handlePress = () => {
     navigation.navigate(`${title}`)
   }
+
+  useEffect(() => {
+    navigation.setOptions({ title })
+  }, [])
 
   const signIn = async () => {
     await GoogleSignin.configure({

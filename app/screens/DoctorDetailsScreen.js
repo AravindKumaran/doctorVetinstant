@@ -14,6 +14,10 @@ const DoctorDetailsScreen = ({ navigation }) => {
   const [doctor, setDoctor] = useState(null)
   const [loading, setLoading] = useState(false)
 
+  useEffect(() => {
+    navigation.setOptions({ title: 'My Details' })
+  }, [])
+
   const getDoctorDetails = async () => {
     setLoading(true)
     const res = await doctorsApi.getLoggedInDoctor(user._id)
@@ -36,7 +40,7 @@ const DoctorDetailsScreen = ({ navigation }) => {
       <View style={styles.container}>
         {doctor ? (
           <View style={styles.details}>
-            <AppText
+            {/* <AppText
               style={{
                 fontSize: 25,
                 fontWeight: '600',
@@ -45,7 +49,7 @@ const DoctorDetailsScreen = ({ navigation }) => {
               }}
             >
               Your Details
-            </AppText>
+            </AppText> */}
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
                 Phone Number :
@@ -105,12 +109,6 @@ const DoctorDetailsScreen = ({ navigation }) => {
                 Your Form File :
               </AppText>
               <AppText>{doctor.file}</AppText>
-            </View>
-            <View style={[styles.card, { marginBottom: 30 }]}>
-              <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Your Profile File :
-              </AppText>
-              <AppText>{doctor.profile}</AppText>
             </View>
           </View>
         ) : (

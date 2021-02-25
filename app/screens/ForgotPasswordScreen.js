@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { Formik } from 'formik'
 import * as Yup from 'yup'
@@ -18,6 +18,10 @@ const validationSchema = Yup.object().shape({
 const ForgotPasswordScreen = ({ navigation }) => {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    navigation.setOptions({ title: 'Forgot Password' })
+  }, [])
 
   const handleSubmit = async ({ email }) => {
     setLoading(true)

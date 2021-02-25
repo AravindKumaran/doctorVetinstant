@@ -13,6 +13,10 @@ const CallLogScreen = ({ navigation }) => {
   const [missedCall, setMissedCall] = useState([])
   const [completedCall, setCompletedCall] = useState([])
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    navigation.setOptions({ title: 'Call Log' })
+  }, [])
   useEffect(() => {
     const getMissedCall = async () => {
       setLoading(true)
