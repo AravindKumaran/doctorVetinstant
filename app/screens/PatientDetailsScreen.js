@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useContext } from 'react'
-import { StyleSheet, View, ScrollView, Image } from 'react-native'
+import React, { useState, useEffect, useContext, useRef } from 'react'
+import { StyleSheet, View, ScrollView, Image, Alert } from 'react-native'
 import AppButton from '../components/AppButton'
 
 import petsApi from '../api/pets'
 import roomsApi from '../api/room'
 import usersApi from '../api/users'
+
+import * as Notifications from 'expo-notifications'
 
 import LoadingIndicator from '../components/LoadingIndicator'
 import AppText from '../components/AppText'
@@ -14,8 +16,60 @@ const PatientDetailsScreen = ({ navigation, route }) => {
   const [pet, setPet] = useState(null)
   const [loading, setLoading] = useState(false)
   const { user } = useContext(AuthContext)
+  const responseListener = useRef()
 
-  console.log('Routee', route.params.pat)
+  // console.log('Routee', route.params.pat)
+
+  useEffect(() => {
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(
+      async (notification) => {
+        if (
+          notification.notification?.request?.content?.data.status ===
+            'startcall' &&
+          notification.notification?.request?.content?.data.tokenn
+        ) {
+          const pushRes = await usersApi.sendPushNotification({
+            targetExpoPushToken:
+              notification.notification?.request?.content?.data.tokenn,
+            title: `Call Started from Dr. ${user.name}`,
+            message: `I have started the call. Please join it ASAP\n** Don't close the app from background!!`,
+            datas: {
+              token:
+                notification.notification?.request?.content?.data.tokenn ||
+                null,
+              details: route?.params?.pat,
+              callStarted: true,
+            },
+          })
+
+          if (!pushRes.ok) {
+            setLoading(false)
+            console.log('Error', pushRes)
+            return
+          }
+          setLoading(false)
+          const tokenRes = await usersApi.getVideoToken({
+            userName: user.name,
+            roomName: route.params.pat.name,
+          })
+          console.log('Video Token', tokenRes)
+          if (!tokenRes.ok) {
+            setLoading(false)
+            console.log('Error', tokenRes)
+          }
+          setLoading(false)
+          navigation.navigate('VideoCall', {
+            name: user.name,
+            token: tokenRes.data,
+          })
+        }
+      }
+    )
+
+    return () => {
+      Notifications.removeNotificationSubscription(responseListener)
+    }
+  }, [])
 
   const getPetById = async () => {
     setLoading(true)
@@ -34,20 +88,68 @@ const PatientDetailsScreen = ({ navigation, route }) => {
   }, [])
 
   const handleVideoCall = async () => {
-    const tokenRes = await usersApi.getVideoToken({
-      userName: user.name,
-      roomName: route.params.pat.name,
-    })
-    console.log('Video Token', tokenRes)
-    if (!tokenRes.ok) {
-      setLoading(false)
-      console.log('Error', tokenRes)
-    }
-    setLoading(false)
-    navigation.navigate('VideoCall', {
-      name: user.name,
-      token: tokenRes.data,
-    })
+    Alert.alert(
+      'Video Call Request',
+      `If you want to call press YES or If call has been already started by patient then press NO`,
+      [
+        {
+          text: 'NO',
+          onPress: async () => {
+            const tokenRes = await usersApi.getVideoToken({
+              userName: user.name,
+              roomName: route.params.pat.name,
+            })
+            console.log('Video Token', tokenRes)
+            if (!tokenRes.ok) {
+              setLoading(false)
+              console.log('Error', tokenRes)
+            }
+            setLoading(false)
+            navigation.navigate('VideoCall', {
+              name: user.name,
+              token: tokenRes.data,
+            })
+          },
+          style: 'cancel',
+        },
+        {
+          text: 'YES',
+          onPress: async () => {
+            const userId = route.params?.pat?.name.split('-')[0]
+            if (userId) {
+              setLoading(true)
+              const pushTokenRes = await usersApi.getPushToken(userId)
+              if (!pushTokenRes.ok) {
+                setLoading(false)
+                console.log('Error', pushTokenRes)
+              }
+              setLoading(false)
+              if (pushTokenRes.data?.token) {
+                setLoading(true)
+
+                const pushRes = await usersApi.sendPushNotification({
+                  targetExpoPushToken: pushTokenRes.data?.token,
+                  title: `Incoming Call Request from Dr. ${user.name}`,
+                  message: `Are you available for next 15-30 minutes?\n** Don't close the app from background!!`,
+                  datas: {
+                    token: user.token || null,
+                    details: route?.params?.pat,
+                  },
+                })
+
+                if (!pushRes.ok) {
+                  setLoading(false)
+                  console.log('Error', pushRes)
+                  return
+                }
+                setLoading(false)
+              }
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    )
   }
 
   return (

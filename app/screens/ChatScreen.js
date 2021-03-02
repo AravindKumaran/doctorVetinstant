@@ -13,6 +13,8 @@ const ChatScreen = ({ navigation, route }) => {
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
 
+  console.log('Route', route.params)
+
   useEffect(() => {
     const getAllChats = async () => {
       setLoading(true)
@@ -25,12 +27,28 @@ const ChatScreen = ({ navigation, route }) => {
         setLoading(false)
         return
       }
-      setMessages(chatRes.data.chats)
+      const sortedChat = chatRes.data.chats.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      )
+      // const chatMessages = chatRes.data.chats
+      const newMessages = sortedChat.map((msg) => {
+        return {
+          ...msg,
+          user: {
+            _id: msg.userId,
+            name: msg.userName,
+          },
+        }
+      })
+      setMessages(newMessages)
       setLoading(false)
 
       socket.emit('room', route.params?.pat.name)
       socket.on('chat', (data) => {
-        setMessages(data)
+        const sortedData = data.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        )
+        setMessages(sortedData)
       })
     }
 
@@ -68,13 +86,27 @@ const ChatScreen = ({ navigation, route }) => {
   const onSend = async (newMsg) => {
     newMsg[0].roomName = route.params?.pat.name
     newMsg[0].petId = route.params?.pat.petId
+    newMsg[0].userId = user._id
+    newMsg[0].userName = user.name
     setLoading(true)
-    await chatsApi.createChat(newMsg[0])
-    setLoading(false)
+    const ress = await chatsApi.createChat({
+      petId: route.params?.pat.petId,
+      roomName: route.params?.pat.name,
+      text: newMsg[0].text,
+      userId: user._id,
+      userName: user.name,
+    })
+    if (!ress.ok) {
+      console.log('ress', ress)
+      setLoading(false)
+      return
+    }
+    //  console.log('ress', ress)
     socket.emit('chat', {
       room: route.params?.pat.name,
       msg: GiftedChat.append(messages, newMsg),
     })
+    setLoading(false)
   }
 
   return (

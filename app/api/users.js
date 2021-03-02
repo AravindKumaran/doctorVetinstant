@@ -22,10 +22,15 @@ const sendPushNotification = (data) => {
   return client.post(`${endPoint}/sendNotification`, data)
 }
 
+const getPushToken = (id) => {
+  return client.get(`${endPoint}/getPushToken/${id}`)
+}
+
 export default {
   getUsers,
   getLoggedInUser,
   getVideoToken,
   createPushToken,
   sendPushNotification,
+  getPushToken,
 }

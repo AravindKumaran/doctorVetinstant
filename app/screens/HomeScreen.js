@@ -94,9 +94,14 @@ const HomeScrren = ({ navigation }) => {
 
     notificationListener.current = Notifications.addNotificationReceivedListener(
       (notification) => {
-        // console.log('REceived', notification)
-        if (!userToken.current && notification.request.content.data.token) {
-          console.log('Received', userToken.current)
+        console.log('REceived', notification.request?.content?.data.status)
+        if (
+          !userToken.current &&
+          notification.request.content.data.token &&
+          (notification.request?.content?.data.status !== 'startcall' ||
+            notification.request?.content?.data.status !== 'nocall')
+        ) {
+          // console.log('Received', userToken.current)
           userToken.current = notification.request.content.data.token
 
           Alert.alert(
@@ -144,7 +149,6 @@ const HomeScrren = ({ navigation }) => {
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(
       (notification) => {
-        console.log(userToken.current)
         console.log('Response', notification)
       }
     )
