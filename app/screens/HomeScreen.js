@@ -32,6 +32,7 @@ const HomeScrren = ({ navigation }) => {
   const handleLogout = () => {
     setUser()
     authStorage.removeToken()
+    // navigation.navigate('VideoCall')
   }
 
   const sendPushToken = async (token, message, status) => {

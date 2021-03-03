@@ -36,6 +36,7 @@ const firstAv = [
 const phoneRegExp = /^[6-9]\d{9}$/
 const ifscRegExp = /^[A-Z]{4}0[A-Z0-9]{6}$/
 const accRegExp = /^[0-9]{9,18}$/
+const feeRegExp = /^[0-9]+$/
 
 const validationSchema = Yup.object().shape({
   hospname: Yup.string()
@@ -72,29 +73,51 @@ const validationSchema = Yup.object().shape({
     .required('Please select a .pdf file of size less than 1 Mb')
     .nullable()
     .label('Document'),
-  acc: Yup.string()
-    .matches(accRegExp, 'Bank Account Number not valid!')
-    .required()
-    .label('Account No.'),
-  accname: Yup.string().required().label('Name'),
-  type: Yup.string()
-    .required('Please Pick Account Type')
-    .nullable()
-    .label('Account Type'),
-  qlf: Yup.string()
-    .required('Please Pick a Qualifications')
-    .nullable()
-    .label('Qualifications'),
-  ifsc: Yup.string()
-    .matches(ifscRegExp, 'IFSC code is not valid!')
-    .required()
-    .label('IFSC Code'),
-  fee: Yup.string().required().label('Consultation Fee'),
   regNo: Yup.string().required().label('Registration Number'),
   firstAvailaibeVet: Yup.string()
     .nullable()
     .required()
     .label('First Available Vet'),
+  qlf: Yup.string()
+    .required('Please Pick a Qualifications')
+    .nullable()
+    .label('Qualifications'),
+  fee: Yup.string()
+    .matches(feeRegExp, 'Please enter your fee')
+    .required()
+    .label('Consultation Fee'),
+  acc: Yup.string()
+    .matches(accRegExp, 'Bank Account Number not valid!')
+    .test('acctest', 'Account number is required', function (value) {
+      const { fee } = this.parent
+      if (fee > 0 && !value) return false
+      return true
+    })
+    .label('Account No.'),
+  accname: Yup.string()
+    .test('accnametest', 'Account name is required', function (value) {
+      const { fee } = this.parent
+      if (fee > 0 && !value) return false
+      return true
+    })
+    .label('Name'),
+  type: Yup.string()
+    .test('acctyppe', 'Please select account type', function (value) {
+      const { fee } = this.parent
+      if (fee > 0 && !value) return false
+      return true
+    })
+    .nullable()
+    .label('Account Type'),
+
+  ifsc: Yup.string()
+    .test('accifsc', 'IFSC code is required', function (value) {
+      const { fee } = this.parent
+      if (fee > 0 && !value) return false
+      return true
+    })
+    .matches(ifscRegExp, 'IFSC code is not valid!')
+    .label('IFSC Code'),
 })
 
 const DetailsScreen = ({ navigation }) => {
@@ -127,6 +150,8 @@ const DetailsScreen = ({ navigation }) => {
   }, [])
 
   const handleSubmit = async (values) => {
+    // console.log('Values', values)
+    // return
     const data = new FormData()
     if (!values.selectHospName) {
       setLoading(true)
@@ -147,14 +172,17 @@ const DetailsScreen = ({ navigation }) => {
       uri: values.file,
     })
     data.append('phone', values.phone)
-    data.append('accno', values.acc)
-    data.append('accname', values.accname)
-    data.append('acctype', values.type)
-    data.append('ifsc', values.ifsc)
-    data.append('fee', values.fee)
     data.append('qlf', values.qlf)
     data.append('firstAvailaibeVet', values.firstAvailaibeVet)
     data.append('regNo', values.regNo)
+    data.append('fee', values.fee)
+    if (values.fee > 0) {
+      data.append('accno', values.acc)
+      data.append('accname', values.accname)
+      data.append('acctype', values.type)
+      data.append('ifsc', values.ifsc)
+    }
+
     setLoading(true)
     const res = await doctorsApi.saveDoctor(data)
     if (!res.ok) {
@@ -193,19 +221,19 @@ const DetailsScreen = ({ navigation }) => {
               selectHospName: '',
               phone: '',
               file: '',
+              qlf: '',
+              regNo: '',
+              firstAvailaibeVet: false,
               acc: '',
               accname: '',
               type: '',
               ifsc: '',
               fee: '',
-              qlf: '',
-              regNo: '',
-              firstAvailaibeVet: false,
             }}
             onSubmit={handleSubmit}
             validationSchema={validationSchema}
           >
-            {() => (
+            {({ values }) => (
               <>
                 <FormFilePicker name='file' size={1} />
                 <AppFormField
@@ -222,7 +250,7 @@ const DetailsScreen = ({ navigation }) => {
                   label='Select Hospital From The List Below'
                   name='selectHospName'
                 />
-                 <AppText
+                <AppText
                   style={{ textAlign: 'center', fontSize: 22, margin: 10 }}
                 >
                   OR
@@ -235,7 +263,7 @@ const DetailsScreen = ({ navigation }) => {
                   name='hospname'
                   numberOfLines={2}
                   placeholder='Hospital/Clinic Name'
-                />  
+                />
                 <AppSelect
                   items={qualifs}
                   label='Select Your Qualifications'
@@ -266,45 +294,52 @@ const DetailsScreen = ({ navigation }) => {
                   keyboardType='numeric'
                   placeholder='Consultation Fee In Rupees (₹)'
                 />
+                {values.fee > 0 && (
+                  <>
+                    <AppText
+                      style={{
+                        textAlign: 'center',
+                        marginVertical: 20,
+                        fontSize: 28,
+                        textDecorationLine: 'underline',
+                      }}
+                    >
+                      Bank Details
+                    </AppText>
 
-                <AppText
-                  style={{
-                    textAlign: 'center',
-                    marginVertical: 20,
-                    fontSize: 28,
-                    textDecorationLine: 'underline',
-                  }}
-                >
-                  Bank Details
-                </AppText>
+                    <AppFormField
+                      label='Bank Account Number'
+                      autoCapitalize='none'
+                      autoCorrect={false}
+                      keyboardType='numeric'
+                      name='acc'
+                      maxLength={18}
+                      placeholder='xxxx xxxx xxxx xxxx'
+                    />
+                    <AppFormField
+                      label='Account Holder Name'
+                      autoCapitalize='none'
+                      autoCorrect={false}
+                      name='accname'
+                      placeholder='Account Holder Name'
+                    />
 
-                <AppFormField
-                  label='Bank Account Number'
-                  autoCapitalize='none'
-                  autoCorrect={false}
-                  keyboardType='numeric'
-                  name='acc'
-                  maxLength={18}
-                  placeholder='xxxx xxxx xxxx xxxx'
-                />
-                <AppFormField
-                  label='Account Holder Name'
-                  autoCapitalize='none'
-                  autoCorrect={false}
-                  name='accname'
-                  placeholder='Account Holder Name'
-                />
+                    <AppSelect
+                      items={accType}
+                      label='Account Type'
+                      name='type'
+                    />
 
-                <AppSelect items={accType} label='Account Type' name='type' />
-
-                <AppFormField
-                  label='IFSC Code'
-                  autoCapitalize='characters'
-                  autoCorrect={false}
-                  name='ifsc'
-                  placeholder='Enter Your Bank IFSC Code'
-                  maxLength={11}
-                />
+                    <AppFormField
+                      label='IFSC Code'
+                      autoCapitalize='characters'
+                      autoCorrect={false}
+                      name='ifsc'
+                      placeholder='Enter Your Bank IFSC Code'
+                      maxLength={11}
+                    />
+                  </>
+                )}
 
                 <SubmitButton title='Submit' />
               </>

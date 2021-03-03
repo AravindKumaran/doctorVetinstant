@@ -40,16 +40,6 @@ const DoctorDetailsScreen = ({ navigation }) => {
       <View style={styles.container}>
         {doctor ? (
           <View style={styles.details}>
-            {/* <AppText
-              style={{
-                fontSize: 25,
-                fontWeight: '600',
-                textAlign: 'center',
-                marginBottom: 30,
-              }}
-            >
-              Professional Details
-            </AppText> */}
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
                 Registration Number
@@ -81,40 +71,44 @@ const DoctorDetailsScreen = ({ navigation }) => {
               <AppText>{doctor.qlf}</AppText>
             </View>
 
-            <AppText
-              style={{
-                fontSize: 25,
-                fontWeight: '600',
-                textAlign: 'center',
-                marginBottom: 30,
-              }}
-            >
-              Billing Details
-            </AppText>
-            <View style={styles.card}>
-              <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Bank Account Number
-              </AppText>
-              <AppText>{doctor.accno}</AppText>
-            </View>
-            <View style={styles.card}>
-              <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Account Holder's Name{' '}
-              </AppText>
-              <AppText>{doctor.accname}</AppText>
-            </View>
-            <View style={styles.card}>
-              <AppText style={{ fontSize: 14, color: '#606770' }}>
-                Account Type
-              </AppText>
-              <AppText>{doctor.acctype}</AppText>
-            </View>
-            <View style={styles.card}>
-              <AppText style={{ fontSize: 14, color: '#606770' }}>
-                IFSC Code
-              </AppText>
-              <AppText>{doctor.ifsc}</AppText>
-            </View>
+            {doctor.fee > 0 && (
+              <>
+                <AppText
+                  style={{
+                    fontSize: 25,
+                    fontWeight: '600',
+                    textAlign: 'center',
+                    marginBottom: 30,
+                  }}
+                >
+                  Billing Details
+                </AppText>
+                <View style={styles.card}>
+                  <AppText style={{ fontSize: 14, color: '#606770' }}>
+                    Bank Account Number
+                  </AppText>
+                  <AppText>{doctor.accno}</AppText>
+                </View>
+                <View style={styles.card}>
+                  <AppText style={{ fontSize: 14, color: '#606770' }}>
+                    Account Holder's Name{' '}
+                  </AppText>
+                  <AppText>{doctor.accname}</AppText>
+                </View>
+                <View style={styles.card}>
+                  <AppText style={{ fontSize: 14, color: '#606770' }}>
+                    Account Type
+                  </AppText>
+                  <AppText>{doctor.acctype}</AppText>
+                </View>
+                <View style={styles.card}>
+                  <AppText style={{ fontSize: 14, color: '#606770' }}>
+                    IFSC Code
+                  </AppText>
+                  <AppText>{doctor.ifsc}</AppText>
+                </View>
+              </>
+            )}
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
                 Registration certificate
