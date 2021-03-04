@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react'
-import { ScrollView, StyleSheet, View } from 'react-native'
+import { ScrollView, StyleSheet, View, BackHandler, Alert } from 'react-native'
 import { Formik } from 'formik'
 import * as Yup from 'yup'
 
@@ -27,6 +27,34 @@ const PrescriptionScreen = ({ navigation }) => {
   const { user } = useContext(AuthContext)
   const [patients, setPatients] = useState([])
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const backAction = () => {
+      Alert.alert('Hold on!', 'Are you sure you want to go back?', [
+        {
+          text: 'Cancel',
+          onPress: () => null,
+          style: 'cancel',
+        },
+        {
+          text: 'YES',
+          onPress: () =>
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Home' }],
+            }),
+        },
+      ])
+      return true
+    }
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction
+    )
+
+    return () => backHandler.remove()
+  }, [])
 
   useEffect(() => {
     const getPatients = async () => {
@@ -103,7 +131,6 @@ const PrescriptionScreen = ({ navigation }) => {
                 <AppSelect
                   items={patients}
                   label='Select Patient Name'
-                  
                   name='patientName'
                 />
                 <AppFormField

@@ -174,7 +174,7 @@ const PatientDetailsScreen = ({ navigation, route }) => {
             <AppText>Gender: {pet.gender} </AppText>
             <AppText>Breed: {pet.breed} </AppText>
             <AppText>Pet Type: {pet.type} </AppText>
-            {pet.petHistoryImages.length > 0 && (
+            {pet.petHistoryImages?.length > 0 && (
               <>
                 <AppText>Pet History Images: </AppText>
                 <ScrollView horizontal style={{ marginVertical: 20 }}>
@@ -194,10 +194,10 @@ const PatientDetailsScreen = ({ navigation, route }) => {
                 </ScrollView>
               </>
             )}
-            {pet.prescriptions.length > 0 && (
+            {pet.prescriptions?.length > 0 && (
               <AppText>Pet Prescriptions:</AppText>
             )}
-            {pet.prescriptions.length > 0 &&
+            {pet.prescriptions?.length > 0 &&
               pet.prescriptions.map((pbm, index) => (
                 <View key={index} style={styles.cardBordered}>
                   <AppText>Prescription: {pbm.prescription}</AppText>
@@ -224,8 +224,8 @@ const PatientDetailsScreen = ({ navigation, route }) => {
                   )}
                 </View>
               ))}
-            {pet.problems.length > 0 && <AppText>Pet Problems:</AppText>}
-            {pet.problems.length > 0 &&
+            {pet.problems?.length > 0 && <AppText>Pet Problems:</AppText>}
+            {pet.problems?.length > 0 &&
               pet.problems.map((pb, index) => (
                 <View key={pb._id} style={styles.cardBordered}>
                   <AppText>Problem: {pb.problem}</AppText>
@@ -233,18 +233,50 @@ const PatientDetailsScreen = ({ navigation, route }) => {
                   <AppText>Time Period: {pb.time}</AppText>
                   <AppText>Appetite: {pb.Appetite}</AppText>
                   <AppText>Behaviour: {pb.Behaviour}</AppText>
-                  <AppText>Ears: {pb.Ears}</AppText>
                   <AppText>Eyes: {pb.Eyes}</AppText>
-                  <AppText>Faces: {pb.Feces}</AppText>
                   <AppText>Gait: {pb.Gait}</AppText>
                   <AppText>Mucous: {pb.Mucous}</AppText>
-                  <AppText>Skin: {pb.Skin}</AppText>
-                  <AppText>Urine: {pb.Urine}</AppText>
                   <AppText>Comment: {pb.comment}</AppText>
-                  {pb.images.length > 0 && <AppText>Pet Problem image</AppText>}
+                  {pb.Ears?.length > 0 && (
+                    <AppText style={{ fontSize: 22 }}>Ears: </AppText>
+                  )}
+
+                  {pb.Ears?.length > 0 &&
+                    pb.Ears.map((er, i) => (
+                      <AppText key={`${i}-Ears`}> {er}</AppText>
+                    ))}
+
+                  {pb.Feces?.length > 0 && (
+                    <AppText style={{ fontSize: 22 }}>Faces: </AppText>
+                  )}
+
+                  {pb.Feces?.length > 0 &&
+                    pb.Feces.map((fc, i) => (
+                      <AppText key={`Feces ${i}`}> {fc}</AppText>
+                    ))}
+                  {pb.Urine?.length > 0 && (
+                    <AppText style={{ fontSize: 22 }}>Urines: </AppText>
+                  )}
+
+                  {pb.Urine?.length > 0 &&
+                    pb.Urine.map((ur, i) => (
+                      <AppText key={`Urines ${i}`}> {ur}</AppText>
+                    ))}
+                  {pb.Skin?.length > 0 && (
+                    <AppText style={{ fontSize: 22 }}>Skins: </AppText>
+                  )}
+
+                  {pb.Skin?.length > 0 &&
+                    pb.Skin.map((sk, i) => (
+                      <AppText key={`Skins ${i}`}> {sk}</AppText>
+                    ))}
+
+                  {pb?.images?.length > 0 && (
+                    <AppText>Pet Problem image</AppText>
+                  )}
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    {pb.images.length > 0 &&
-                      pb.images.map((img, i) => (
+                    {pb?.images?.length > 0 &&
+                      pb?.images.map((img, i) => (
                         <>
                           <Image
                             key={i + img}
@@ -274,6 +306,10 @@ const PatientDetailsScreen = ({ navigation, route }) => {
             }
           />
           <AppButton title='Video Call' onPress={handleVideoCall} />
+          <AppButton
+            title='Send Prescription'
+            onPress={() => navigation.navigate('Prescription')}
+          />
         </>
       )}
     </ScrollView>

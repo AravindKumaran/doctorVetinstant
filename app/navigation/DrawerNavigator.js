@@ -106,7 +106,7 @@ const DrawerNavigator = () => (
         unmountOnBlur: true,
       }}
     /> */}
-    <Drawer.Screen
+    {/* <Drawer.Screen
       name='Prescription'
       component={PrescriptionScreen}
       options={{
@@ -116,7 +116,7 @@ const DrawerNavigator = () => (
         headerShown: true,
         unmountOnBlur: true,
       }}
-    />
+    /> */}
     <Drawer.Screen
       name='CallLog'
       component={CallLogNavigator}

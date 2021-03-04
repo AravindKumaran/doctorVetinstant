@@ -10,6 +10,7 @@ import ChatScreen from '../screens/ChatScreen'
 import PatientListScreen from '../screens/PatientListScreen'
 import PatientDetailsScreen from '../screens/PatientDetailsScreen'
 import VideoCallScreen from '../screens/VideoCallScreen'
+import PrescriptionScreen from '../screens/PrescriptionScreen'
 
 import { Feather } from '@expo/vector-icons'
 
@@ -55,9 +56,22 @@ const AppNavigator = ({ navigation }) => {
       <Stack.Screen name='DoctorDetails' component={DoctorDetailsScreen} />
       <Stack.Screen name='Patient' component={PatientScreen} />
       <Stack.Screen name='PatientDetails' component={PatientDetailsScreen} />
+      <Stack.Screen
+        name='Prescription'
+        component={PrescriptionScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
       <Stack.Screen name='Chat' component={ChatScreen} />
       <Stack.Screen name='PatientList' component={PatientListScreen} />
-      <Stack.Screen name='VideoCall' component={VideoCallScreen} />
+      <Stack.Screen
+        name='VideoCall'
+        component={VideoCallScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack.Navigator>
   )
 }
