@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   StyleSheet,
   View,
@@ -18,11 +18,13 @@ const ScheduleCallScreen = ({ navigation, route }) => {
   const [mode, setMode] = useState('date')
   const [show, setShow] = useState(false)
   const [loading, setLoading] = useState(false)
+  // const [currentDate, setCurrentDate] = useState('');
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date
     setShow(Platform.OS === 'ios')
     setDate(currentDate)
+    // moment(selectedDate).format('YYYY-MM-DD')
   }
 
   const showMode = (currentMode) => {
@@ -37,6 +39,22 @@ const ScheduleCallScreen = ({ navigation, route }) => {
   const showTimepicker = () => {
     showMode('time')
   }
+
+  // useEffect(() => {
+  //   var date = new Date().getDate();
+  //   var month = new Date().getMonth() + 1;
+  //   var year = new Date().getFullYear();
+  //   setDate(
+  //     date + '/' + month + '/' + year 
+  //   );
+  // }, []);
+
+  // const ShowCurrentDate = () => {
+  //   var date = new Date().getDate();
+  //   var month = new Date().getMonth() + 1;
+  //   var year = new Date().getFullYear();
+  //   console.log(date + '/' + month + '/' + year);
+  //  }
 
   const handlePress = async () => {
     const data = {
@@ -96,6 +114,8 @@ const ScheduleCallScreen = ({ navigation, route }) => {
             onChange={onChange}
             neutralButtonLabel='clear'
             minimumDate={new Date()}
+            // dateFormat={ShowCurrentDate}
+            // dateFormat='dd/MM/yyyy'
           />
         )}
 

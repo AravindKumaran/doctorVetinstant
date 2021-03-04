@@ -163,6 +163,9 @@ const PatientDetailsScreen = ({ navigation, route }) => {
       {pet && (
         <>
           <View style={styles.card}>
+            <AppText>
+              Date: {new Date(pet.createdAt).toLocaleDateString()}
+            </AppText>
             <AppText>Weight: {pet.weight} Kg</AppText>
             <AppText>
               Age: {pet.years !== 0 && `${pet.years} years`}{' '}
@@ -182,7 +185,7 @@ const PatientDetailsScreen = ({ navigation, route }) => {
                         //   uri: `https://vetinstantbe.azurewebsites.net/${img}`,
                         // }}
                         source={{
-                          uri: `http://192.168.43.242:8000/${img}`,
+                          uri: `https://vetinstantbe.azurewebsites.net/${img}`,
                         }}
                         style={{ width: 150, height: 150, borderRadius: 75 }}
                       />
@@ -210,7 +213,7 @@ const PatientDetailsScreen = ({ navigation, route }) => {
                       <AppText>Prescription Image:</AppText>
                       <Image
                         source={{
-                          uri: `http://192.168.43.242:8000/${pbm.img}`,
+                          uri: `http://192.168.29.239:8000/${pbm.img}`,
                         }}
                         // source={{
                         //   uri: `https://vetinstantbe.azurewebsites.net/api/v1/${pbm.img}`,
@@ -246,7 +249,7 @@ const PatientDetailsScreen = ({ navigation, route }) => {
                           <Image
                             key={i + img}
                             source={{
-                              uri: `http://192.168.43.242:8000/${img}`,
+                              uri: `http://192.168.29.239:8000/${img}`,
                             }}
                             // source={{
                             //   uri: `https://vetinstantbe.azurewebsites.net/api/v1/${img}`,
