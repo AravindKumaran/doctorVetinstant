@@ -166,6 +166,9 @@ const PatientDetailsScreen = ({ navigation, route }) => {
             <AppText>
               Date: {new Date(pet.createdAt).toLocaleDateString()}
             </AppText>
+            <AppText>
+              Time: {new Date(pet.createdAt).toLocaleTimeString()}
+            </AppText>
             <AppText>Weight: {pet.weight} Kg</AppText>
             <AppText>
               Age: {pet.years !== 0 && `${pet.years} years`}{' '}
