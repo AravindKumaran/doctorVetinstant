@@ -3,20 +3,22 @@ import React from 'react'
 import { useFormikContext } from 'formik'
 
 import ErrorMessage from '../ErrorMessage'
-import ImageInput from './ImageInput'
+import { StyleSheet, View, Text } from 'react-native'
+import ImagePickerBottomSheet from './ImagePickerBottomSheet'
 
-const FormImagePicker = ({ name }) => {
+const AppImagePicker = ({ name }) => {
   const { errors, setFieldValue, touched, values } = useFormikContext()
-
   return (
-    <>
-      <ImageInput
+    <View>
+      <ImagePickerBottomSheet
         imageUri={values[name]}
         onChangeImage={(uri) => setFieldValue(name, uri)}
       />
       <ErrorMessage error={errors[name]} visible={touched[name]} />
-    </>
+    </View>
   )
 }
 
-export default FormImagePicker
+const styles = StyleSheet.create({})
+
+export default AppImagePicker

@@ -1,12 +1,13 @@
 import React, { useState, useContext, useEffect } from 'react'
 
-import { StyleSheet, View, ScrollView } from 'react-native'
+import { StyleSheet, View, ScrollView, Linking } from 'react-native'
 
 import AppText from '../components/AppText'
 import AppButton from '../components/AppButton'
 import AuthContext from '../context/authContext'
 import LoadingIndicator from '../components/LoadingIndicator'
 import doctorsApi from '../api/doctors'
+import { TouchableOpacity } from 'react-native-gesture-handler'
 
 const DoctorDetailsScreen = ({ navigation }) => {
   const { user } = useContext(AuthContext)
@@ -27,6 +28,7 @@ const DoctorDetailsScreen = ({ navigation }) => {
       return
     }
     setDoctor(res.data.doctor)
+    // console.log('Res', res)
     setLoading(false)
   }
 
@@ -56,7 +58,7 @@ const DoctorDetailsScreen = ({ navigation }) => {
               <AppText style={{ fontSize: 14, color: '#606770' }}>
                 Hospital/Clinic Name
               </AppText>
-              <AppText>{doctor.hospital.name}</AppText>
+              <AppText>{doctor?.hospital?.name}</AppText>
             </View>
             <View style={styles.card}>
               <AppText style={{ fontSize: 14, color: '#606770' }}>
@@ -113,7 +115,9 @@ const DoctorDetailsScreen = ({ navigation }) => {
               <AppText style={{ fontSize: 14, color: '#606770' }}>
                 Registration certificate
               </AppText>
-              <AppText>{doctor.file}</AppText>
+              <TouchableOpacity onPress={() => Linking.openURL(doctor.file)}>
+                <AppText>{doctor.file.split('/documents/')[1]}</AppText>
+              </TouchableOpacity>
             </View>
           </View>
         ) : (

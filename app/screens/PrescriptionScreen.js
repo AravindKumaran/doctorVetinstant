@@ -9,7 +9,7 @@ import LoadingIndicator from '../components/LoadingIndicator'
 import AppSelect from '../components/forms/AppSelect'
 import SubmitButton from '../components/SubmitButton'
 import AppFormField from '../components/AppFormField'
-import FormImagePicker from '../components/forms/FormImagePicker'
+import AppImagePicker from '../components/forms/AppImagePicker'
 
 import roomsApi from '../api/room'
 import petsApi from '../api/pets'
@@ -146,7 +146,7 @@ const PrescriptionScreen = ({ navigation }) => {
                   Select Image(optional)
                 </AppText>
 
-                <FormImagePicker name='photo' />
+                <AppImagePicker name='photo' />
 
                 <SubmitButton title='Send' />
               </>

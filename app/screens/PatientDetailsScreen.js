@@ -184,12 +184,12 @@ const PatientDetailsScreen = ({ navigation, route }) => {
                   {pet.petHistoryImages.map((img, i) => (
                     <View key={`${img}-${i}`} style={{ marginRight: 20 }}>
                       <Image
-                        source={{
-                          uri: `https://vetinstantbe.azurewebsites.net/img/${img}`,
-                        }}
                         // source={{
-                        //   uri: `http://192.168.43.242:8000/img/${img}`,
+                        //   uri: `https://vetinstantbe.azurewebsites.net/img/${img}`,
                         // }}
+                        source={{
+                          uri: `${img}`,
+                        }}
                         style={{ width: 150, height: 150, borderRadius: 75 }}
                       />
                     </View>
@@ -219,7 +219,7 @@ const PatientDetailsScreen = ({ navigation, route }) => {
                         //   uri: `http://192.168.43.242:8000/img/${pbm.img}`,
                         // }}
                         source={{
-                          uri: `https://vetinstantbe.azurewebsites.net/img/${pbm.img}`,
+                          uri: `${pbm.img}`,
                         }}
                         style={{ width: 150, height: 150, borderRadius: 75 }}
                       />
@@ -287,7 +287,7 @@ const PatientDetailsScreen = ({ navigation, route }) => {
                             //   uri: `http://192.168.43.242:8000/img/${img}`,
                             // }}
                             source={{
-                              uri: `https://vetinstantbe.azurewebsites.net/img/${img}`,
+                              uri: `${img}`,
                             }}
                             style={{
                               width: 150,
