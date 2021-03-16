@@ -9,6 +9,7 @@ import DoctorScreen from '../screens/DoctorScreen'
 import PrescriptionScreen from '../screens/PrescriptionScreen'
 import ScheduleCallScreen from '../screens/ScheduleCallScreen'
 import CallLogScreen from '../screens/CallLogScreen'
+import CallPendingScreen from '../screens/callPendingScreen'
 
 import AppNavigator from './AppNavigator'
 
@@ -52,6 +53,7 @@ const CallLogNavigator = ({ navigation }) => {
           ),
         }}
       />
+      <Stack.Screen name='PendingCalls' component={CallPendingScreen} />
       <Stack.Screen name='ScheduleCall' component={ScheduleCallScreen} />
     </Stack.Navigator>
   )
@@ -95,6 +97,7 @@ const DrawerNavigator = () => (
         ),
       }}
     />
+
     {/* <Drawer.Screen
       name='Doctor'
       component={DoctorScreen}

@@ -12,19 +12,19 @@ import { Feather } from '@expo/vector-icons'
 import AppText from '../components/AppText'
 import AppButton from '../components/AppButton'
 import scheduledCallsApi from '../api/scheduledCall'
+import pendingsApi from '../api/callPending'
 
 const ScheduleCallScreen = ({ navigation, route }) => {
   const [date, setDate] = useState(new Date())
   const [mode, setMode] = useState('date')
   const [show, setShow] = useState(false)
   const [loading, setLoading] = useState(false)
-  // const [currentDate, setCurrentDate] = useState('');
+  console.log('Ddd', route?.params?.sdata)
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date
     setShow(Platform.OS === 'ios')
     setDate(currentDate)
-    // moment(selectedDate).format('YYYY-MM-DD')
   }
 
   const showMode = (currentMode) => {
@@ -40,44 +40,65 @@ const ScheduleCallScreen = ({ navigation, route }) => {
     showMode('time')
   }
 
-  // useEffect(() => {
-  //   var date = new Date().getDate();
-  //   var month = new Date().getMonth() + 1;
-  //   var year = new Date().getFullYear();
-  //   setDate(
-  //     date + '/' + month + '/' + year 
-  //   );
-  // }, []);
-
-  // const ShowCurrentDate = () => {
-  //   var date = new Date().getDate();
-  //   var month = new Date().getMonth() + 1;
-  //   var year = new Date().getFullYear();
-  //   console.log(date + '/' + month + '/' + year);
-  //  }
-
   const handlePress = async () => {
-    const data = {
-      date,
-      userId: route.params.call.senderId._id,
-      doctorId: route.params.call.receiverId._id,
-      doctorName: route.params.call.receiverId.name,
-    }
+    if (route?.params?.scheduled) {
+      const npCall = {
+        ...route?.params?.sdata,
+        status: 'scheduled',
+        extraInfo: `${date}`,
+      }
+      // console.log('Callssd', npCall)
+      setLoading(true)
+      const pRes = await pendingsApi.updateCallPending(
+        route?.params?.sdata._id,
+        npCall
+      )
+      if (!pRes.ok) {
+        console.log('Error', pRes)
+        setLoading(false)
+        return
+      }
+      const data = {
+        date,
+        userId: route?.params?.sdata.userId,
+        doctorId: route?.params?.sdata.docId,
+        doctorName: route?.params?.sdata.docName,
+      }
 
-    setLoading(true)
-
-    const res = await scheduledCallsApi.createScheduledCall(data)
-    if (!res.ok) {
+      const res = await scheduledCallsApi.createScheduledCall(data)
+      if (!res.ok) {
+        setLoading(false)
+        console.log('Res', res)
+        return
+      }
+      alert('Your call has been scheduled!')
       setLoading(false)
-      console.log('Res', res)
-      return
+      navigation.navigate('CallLog')
+    } else {
+      const data = {
+        date,
+        userId: route.params.call.senderId._id,
+        doctorId: route.params.call.receiverId._id,
+        doctorName: route.params.call.receiverId.name,
+      }
+
+      // console.log('Data', data)
+
+      setLoading(true)
+
+      const res = await scheduledCallsApi.createScheduledCall(data)
+      if (!res.ok) {
+        setLoading(false)
+        console.log('Res', res)
+        return
+      }
+
+      console.log('res', res)
+      setLoading(false)
+
+      alert('Your call has been scheduled!')
+      navigation.goBack()
     }
-
-    console.log('res', res)
-    setLoading(false)
-
-    alert('Your call has been scheduled!')
-    navigation.goBack()
   }
   return (
     <ScrollView>

@@ -13,10 +13,12 @@ const CallLogScreen = ({ navigation }) => {
   const [missedCall, setMissedCall] = useState([])
   const [completedCall, setCompletedCall] = useState([])
   const [loading, setLoading] = useState(false)
+  // const [pendingCalls, setPendingCalls] = useState([])
 
   useEffect(() => {
     navigation.setOptions({ title: 'Call Log' })
   }, [])
+
   useEffect(() => {
     const getMissedCall = async () => {
       setLoading(true)
@@ -27,22 +29,35 @@ const CallLogScreen = ({ navigation }) => {
         return
       }
       const callLogsArray = res.data.callLogs
+      const msCall = []
+      const cmCall = []
       callLogsArray.forEach((log) => {
         if (log.callPending) {
-          setMissedCall((prevLog) => [...prevLog, log])
+          msCall.push(log)
         } else {
-          setCompletedCall((prevLog) => [...prevLog, log])
+          cmCall.push(log)
         }
       })
+
+      setMissedCall(msCall)
+      setCompletedCall(cmCall)
       setLoading(false)
     }
 
     getMissedCall()
   }, [])
+
   return (
     <ScrollView>
       <LoadingIndicator visible={loading} />
       <View style={styles.container}>
+        <View style={{ margin: 15, padding: 10 }}>
+          <AppButton
+            title='See Pending Calls'
+            onPress={() => navigation.navigate('PendingCalls')}
+          />
+        </View>
+
         <View style={styles.titleWrapper}>
           <Feather
             style={{ marginLeft: 25 }}
