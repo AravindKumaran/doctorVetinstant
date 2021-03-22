@@ -30,8 +30,8 @@ const LoginScreen = ({ navigation }) => {
     setLoading(true)
     const res = await authApi.login(email, password)
     if (!res.ok) {
-      // console.log(res.data.msg)
-      setError(res.data.msg)
+      console.log('Error', res)
+      setError(res.data?.msg)
       setLoading(false)
       return
     }
@@ -39,8 +39,10 @@ const LoginScreen = ({ navigation }) => {
     authStorage.storeToken(res.data.token)
     const userRes = await usersApi.getLoggedInUser()
     if (!userRes.ok) {
+      console.log('Error', userRes)
+      setError('You are not allowed to login')
       setLoading(false)
-      console.log(userRes)
+      // console.log(userRes.data.msg)
       return
     }
     socket.emit('online', userRes.data.user._id)

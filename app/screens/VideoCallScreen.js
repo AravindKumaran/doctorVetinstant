@@ -22,6 +22,8 @@ import {
 
 import socket from '../components/utils/socket'
 
+import pendingsApi from '../api/callPending'
+
 const VideoCallScreen = ({ navigation, route }) => {
   const [isAudioEnabled, setIsAudioEnabled] = useState(true)
   const [isVideoEnabled, setIsVideoEnabled] = useState(true)
@@ -29,8 +31,19 @@ const VideoCallScreen = ({ navigation, route }) => {
   const [participants, setParticipants] = useState(new Map())
   const [videoTracks, setVideoTracks] = useState(new Map())
   const [token, setToken] = useState(route.params?.token)
-  // const [token, setToken] = useState()
   const twilioVideo = useRef(null)
+
+  const handleDeleteCall = async () => {
+    const callRes = await pendingsApi.singleCallPending(route.params?.item._id)
+    if (callRes.ok) {
+      const call = callRes.data.call
+      call.userJoined && call.docJoined
+        ? await pendingsApi.deleteCallPending(call._id)
+        : await pendingsApi.updateCallPending(call._id, {
+            docJoined: false,
+          })
+    }
+  }
 
   useEffect(() => {
     console.log('Inside Effect')
@@ -38,10 +51,16 @@ const VideoCallScreen = ({ navigation, route }) => {
       console.log('Incoming Call', data)
     })
     const _onConnectButtonPress = async () => {
-      // console.log(token)
       if (Platform.OS === 'android') {
         await _requestAudioPermission()
         await _requestCameraPermission()
+      }
+      const cRes = await pendingsApi.updateCallPending(route.params?.item._id, {
+        docJoined: true,
+      })
+      if (!cRes.ok) {
+        navigation.goBack()
+        return
       }
       twilioVideo.current.connect({
         accessToken: token,
@@ -54,14 +73,12 @@ const VideoCallScreen = ({ navigation, route }) => {
 
     return () => {
       console.log('Outside Effect')
+      handleDeleteCall()
       twilioVideo.current.disconnect()
     }
   }, [])
 
   const _onEndButtonPress = () => {
-    // twilioVideo.current.disconnect()
-    // // navigation.goBack()
-    // navigation.navigate('Prescription')
     Alert.alert('Hold on!', 'Are you sure you want to End Video Call?', [
       {
         text: 'Cancel',
@@ -70,7 +87,8 @@ const VideoCallScreen = ({ navigation, route }) => {
       },
       {
         text: 'YES',
-        onPress: () => {
+        onPress: async () => {
+          handleDeleteCall()
           twilioVideo.current.disconnect()
           navigation.navigate('Prescription')
         },
@@ -89,6 +107,7 @@ const VideoCallScreen = ({ navigation, route }) => {
         {
           text: 'YES',
           onPress: () => {
+            handleDeleteCall()
             twilioVideo.current.disconnect()
             navigation.navigate('Prescription')
           },
@@ -197,18 +216,6 @@ const VideoCallScreen = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      {/* {status === 'disconnected' && (
-        <View>
-          <Text style={styles.welcome}>React Native Twilio Video</Text>
-
-          <Button
-            title='Connect'
-            style={styles.button}
-            onPress={_onConnectButtonPress}
-          ></Button>
-        </View>
-      )} */}
-
       {(status === 'connected' || status === 'connecting') && (
         <View style={styles.callContainer}>
           {status === 'connected' && (

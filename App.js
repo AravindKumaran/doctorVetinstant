@@ -31,7 +31,7 @@ const App = () => {
   return (
     <AuthContext.Provider value={{ user, setUser }}>
       <NavigationContainer>
-        {user && user.role === 'doctor' ? (
+        {user && user.role === 'doctor' && user.block === false ? (
           <DrawerNavigator />
         ) : (
           <AuthNavigator />

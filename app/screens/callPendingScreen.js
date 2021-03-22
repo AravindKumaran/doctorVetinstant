@@ -97,6 +97,7 @@ const CallPendingScreen = ({ navigation }) => {
       params: {
         name: user.name,
         token: tokenRes.data,
+        item,
       },
     })
   }

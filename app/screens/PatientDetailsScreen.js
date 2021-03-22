@@ -3,16 +3,13 @@ import { StyleSheet, View, ScrollView, Image, Alert } from 'react-native'
 import AppButton from '../components/AppButton'
 
 import petsApi from '../api/pets'
-import usersApi from '../api/users'
 
 import LoadingIndicator from '../components/LoadingIndicator'
 import AppText from '../components/AppText'
-import AuthContext from '../context/authContext'
 
 const PatientDetailsScreen = ({ navigation, route }) => {
   const [pet, setPet] = useState(null)
   const [loading, setLoading] = useState(false)
-  const { user } = useContext(AuthContext)
 
   const getPetById = async () => {
     setLoading(true)
@@ -29,71 +26,6 @@ const PatientDetailsScreen = ({ navigation, route }) => {
   useEffect(() => {
     getPetById()
   }, [])
-
-  const handleVideoCall = async () => {
-    Alert.alert(
-      'Video Call Request',
-      `If you want to call press YES or If call has been already started by patient then press NO`,
-      [
-        {
-          text: 'NO',
-          onPress: async () => {
-            const tokenRes = await usersApi.getVideoToken({
-              userName: user.name,
-              roomName: route.params.pat.name,
-            })
-            console.log('Video Token', tokenRes)
-            if (!tokenRes.ok) {
-              setLoading(false)
-              console.log('Error', tokenRes)
-            }
-            setLoading(false)
-            navigation.navigate('VideoCall', {
-              name: user.name,
-              token: tokenRes.data,
-            })
-          },
-          style: 'cancel',
-        },
-        {
-          text: 'YES',
-          onPress: async () => {
-            const userId = route.params?.pat?.name.split('-')[0]
-            if (userId) {
-              setLoading(true)
-              const pushTokenRes = await usersApi.getPushToken(userId)
-              if (!pushTokenRes.ok) {
-                setLoading(false)
-                console.log('Error', pushTokenRes)
-              }
-              setLoading(false)
-              if (pushTokenRes.data?.token) {
-                setLoading(true)
-
-                const pushRes = await usersApi.sendPushNotification({
-                  targetExpoPushToken: pushTokenRes.data?.token,
-                  title: `Incoming Call Request from Dr. ${user.name}`,
-                  message: `Are you available for next 15-30 minutes?\n** Don't close the app from background!!`,
-                  datas: {
-                    token: user.token || null,
-                    details: route?.params?.pat,
-                  },
-                })
-
-                if (!pushRes.ok) {
-                  setLoading(false)
-                  console.log('Error', pushRes)
-                  return
-                }
-                setLoading(false)
-              }
-            }
-          },
-        },
-      ],
-      { cancelable: true }
-    )
-  }
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -251,7 +183,7 @@ const PatientDetailsScreen = ({ navigation, route }) => {
               navigation.navigate('Chat', { pat: route.params.pat })
             }
           />
-          <AppButton title='Video Call' onPress={handleVideoCall} />
+          {/* <AppButton title='Video Call' onPress={handleVideoCall} /> */}
           <AppButton
             title='Send Prescription'
             onPress={() => navigation.navigate('Prescription')}
