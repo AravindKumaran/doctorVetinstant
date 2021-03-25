@@ -18,6 +18,10 @@ const createPushToken = (token) => {
   return client.patch(`${endPoint}/saveToken`, token)
 }
 
+const updateDoctorHosp = (hospitalId) => {
+  return client.patch(`${endPoint}/updateDoctorHosp`, { hospitalId })
+}
+
 const sendPushNotification = (data) => {
   return client.post(`${endPoint}/sendNotification`, data)
 }
@@ -33,4 +37,5 @@ export default {
   createPushToken,
   sendPushNotification,
   getPushToken,
+  updateDoctorHosp,
 }

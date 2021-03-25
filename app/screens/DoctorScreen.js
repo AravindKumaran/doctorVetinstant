@@ -15,6 +15,7 @@ import FormFilePicker from '../components/forms/FormFilePicker'
 
 import doctorsApi from '../api/doctors'
 import hospitalsApi from '../api/hospitals'
+import usersApi from '../api/users'
 
 const accType = [
   { label: 'Savings', value: 'savings' },
@@ -152,6 +153,7 @@ const DetailsScreen = ({ navigation }) => {
   const handleSubmit = async (values) => {
     // console.log('Values', values)
     // return
+    let hsp
     const data = new FormData()
     if (!values.selectHospName) {
       setLoading(true)
@@ -162,8 +164,10 @@ const DetailsScreen = ({ navigation }) => {
         // setError(hosRes.data.msg);
         return
       }
+      hsp = hosRes.data.newHospital._id
       data.append('hospital', hosRes.data.newHospital._id)
     } else {
+      hsp = values.selectHospName
       data.append('hospital', values.selectHospName)
     }
     data.append('file', {
@@ -184,6 +188,12 @@ const DetailsScreen = ({ navigation }) => {
     }
 
     setLoading(true)
+    const res1 = await usersApi.updateDoctorHosp(hsp)
+    if (!res1.ok) {
+      setLoading(false)
+      setError('Something went wrong!')
+      console.log(res)
+    }
     const res = await doctorsApi.saveDoctor(data)
     if (!res.ok) {
       setLoading(false)
