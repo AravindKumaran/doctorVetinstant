@@ -8,8 +8,9 @@ import callLogsApi from '../api/callLog'
 import AuthContext from '../context/authContext'
 import LoadingIndicator from '../components/LoadingIndicator'
 
-const CallLogScreen = ({ navigation }) => {
+const CallLogScreen = ({ navigation, route }) => {
   const { user } = useContext(AuthContext)
+  // console.log('Routew', route)
   const [missedCall, setMissedCall] = useState([])
   const [completedCall, setCompletedCall] = useState([])
   const [loading, setLoading] = useState(false)
@@ -18,6 +19,13 @@ const CallLogScreen = ({ navigation }) => {
   useEffect(() => {
     navigation.setOptions({ title: 'Call Log' })
   }, [])
+
+  // useEffect(() => {
+  //   console.log('I am called')
+  //   if (route?.params?.moved) {
+  //     navigation.navigate('PendingCalls')
+  //   }
+  // }, [route?.params])
 
   useEffect(() => {
     const getMissedCall = async () => {

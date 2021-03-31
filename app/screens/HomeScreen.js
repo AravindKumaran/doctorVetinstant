@@ -68,14 +68,19 @@ const HomeScrren = ({ navigation }) => {
     }
   }, [])
 
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        navigation.navigate('CallLog', { name: 'Avids' })
+      }
+    )
+    return () => subscription.remove()
+  }, [])
+
   return (
     <View style={styles.container}>
       <LoadingIndicator visible={loading} />
       <AppText>Welcome Doctor {user ? user.name.split(' ')[0] : ''}</AppText>
-      {/* <AppButton
-        title='View History'
-        onPress={() => navigation.navigate('Patient')}
-      /> */}
       <AppButton
         title='My Details'
         onPress={() => navigation.navigate('DoctorDetails')}
