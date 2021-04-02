@@ -38,7 +38,7 @@ const AuthScreen = ({ route, navigation }) => {
       setLoading(true)
       await GoogleSignin.hasPlayServices()
       const userInfo = await GoogleSignin.signIn()
-      console.log('User', userInfo.user)
+      // console.log('User', userInfo.user)
       const password = userInfo.user.id + Date.now()
       const res = await authApi.saveGoogleUser(
         userInfo.user.name,
@@ -47,15 +47,24 @@ const AuthScreen = ({ route, navigation }) => {
       )
       if (!res.ok) {
         setLoading(false)
-        // setError(res.data.msg);
+        alert(res.data?.msg)
         console.log(res)
         return
       }
-      authStorage.storeToken(res.data.token)
-      const userRes = await usersApi.getLoggedInUser()
-      setUser(userRes.data.user)
-
-      setLoading(false)
+      if (title === 'Login') {
+        authStorage.storeToken(res.data.token)
+        const userRes = await usersApi.getLoggedInUser()
+        setUser(userRes.data.user)
+        setLoading(false)
+      } else {
+        authStorage.storeToken(res.data.token)
+        setLoading(false)
+        alert("Please add doctor Details! Don't Press back button")
+        navigation.navigate('AddDoctor', {
+          msg: 'Registration  Successfull. Please wait for admin approval',
+        })
+        // alert()
+      }
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         console.log('e 1')

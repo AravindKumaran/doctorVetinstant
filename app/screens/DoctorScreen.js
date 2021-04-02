@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { StyleSheet, View, Alert, Text } from 'react-native'
-import { ScrollView } from 'react-native-gesture-handler'
+import { StyleSheet, View, Alert, Text, ScrollView } from 'react-native'
 import { Formik } from 'formik'
 import * as Yup from 'yup'
 
@@ -121,7 +120,7 @@ const validationSchema = Yup.object().shape({
     .label('IFSC Code'),
 })
 
-const DetailsScreen = ({ navigation }) => {
+const DetailsScreen = ({ navigation, route }) => {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
   const [hospitals, setHopitals] = useState([])
@@ -202,9 +201,15 @@ const DetailsScreen = ({ navigation }) => {
     }
     setLoading(false)
 
-    alert('Your data has been saved!')
-    navigation.navigate('Home')
-    setError(null)
+    if (route?.params?.msg) {
+      alert(route?.params?.msg)
+      navigation.goBack()
+      setError(null)
+    } else {
+      alert('Your data has been saved!')
+      navigation.navigate('Home')
+      setError(null)
+    }
   }
 
   return (

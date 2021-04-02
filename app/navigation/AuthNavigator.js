@@ -7,6 +7,7 @@ import RegisterScreen from '../screens/RegisterScreen'
 import WelcomeScreen from '../screens/WelcomeScreen'
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen'
 import ResetPasswordScreen from '../screens/ResetPasswordScreen'
+import DoctorScreen from '../screens/DoctorScreen'
 
 const Stack = createStackNavigator()
 
@@ -14,6 +15,7 @@ const AuthNavigator = () => (
   <Stack.Navigator>
     <Stack.Screen name='Welcome' component={WelcomeScreen} />
     <Stack.Screen name='Auth' component={AuthScreen} />
+    <Stack.Screen name='AddDoctor' component={DoctorScreen} />
     <Stack.Screen name='Register' component={RegisterScreen} />
     <Stack.Screen name='Login' component={LoginScreen} />
     <Stack.Screen name='ForgotPassword' component={ForgotPasswordScreen} />
