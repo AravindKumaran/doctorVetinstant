@@ -30,6 +30,8 @@ const CallPendingScreen = ({ navigation }) => {
   const refRBSheet = useRef()
   const { user } = useContext(AuthContext)
   const [pendingCalls, setPendingCalls] = useState([])
+  const [currentProblem, setCurrentProblem] = useState(null)
+  const [previousProblem, setPreviousProblem] = useState(null)
   const [loading, setLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [pet, setPet] = useState(null)
@@ -118,6 +120,20 @@ const CallPendingScreen = ({ navigation }) => {
     }
     setLoading(false)
     setPet(petRes.data.exPet)
+    if (petRes.data.exPet.problems?.length > 0) {
+      const allProb = petRes.data.exPet.problems.reverse()
+      const curProbIndex = allProb.findIndex(
+        (prob) => prob.docname === user.name
+      )
+      if (curProbIndex !== -1) {
+        const cur = allProb[curProbIndex]
+        setCurrentProblem(cur)
+        allProb.splice(curProbIndex, 1)
+        setPreviousProblem(allProb)
+      } else {
+        setPreviousProblem(allProb)
+      }
+    }
   }
 
   const _renderItem = ({ item, index }) => (
@@ -374,9 +390,87 @@ const CallPendingScreen = ({ navigation }) => {
                       )}
                     </View>
                   ))}
-                {pet.problems?.length > 0 && <AppText>Pet Problems:</AppText>}
-                {pet.problems?.length > 0 &&
-                  pet.problems.map((pb, index) => (
+                {currentProblem && <AppText>Current Pet Problem:</AppText>}
+                {currentProblem && (
+                  <View style={styles.cardBordered}>
+                    <AppText>Problem: {currentProblem.problem}</AppText>
+                    <AppText>Doctor name: {currentProblem.docname}</AppText>
+                    <AppText>Time Period: {currentProblem.time}</AppText>
+                    <AppText>Appetite: {currentProblem.Appetite}</AppText>
+                    <AppText>Behaviour: {currentProblem.Behaviour}</AppText>
+                    <AppText>Eyes: {currentProblem.Eyes}</AppText>
+                    <AppText>Gait: {currentProblem.Gait}</AppText>
+                    <AppText>Mucous: {currentProblem.Mucous}</AppText>
+                    <AppText>Comment: {currentProblem.comment}</AppText>
+                    {currentProblem.Ears?.length > 0 && (
+                      <AppText style={{ fontSize: 22 }}>Ears: </AppText>
+                    )}
+
+                    {currentProblem.Ears?.length > 0 &&
+                      currentProblem.Ears.map((er, i) => (
+                        <AppText key={`${i}-Ears`}> {er}</AppText>
+                      ))}
+
+                    {currentProblem.Feces?.length > 0 && (
+                      <AppText style={{ fontSize: 22 }}>Faces: </AppText>
+                    )}
+
+                    {currentProblem.Feces?.length > 0 &&
+                      currentProblem.Feces.map((fc, i) => (
+                        <AppText key={`Feces ${i}`}> {fc}</AppText>
+                      ))}
+                    {currentProblem.Urine?.length > 0 && (
+                      <AppText style={{ fontSize: 22 }}>Urines: </AppText>
+                    )}
+
+                    {currentProblem.Urine?.length > 0 &&
+                      currentProblem.Urine.map((ur, i) => (
+                        <AppText key={`Urines ${i}`}> {ur}</AppText>
+                      ))}
+                    {currentProblem.Skin?.length > 0 && (
+                      <AppText style={{ fontSize: 22 }}>Skins: </AppText>
+                    )}
+
+                    {currentProblem.Skin?.length > 0 &&
+                      currentProblem.Skin.map((sk, i) => (
+                        <AppText key={`Skins ${i}`}> {sk}</AppText>
+                      ))}
+
+                    {currentProblem?.images?.length > 0 && (
+                      <AppText>Pet Problem image</AppText>
+                    )}
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                    >
+                      {currentProblem?.images?.length > 0 &&
+                        currentProblem?.images.map((img, i) => (
+                          <>
+                            <Image
+                              key={i + img}
+                              // source={{
+                              //   uri: `http://192.168.43.242:8000/img/${img}`,
+                              // }}
+                              source={{
+                                uri: `${img}`,
+                              }}
+                              style={{
+                                width: 150,
+                                height: 150,
+                                borderRadius: 75,
+                                marginHorizontal: 5,
+                              }}
+                            />
+                          </>
+                        ))}
+                    </ScrollView>
+                  </View>
+                )}
+                {previousProblem?.length > 0 && (
+                  <AppText>Previous Pet Problems:</AppText>
+                )}
+                {previousProblem?.length > 0 &&
+                  previousProblem.map((pb, index) => (
                     <View key={pb._id} style={styles.cardBordered}>
                       <AppText>Problem: {pb.problem}</AppText>
                       <AppText>Doctor name: {pb.docname}</AppText>
