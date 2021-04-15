@@ -25,6 +25,8 @@ import usersApi from '../api/users'
 import petsApi from '../api/pets'
 import LoadingIndicator from '../components/LoadingIndicator'
 import AuthContext from '../context/authContext'
+import * as Notifications from 'expo-notifications'
+import { removeValue, getObjectData } from '../components/utils/reminderStorage'
 
 const CallPendingScreen = ({ navigation }) => {
   const refRBSheet = useRef()
@@ -36,6 +38,28 @@ const CallPendingScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false)
   const [pet, setPet] = useState(null)
 
+  const sendPushToken = async (token, title, message) => {
+    if (token) {
+      setLoading(true)
+
+      const pushRes = await usersApi.sendPushNotification({
+        targetExpoPushToken: token,
+        title: ` Dr. ${user.name} ${title} `,
+        message: message || `Open the pending calls page for further action`,
+        datas: { token: user.token || null },
+      })
+
+      if (!pushRes.ok) {
+        setLoading(false)
+        console.log('Error', pushRes)
+        return
+      }
+      setLoading(false)
+    } else {
+      alert('Something Went Wrong. Try Again Later')
+    }
+  }
+
   const getUserPendingCalls = async () => {
     setLoading(true)
     const pres = await pendingsApi.getCallPendingByDoctor(user._id)
@@ -45,7 +69,23 @@ const CallPendingScreen = ({ navigation }) => {
       setRefreshing(false)
       return
     }
-    console.log('Ress', pres.data)
+    // console.log('Ress', pres.data)
+    const allDeniedCalls = pres.data.calls.filter(
+      (call) => call.status === 'deny'
+    )
+
+    allDeniedCalls.forEach(async (call) => {
+      const d = new Date(call.extraInfo)
+      const rmr = await getObjectData(
+        `${d.toLocaleDateString()}-${d.toLocaleTimeString()}`
+      )
+
+      // console.log('Rmr', rmr.docName)
+      if (rmr) {
+        await removeValue(`${d.toLocaleDateString()}-${d.toLocaleTimeString()}`)
+        await Notifications.cancelScheduledNotificationAsync(rmr.identifier)
+      }
+    })
     setPendingCalls(pres.data.calls)
     setLoading(false)
     setRefreshing(false)
@@ -68,6 +108,7 @@ const CallPendingScreen = ({ navigation }) => {
       setLoading(false)
       return
     }
+    await sendPushToken(pRes.data.calls.userMobToken, ` ${str} your request`)
     setLoading(false)
     setPendingCalls(allPCalls)
   }
@@ -93,6 +134,18 @@ const CallPendingScreen = ({ navigation }) => {
       setLoading(false)
       console.log('Error', tokenRes)
     }
+    const d = new Date(item.extraInfo)
+    const rmr = await getObjectData(
+      `${d.toLocaleDateString()}-${d.toLocaleTimeString()}`
+    )
+    if (rmr) {
+      await removeValue(`${d.toLocaleDateString()}-${d.toLocaleTimeString()}`)
+    }
+    await sendPushToken(
+      item.userMobToken,
+      ` has joined the video call`,
+      'Please join it ASAP'
+    )
     setLoading(false)
 
     navigation.navigate('Home', {

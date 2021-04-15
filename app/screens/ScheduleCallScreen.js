@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useContext } from 'react'
 import {
   StyleSheet,
   View,
@@ -13,9 +13,14 @@ import AppText from '../components/AppText'
 import AppButton from '../components/AppButton'
 import scheduledCallsApi from '../api/scheduledCall'
 import pendingsApi from '../api/callPending'
+import usersApi from '../api/users'
+import AuthContext from '../context/authContext'
+import * as Notifications from 'expo-notifications'
+import { storeObjectData } from '../components/utils/reminderStorage'
 
 const ScheduleCallScreen = ({ navigation, route }) => {
   const [date, setDate] = useState(new Date())
+  const { user } = useContext(AuthContext)
   const [mode, setMode] = useState('date')
   const [show, setShow] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -38,6 +43,45 @@ const ScheduleCallScreen = ({ navigation, route }) => {
 
   const showTimepicker = () => {
     showMode('time')
+  }
+
+  const sendPushToken = async (token, title, message) => {
+    if (token) {
+      setLoading(true)
+
+      const pushRes = await usersApi.sendPushNotification({
+        targetExpoPushToken: token,
+        title: ` Dr. ${user.name} ${title} `,
+        message: message || `Open the pending calls page for further action`,
+        datas: { token: user.token || null },
+      })
+
+      if (!pushRes.ok) {
+        setLoading(false)
+        console.log('Error', pushRes)
+        return
+      }
+      setLoading(false)
+    } else {
+      alert('Something Went Wrong. Try Again Later')
+    }
+  }
+
+  const scheduleNotification = async (rmr) => {
+    const date1 = new Date(date.getTime() - 10 * 60 * 1000)
+    const trigger = new Date(date1)
+    trigger.setMinutes(date1.getMinutes())
+    trigger.setSeconds(date1.getSeconds())
+    console.log('Trigger', trigger.toLocaleString())
+    console.log('Date1', date1.toLocaleString())
+    const identifier = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Your Today Scheduled Call Reminder',
+        body: `You have call with ${rmr.userName}. Please join it`,
+      },
+      trigger,
+    })
+    return identifier
   }
 
   const handlePress = async () => {
@@ -71,6 +115,21 @@ const ScheduleCallScreen = ({ navigation, route }) => {
         console.log('Res', res)
         return
       }
+      const rmr1 = {
+        date,
+        ...route?.params?.sdata,
+      }
+      const idt1 = await scheduleNotification(rmr1)
+      rmr1['identifier'] = idt1
+      // console.log('Rmsdr', rmr1)
+      await storeObjectData(
+        `${date.toLocaleDateString()}-${date.toLocaleTimeString()}`,
+        rmr1
+      )
+      await sendPushToken(
+        route?.params?.sdata.userMobToken,
+        'has scheduled your call'
+      )
       alert('Your call has been scheduled!')
       setLoading(false)
       navigation.navigate('CallLog')
