@@ -61,6 +61,7 @@ const CallPendingScreen = ({ navigation }) => {
   }
 
   const getUserPendingCalls = async () => {
+    console.log('I am called')
     setLoading(true)
     const pres = await pendingsApi.getCallPendingByDoctor(user._id)
     if (!pres.ok) {
@@ -86,7 +87,27 @@ const CallPendingScreen = ({ navigation }) => {
         await Notifications.cancelScheduledNotificationAsync(rmr.identifier)
       }
     })
-    setPendingCalls(pres.data.calls)
+
+    const expiredCalls = []
+    const allCalls = pres.data.calls.filter((call) => {
+      if (call?.deleteAfter) {
+        if (dayjs().isSameOrAfter(dayjs(call.deleteAfter))) {
+          expiredCalls.push(call)
+          return
+        } else {
+          return call
+        }
+      } else {
+        return call
+      }
+    })
+
+    console.log('Expired', expiredCalls)
+
+    expiredCalls.forEach(async (call) => {
+      await pendingsApi.deleteCallPendingAfter(call._id)
+    })
+    setPendingCalls(allCalls)
     setLoading(false)
     setRefreshing(false)
   }

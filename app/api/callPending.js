@@ -20,10 +20,14 @@ const singleCallPending = (id) => {
   return client.get(`${endPoint}/${id}`)
 }
 
+const deleteCallPendingAfter = (id) => {
+  return client.delete(`${endPoint}/after/${id}`)
+}
 export default {
   saveCallPending,
   getCallPendingByDoctor,
   updateCallPending,
   deleteCallPending,
   singleCallPending,
+  deleteCallPendingAfter,
 }

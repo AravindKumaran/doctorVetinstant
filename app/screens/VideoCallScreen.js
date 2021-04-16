@@ -73,7 +73,7 @@ const VideoCallScreen = ({ navigation, route }) => {
 
     return () => {
       console.log('Outside Effect')
-      handleDeleteCall()
+      // handleDeleteCall()
       twilioVideo.current.disconnect()
     }
   }, [])
@@ -88,7 +88,7 @@ const VideoCallScreen = ({ navigation, route }) => {
       {
         text: 'YES',
         onPress: async () => {
-          handleDeleteCall()
+          // handleDeleteCall()
           twilioVideo.current.disconnect()
           navigation.navigate('Prescription')
         },
@@ -107,7 +107,7 @@ const VideoCallScreen = ({ navigation, route }) => {
         {
           text: 'YES',
           onPress: () => {
-            handleDeleteCall()
+            // handleDeleteCall()
             twilioVideo.current.disconnect()
             navigation.navigate('Prescription')
           },
