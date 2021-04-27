@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useContext } from 'react'
 import {
   StyleSheet,
   Text,
@@ -10,6 +10,8 @@ import {
   TouchableOpacity,
   BackHandler,
   Alert,
+  Dimensions,
+  ScrollView,
 } from 'react-native'
 
 import { MaterialIcons, Feather } from '@expo/vector-icons'
@@ -22,7 +24,14 @@ import {
 
 import socket from '../components/utils/socket'
 
+import RBSheet from 'react-native-raw-bottom-sheet'
 import pendingsApi from '../api/callPending'
+import petsApi from '../api/pets'
+import LoadingIndicator from '../components/LoadingIndicator'
+
+import AppText from '../components/AppText'
+import AppButton from '../components/AppButton'
+import AuthContext from '../context/authContext'
 
 const VideoCallScreen = ({ navigation, route }) => {
   const [isAudioEnabled, setIsAudioEnabled] = useState(true)
@@ -32,6 +41,12 @@ const VideoCallScreen = ({ navigation, route }) => {
   const [videoTracks, setVideoTracks] = useState(new Map())
   const [token, setToken] = useState(route.params?.token)
   const twilioVideo = useRef(null)
+  const { user } = useContext(AuthContext)
+  const [currentProblem, setCurrentProblem] = useState(null)
+  const [previousProblem, setPreviousProblem] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [pet, setPet] = useState(null)
+  const refRBSheet = useRef()
 
   const handleDeleteCall = async () => {
     const callRes = await pendingsApi.singleCallPending(route.params?.item._id)
@@ -214,8 +229,314 @@ const VideoCallScreen = ({ navigation, route }) => {
     })
   }
 
+  const getPetDetails = async () => {
+    const id = route?.params?.item.petId
+    setPet(null)
+    refRBSheet.current.open()
+    setLoading(true)
+    const petRes = await petsApi.getPetDetails(id)
+    if (!petRes.ok) {
+      console.log('Error', petRes)
+      alert('Pet Not Found!')
+      setPet(null)
+      setLoading(false)
+      refRBSheet.current.close()
+      return
+    }
+    setLoading(false)
+    setPet(petRes.data.exPet)
+    if (petRes.data.exPet.problems?.length > 0) {
+      const allProb = petRes.data.exPet.problems.reverse()
+      const curProbIndex = allProb.findIndex(
+        (prob) => prob.docname === user.name
+      )
+      if (curProbIndex !== -1) {
+        const cur = allProb[curProbIndex]
+        setCurrentProblem(cur)
+        allProb.splice(curProbIndex, 1)
+        setPreviousProblem(allProb)
+      } else {
+        setPreviousProblem(allProb)
+      }
+    }
+  }
+
   return (
     <View style={styles.container}>
+      {loading && <LoadingIndicator visible={loading} />}
+      <RBSheet
+        ref={refRBSheet}
+        height={Dimensions.get('window').height - 150}
+        animationType='fade'
+        closeOnDragDown={false}
+        customStyles={{
+          wrapper: {
+            backgroundColor: 'rgba(0,0,0,.6)',
+          },
+          draggableIcon: {
+            backgroundColor: '#000',
+          },
+          container: {
+            backgroundColor: '#fff',
+            borderTopRightRadius: 25,
+            borderTopLeftRadius: 25,
+          },
+        }}
+      >
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={{
+            marginHorizontal: 20,
+            marginBottom: 10,
+          }}
+        >
+          {loading && <LoadingIndicator visible={loading} />}
+          <AppText
+            style={{
+              fontSize: 24,
+              fontWeight: '500',
+              marginVertical: 20,
+              textAlign: 'center',
+            }}
+          >
+            Pet Details :-
+          </AppText>
+          {pet && (
+            <>
+              <View style={styles.card2}>
+                <AppText>
+                  Date: {new Date(pet.createdAt).toLocaleDateString()}
+                </AppText>
+                <AppText>
+                  Time: {new Date(pet.createdAt).toLocaleTimeString()}
+                </AppText>
+                <AppText>Weight: {pet.weight} Kg</AppText>
+                <AppText>
+                  Age: {pet.years !== 0 && `${pet.years} years`}{' '}
+                  {pet.months !== 0 && `${pet.months} months`}
+                </AppText>
+                <AppText>Gender: {pet.gender} </AppText>
+                <AppText>Breed: {pet.breed} </AppText>
+                <AppText>Pet Type: {pet.type} </AppText>
+                {pet.petHistoryImages?.length > 0 && (
+                  <>
+                    <AppText>Pet History Images: </AppText>
+                    <ScrollView horizontal style={{ marginVertical: 20 }}>
+                      {pet.petHistoryImages.map((img, i) => (
+                        <View key={`${img}-${i}`} style={{ marginRight: 20 }}>
+                          <Image
+                            // source={{
+                            //   uri: `https://vetinstantbe.azurewebsites.net/img/${img}`,
+                            // }}
+                            source={{
+                              uri: `${img}`,
+                            }}
+                            style={{
+                              width: 150,
+                              height: 150,
+                              borderRadius: 75,
+                            }}
+                          />
+                        </View>
+                      ))}
+                    </ScrollView>
+                  </>
+                )}
+                {pet.prescriptions?.length > 0 && (
+                  <AppText>Pet Prescriptions:</AppText>
+                )}
+                {pet.prescriptions?.length > 0 &&
+                  pet.prescriptions.map((pbm, index) => (
+                    <View key={index} style={styles.cardBordered}>
+                      <AppText>Prescription: {pbm.prescription}</AppText>
+                      <AppText>Doctor name: {pbm.docname}</AppText>
+                      <AppText>
+                        Date: {new Date(pbm.date).toLocaleDateString()}
+                      </AppText>
+                      <AppText>
+                        Time: {new Date(pbm.date).toLocaleTimeString()}
+                      </AppText>
+                      {pbm.img && (
+                        <>
+                          <AppText>Prescription Image:</AppText>
+                          <Image
+                            // source={{
+                            //   uri: `http://192.168.43.242:8000/img/${pbm.img}`,
+                            // }}
+                            source={{
+                              uri: `${pbm.img}`,
+                            }}
+                            style={{
+                              width: 150,
+                              height: 150,
+                              borderRadius: 75,
+                            }}
+                          />
+                        </>
+                      )}
+                    </View>
+                  ))}
+                {currentProblem && <AppText>Current Pet Problem:</AppText>}
+                {currentProblem && (
+                  <View style={styles.cardBordered}>
+                    <AppText>Problem: {currentProblem.problem}</AppText>
+                    <AppText>Doctor name: {currentProblem.docname}</AppText>
+                    <AppText>Time Period: {currentProblem.time}</AppText>
+                    <AppText>Appetite: {currentProblem.Appetite}</AppText>
+                    <AppText>Behaviour: {currentProblem.Behaviour}</AppText>
+                    <AppText>Eyes: {currentProblem.Eyes}</AppText>
+                    <AppText>Gait: {currentProblem.Gait}</AppText>
+                    <AppText>Mucous: {currentProblem.Mucous}</AppText>
+                    <AppText>Comment: {currentProblem.comment}</AppText>
+                    {currentProblem.Ears?.length > 0 && (
+                      <AppText style={{ fontSize: 22 }}>Ears: </AppText>
+                    )}
+
+                    {currentProblem.Ears?.length > 0 &&
+                      currentProblem.Ears.map((er, i) => (
+                        <AppText key={`${i}-Ears`}> {er}</AppText>
+                      ))}
+
+                    {currentProblem.Feces?.length > 0 && (
+                      <AppText style={{ fontSize: 22 }}>Faces: </AppText>
+                    )}
+
+                    {currentProblem.Feces?.length > 0 &&
+                      currentProblem.Feces.map((fc, i) => (
+                        <AppText key={`Feces ${i}`}> {fc}</AppText>
+                      ))}
+                    {currentProblem.Urine?.length > 0 && (
+                      <AppText style={{ fontSize: 22 }}>Urines: </AppText>
+                    )}
+
+                    {currentProblem.Urine?.length > 0 &&
+                      currentProblem.Urine.map((ur, i) => (
+                        <AppText key={`Urines ${i}`}> {ur}</AppText>
+                      ))}
+                    {currentProblem.Skin?.length > 0 && (
+                      <AppText style={{ fontSize: 22 }}>Skins: </AppText>
+                    )}
+
+                    {currentProblem.Skin?.length > 0 &&
+                      currentProblem.Skin.map((sk, i) => (
+                        <AppText key={`Skins ${i}`}> {sk}</AppText>
+                      ))}
+
+                    {currentProblem?.images?.length > 0 && (
+                      <AppText>Pet Problem image</AppText>
+                    )}
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                    >
+                      {currentProblem?.images?.length > 0 &&
+                        currentProblem?.images.map((img, i) => (
+                          <>
+                            <Image
+                              key={i + img}
+                              // source={{
+                              //   uri: `http://192.168.43.242:8000/img/${img}`,
+                              // }}
+                              source={{
+                                uri: `${img}`,
+                              }}
+                              style={{
+                                width: 150,
+                                height: 150,
+                                borderRadius: 75,
+                                marginHorizontal: 5,
+                              }}
+                            />
+                          </>
+                        ))}
+                    </ScrollView>
+                  </View>
+                )}
+                {previousProblem?.length > 0 && (
+                  <AppText>Previous Pet Problems:</AppText>
+                )}
+                {previousProblem?.length > 0 &&
+                  previousProblem.map((pb, index) => (
+                    <View key={pb._id} style={styles.cardBordered}>
+                      <AppText>Problem: {pb.problem}</AppText>
+                      <AppText>Doctor name: {pb.docname}</AppText>
+                      <AppText>Time Period: {pb.time}</AppText>
+                      <AppText>Appetite: {pb.Appetite}</AppText>
+                      <AppText>Behaviour: {pb.Behaviour}</AppText>
+                      <AppText>Eyes: {pb.Eyes}</AppText>
+                      <AppText>Gait: {pb.Gait}</AppText>
+                      <AppText>Mucous: {pb.Mucous}</AppText>
+                      <AppText>Comment: {pb.comment}</AppText>
+                      {pb.Ears?.length > 0 && (
+                        <AppText style={{ fontSize: 22 }}>Ears: </AppText>
+                      )}
+
+                      {pb.Ears?.length > 0 &&
+                        pb.Ears.map((er, i) => (
+                          <AppText key={`${i}-Ears`}> {er}</AppText>
+                        ))}
+
+                      {pb.Feces?.length > 0 && (
+                        <AppText style={{ fontSize: 22 }}>Faces: </AppText>
+                      )}
+
+                      {pb.Feces?.length > 0 &&
+                        pb.Feces.map((fc, i) => (
+                          <AppText key={`Feces ${i}`}> {fc}</AppText>
+                        ))}
+                      {pb.Urine?.length > 0 && (
+                        <AppText style={{ fontSize: 22 }}>Urines: </AppText>
+                      )}
+
+                      {pb.Urine?.length > 0 &&
+                        pb.Urine.map((ur, i) => (
+                          <AppText key={`Urines ${i}`}> {ur}</AppText>
+                        ))}
+                      {pb.Skin?.length > 0 && (
+                        <AppText style={{ fontSize: 22 }}>Skins: </AppText>
+                      )}
+
+                      {pb.Skin?.length > 0 &&
+                        pb.Skin.map((sk, i) => (
+                          <AppText key={`Skins ${i}`}> {sk}</AppText>
+                        ))}
+
+                      {pb?.images?.length > 0 && (
+                        <AppText>Pet Problem image</AppText>
+                      )}
+                      <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                      >
+                        {pb?.images?.length > 0 &&
+                          pb?.images.map((img, i) => (
+                            <>
+                              <Image
+                                key={i + img}
+                                // source={{
+                                //   uri: `http://192.168.43.242:8000/img/${img}`,
+                                // }}
+                                source={{
+                                  uri: `${img}`,
+                                }}
+                                style={{
+                                  width: 150,
+                                  height: 150,
+                                  borderRadius: 75,
+                                  marginHorizontal: 5,
+                                }}
+                              />
+                            </>
+                          ))}
+                      </ScrollView>
+                    </View>
+                  ))}
+              </View>
+            </>
+          )}
+          <AppButton title='Close' onPress={() => refRBSheet.current.close()} />
+        </ScrollView>
+      </RBSheet>
       {(status === 'connected' || status === 'connecting') && (
         <View style={styles.callContainer}>
           {status === 'connected' && (
@@ -244,7 +565,7 @@ const VideoCallScreen = ({ navigation, route }) => {
                 borderRadius: 40,
                 textAlign: 'center',
                 paddingTop: 12,
-                paddingHorizontal: 10,
+                paddingHorizontal: 5,
               }}
             />
 
@@ -274,6 +595,12 @@ const VideoCallScreen = ({ navigation, route }) => {
               onPress={_onFlipButtonPress}
             >
               <MaterialIcons name='crop-rotate' size={24} color='black' />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.optionButton}
+              onPress={getPetDetails}
+            >
+              <MaterialIcons name='pets' size={24} color='black' />
             </TouchableOpacity>
           </View>
 
@@ -364,8 +691,8 @@ const styles = StyleSheet.create({
   optionButton: {
     width: 60,
     height: 60,
-    marginLeft: 10,
-    marginRight: 10,
+    marginLeft: 8,
+    marginRight: 5,
     borderRadius: 100 / 2,
     backgroundColor: '#fff',
     justifyContent: 'center',
@@ -381,6 +708,14 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 30,
     zIndex: 1,
+  },
+  cardBordered: {
+    borderColor: '#dfd9d9',
+    borderWidth: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    marginVertical: 5,
+    borderRadius: 5,
   },
 })
 
