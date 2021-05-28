@@ -1,431 +1,249 @@
-import React, { useState, useContext, useEffect } from 'react'
-import { StyleSheet, View, ScrollView } from 'react-native'
-import { Formik } from 'formik'
-import * as Yup from 'yup'
+import React, { useState, useContext } from "react";
+import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
+import { Formik } from "formik";
+import * as Yup from "yup";
+import {
+  GoogleSignin,
+  statusCodes,
+} from "@react-native-community/google-signin";
 
-import AppText from '../components/AppText'
-import AppFormField from '../components/AppFormField'
-import SubmitButton from '../components/SubmitButton'
-import ErrorMessage from '../components/ErrorMessage'
-import LoadingIndicator from '../components/LoadingIndicator'
+import AppFormField from "../components/AppFormField";
+import SubmitButton from "../components/SubmitButton";
+import ErrorMessage from "../components/ErrorMessage";
 
-import AppSelect from '../components/forms/AppSelect'
+import authApi from "../api/auth";
+import AuthContext from "../context/authContext";
+import authStorage from "../components/utils/authStorage";
+import LoadingIndicator from "../components/LoadingIndicator";
+import socket from "../components/utils/socket";
 
-import FormFilePicker from '../components/forms/FormFilePicker'
-
-import authApi from '../api/auth'
-import doctorsApi from '../api/doctors'
-import hospitalsApi from '../api/hospitals'
-import usersApi from '../api/users'
-import AuthContext from '../context/authContext'
-import authStorage from '../components/utils/authStorage'
-import socket from '../components/utils/socket'
-
-const accType = [
-  { label: 'Savings', value: 'savings' },
-  { label: 'Current', value: 'current' },
-]
-
-const qualifs = [
-  { label: 'BVSc', value: 'BVSc' },
-  { label: 'BVSc & AH', value: 'BVSc& AH' },
-  { label: 'MVSc', value: 'MVSc' },
-  { label: 'PhD', value: 'PhD' },
-]
-
-const firstAv = [
-  { label: 'Yes', value: true },
-  { label: 'No', value: false },
-]
-
-const phoneRegExp = /^[6-9]\d{9}$/
-const ifscRegExp = /^[A-Z]{4}0[A-Z0-9]{6}$/
-const accRegExp = /^[0-9]{9,18}$/
-const feeRegExp = /^[0-9]+$/
+import usersApi from "../api/users";
 
 const validationSchema = Yup.object().shape({
-  name: Yup.string().required().label('Name'),
-  email: Yup.string().required().email().label('Email'),
-  password: Yup.string().required().min(8).label('Password'),
+  name: Yup.string().required().label("Name"),
+  email: Yup.string().required().email().label("Email"),
+  password: Yup.string().required().min(8).label("Password"),
   cnfPassword: Yup.string()
     .required()
-    .oneOf([Yup.ref('password'), null], 'Password do not match')
-    .label('Confirm Password'),
-  hospname: Yup.string()
-    .test(
-      'samefield',
-      'Please either enter or select Hospital name',
-      function (value) {
-        const { selectHospName } = this.parent
-        if (selectHospName && value) return false
-        if (!selectHospName) return value != null
-        return true
-      }
-    )
-    .max(100)
-    .label('Hospital/Clinic Name'),
-  selectHospName: Yup.string()
-    .test(
-      'samefield',
-      'Please either enter or select Hospital name',
-      function (value) {
-        const { hospname } = this.parent
-        if (hospname && value) return false
-        if (!hospname) return value != null
-        return true
-      }
-    )
-    .nullable()
-    .label('Hospital/Clinic Name'),
-  phone: Yup.string()
-    .matches(phoneRegExp, 'Phone number is not valid')
-    .required()
-    .label('Phone'),
-  file: Yup.string()
-    .required('Please select a .pdf file of size less than 1 Mb')
-    .nullable()
-    .label('Document'),
-  regNo: Yup.string().required().label('Registration Number'),
-  firstAvailaibeVet: Yup.string()
-    .nullable()
-    .required()
-    .label('First Available Vet'),
-  qlf: Yup.string()
-    .required('Please Pick a Qualifications')
-    .nullable()
-    .label('Qualifications'),
-  fee: Yup.string()
-    .matches(feeRegExp, 'Please enter your fee')
-    .required()
-    .label('Consultation Fee'),
-  acc: Yup.string()
-    .matches(accRegExp, 'Bank Account Number not valid!')
-    .test('acctest', 'Account number is required', function (value) {
-      const { fee } = this.parent
-      if (fee > 0 && !value) return false
-      return true
-    })
-    .label('Account No.'),
-  accname: Yup.string()
-    .test('accnametest', 'Account name is required', function (value) {
-      const { fee } = this.parent
-      if (fee > 0 && !value) return false
-      return true
-    })
-    .label('Name'),
-  type: Yup.string()
-    .test('acctyppe', 'Please select account type', function (value) {
-      const { fee } = this.parent
-      if (fee > 0 && !value) return false
-      return true
-    })
-    .nullable()
-    .label('Account Type'),
+    .oneOf([Yup.ref("password"), null], "Password do not match")
+    .label("Confirm Password"),
+});
 
-  ifsc: Yup.string()
-    .test('accifsc', 'IFSC code is required', function (value) {
-      const { fee } = this.parent
-      if (fee > 0 && !value) return false
-      return true
-    })
-    .matches(ifscRegExp, 'IFSC code is not valid!')
-    .label('IFSC Code'),
-})
+const RegisterScreen = ({ navigation }) => {
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-const RegisterScreen = () => {
-  const [error, setError] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [hospitals, setHopitals] = useState([])
+  const { setUser } = useContext(AuthContext);
 
-  useEffect(() => {
-    const getAllHospitals = async () => {
-      setLoading(true)
-      const res = await hospitalsApi.getHospitals()
-      if (!res.ok) {
-        setLoading(false)
-        console.log(res)
-        return
-      }
-      let allHospitals = res.data.hospitals
-
-      let newHospitals = allHospitals.reduce((acc, item) => {
-        acc.push({
-          label: item.name.charAt(0).toUpperCase() + item.name.slice(1),
-          value: item._id,
-        })
-        return acc
-      }, [])
-      setHopitals(newHospitals)
-      setLoading(false)
-    }
-    getAllHospitals()
-  }, [])
-
-  const handleSubmit = async (values) => {
-    setLoading(true)
-    const res12 = await authApi.register(
-      values.name,
-      values.email,
-      values.password
-    )
-
-    if (!res12.ok) {
-      // console.log(res.data.msg);
-      setLoading(false)
-      setError(res12.data.msg)
-      return
-    }
-
-    let hsp
-    authStorage.storeToken(res12.data.token)
-    console.log('Resss', res12.data)
-    const data = new FormData()
-    if (!values.selectHospName) {
-      const hosRes = await hospitalsApi.saveHospitalName(values.hospname)
-      if (!hosRes.ok) {
-        setLoading(false)
-        alert(hosRes.data.msg)
-        // setError(hosRes.data.msg);
-        return
-      }
-      hsp = hosRes.data.newHospital._id
-      data.append('hospital', hosRes.data.newHospital._id)
-    } else {
-      hsp = values.selectHospName
-      data.append('hospital', values.selectHospName)
-    }
-    data.append('file', {
-      name: 'file',
-      type: 'application/pdf',
-      uri: values.file,
-    })
-    data.append('phone', values.phone)
-    data.append('qlf', values.qlf)
-    data.append('firstAvailaibeVet', values.firstAvailaibeVet)
-    data.append('regNo', values.regNo)
-    data.append('fee', values.fee)
-    if (values.fee > 0) {
-      data.append('accno', values.acc)
-      data.append('accname', values.accname)
-      data.append('acctype', values.type)
-      data.append('ifsc', values.ifsc)
-    }
-
-    const res1 = await usersApi.updateDoctorHosp(hsp)
-    if (!res1.ok) {
-      setLoading(false)
-      setError('Something went wrong!')
-      console.log(res)
-    }
-    const res = await doctorsApi.saveDoctor(data)
+  const handleSubmit = async ({ email, password, name }) => {
+    setLoading(true);
+    const res = await authApi.register(name, email, password);
     if (!res.ok) {
-      setLoading(false)
-      setError(res.data?.msg)
-      console.log(res)
+      setLoading(false);
+      console.log("Ress Regs", res);
+      setError(res.data?.msg ? res.data.msg : "Something Went Wrong");
+      return;
     }
-    setLoading(false)
-    alert('Registration  Successfull. Please wait for admin approval')
-    setError(null)
-  }
+    setError(null);
+    authStorage.storeToken(res.data.token);
+    const userRes = await usersApi.getLoggedInUser();
+    if (!userRes.ok) {
+      setLoading(false);
+      console.log(userRes);
+      return;
+    }
+    socket.emit("online", userRes.data.user._id);
+    setUser(userRes.data.user);
+    setLoading(false);
+  };
+
+  const signIn = async () => {
+    await GoogleSignin.configure({
+      androidClientId:
+        "320113619885-drs735a38tcvfq000k0psg7t60c8nfff.apps.googleusercontent.com",
+    });
+    try {
+      setLoading(true);
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      // console.log('User', userInfo.user)
+      const password = userInfo.user.id + Date.now();
+      const res = await authApi.saveGoogleUser(
+        userInfo.user.name,
+        userInfo.user.email,
+        password
+      );
+      if (!res.ok) {
+        setLoading(false);
+        // setError(res.data.msg);
+        console.log(res);
+        return;
+      }
+      authStorage.storeToken(res.data.token);
+      const userRes = await usersApi.getLoggedInUser();
+      setUser(userRes.data.user);
+
+      setLoading(false);
+    } catch (error) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        console.log("e 1");
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        console.log("e 2");
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        console.log("e 3");
+      } else {
+        console.log("Eror", error);
+      }
+      setLoading(false);
+    }
+  };
 
   return (
     <>
       <LoadingIndicator visible={loading} />
-      <ScrollView>
-        <View style={styles.container}>
-          <AppText>Register</AppText>
+      <View style={styles.container}>
+        {/* <AppText
+          style={{
+            textAlign: 'center',
+            fontSize: 22,
+            fontWeight: '500',
+            marginBottom: 20,
+          }}
+        >
+          Register
+        </AppText> */}
+
+        <View style={{ marginTop: 60, marginHorizontal: 30 }}>
+          <TouchableOpacity
+            onPress={signIn}
+            style={{
+              backgroundColor: "#F6F6F6",
+              borderRadius: 75,
+              justifyContent: "center",
+              alignItems: "center",
+              alignContent: "center",
+              alignSelf: "center",
+              padding: 10,
+              width: 320,
+              height: 60,
+              marginBottom: 20,
+              elevation: 10,
+            }}
+          >
+            <Image source={require("../components/assets/images/google.png")} />
+          </TouchableOpacity>
+
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 10,
+            }}
+          >
+            <View
+              style={{
+                marginLeft: "17%",
+                flex: 1,
+                height: 1,
+                backgroundColor: "#47687F",
+              }}
+            />
+            <View>
+              <Text style={styles.text1}>OR</Text>
+            </View>
+            <View
+              style={{
+                flex: 1,
+                height: 1,
+                backgroundColor: "#47687F",
+                marginRight: "17%",
+              }}
+            />
+          </View>
 
           {error && <ErrorMessage error={error} visible={!loading} />}
 
           <Formik
-            initialValues={{
-              name: '',
-              email: '',
-              password: '',
-              hospname: '',
-              selectHospName: '',
-              phone: '',
-              file: '',
-              qlf: '',
-              regNo: '',
-              firstAvailaibeVet: false,
-              acc: '',
-              accname: '',
-              type: '',
-              ifsc: '',
-              fee: '',
-            }}
+            initialValues={{ email: "", password: "", name: "" }}
             onSubmit={handleSubmit}
             validationSchema={validationSchema}
           >
-            {({ values }) => (
+            {() => (
               <>
                 <AppFormField
-                  icon='account'
-                  autoCapitalize='none'
+                  icon="account"
+                  autoCapitalize="none"
                   autoCorrect={false}
-                  name='name'
-                  placeholder='Enter your name'
-                />
-                <AppFormField
-                  icon='email'
-                  autoCapitalize='none'
-                  autoCorrect={false}
-                  keyboardType='email-address'
-                  name='email'
-                  placeholder='Enter your email id'
+                  name="name"
+                  label="Name"
                 />
 
                 <AppFormField
-                  autoCapitalize='none'
+                  icon="email"
+                  autoCapitalize="none"
                   autoCorrect={false}
-                  icon='lock'
-                  name='password'
+                  keyboardType="email-address"
+                  name="email"
+                  label="Email ID"
+                />
+
+                <AppFormField
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  icon="lock"
+                  name="password"
                   secureTextEntry
-                  placeholder='Enter your password'
+                  label="Password"
                 />
 
                 <AppFormField
-                  autoCapitalize='none'
+                  autoCapitalize="none"
                   autoCorrect={false}
-                  icon='lock'
-                  name='cnfPassword'
+                  icon="lock"
+                  name="cnfPassword"
                   secureTextEntry
-                  placeholder='Retype your password'
+                  label="Confirm Password"
                 />
-                <AppText
-                  style={{
-                    marginBottom: 30,
-                    fontWeight: '600',
-                    fontSize: 22,
-                    marginTop: 10,
-                  }}
+
+                <TouchableOpacity
+                  style={{ alignSelf: "center", paddingTop: 5 }}
+                  onPress={() => navigation.navigate("Login")}
                 >
-                  Registration Certificate
-                </AppText>
-
-                <FormFilePicker name='file' size={1} />
-                <AppFormField
-                  label='Registration Number'
-                  autoCapitalize='none'
-                  autoCorrect={false}
-                  name='regNo'
-                  keyboardType='numeric'
-                  placeholder='Enter Your Registration Number'
-                  maxLength={10}
-                />
-                <AppSelect
-                  items={hospitals}
-                  label='Select Hospital From The List Below'
-                  name='selectHospName'
-                />
-                <AppText
-                  style={{ textAlign: 'center', fontSize: 22, margin: 10 }}
-                >
-                  OR
-                </AppText>
-
-                <AppFormField
-                  label='Hospital/Clinic Name'
-                  autoCapitalize='none'
-                  autoCorrect={false}
-                  name='hospname'
-                  numberOfLines={2}
-                  placeholder='Hospital/Clinic Name'
-                />
-                <AppSelect
-                  items={qualifs}
-                  label='Select Your Qualifications'
-                  name='qlf'
-                />
-
-                <AppSelect
-                  items={firstAv}
-                  label='Want To Be First Available Vet?'
-                  name='firstAvailaibeVet'
-                />
-
-                <AppFormField
-                  label='Phone Number'
-                  autoCapitalize='none'
-                  autoCorrect={false}
-                  name='phone'
-                  keyboardType='numeric'
-                  placeholder='Enter Your Phone Number'
-                  maxLength={10}
-                />
-
-                <AppFormField
-                  label='Consultation Fee'
-                  autoCapitalize='none'
-                  autoCorrect={false}
-                  name='fee'
-                  keyboardType='numeric'
-                  placeholder='Consultation Fee In Rupees (₹)'
-                />
-                {values.fee > 0 && (
-                  <>
-                    <AppText
-                      style={{
-                        textAlign: 'center',
-                        marginVertical: 20,
-                        fontSize: 28,
-                        textDecorationLine: 'underline',
-                      }}
-                    >
-                      Bank Details
-                    </AppText>
-
-                    <AppFormField
-                      label='Bank Account Number'
-                      autoCapitalize='none'
-                      autoCorrect={false}
-                      keyboardType='numeric'
-                      name='acc'
-                      maxLength={18}
-                      placeholder='xxxx xxxx xxxx xxxx'
-                    />
-                    <AppFormField
-                      label='Account Holder Name'
-                      autoCapitalize='none'
-                      autoCorrect={false}
-                      name='accname'
-                      placeholder='Account Holder Name'
-                    />
-
-                    <AppSelect
-                      items={accType}
-                      label='Account Type'
-                      name='type'
-                    />
-
-                    <AppFormField
-                      label='IFSC Code'
-                      autoCapitalize='characters'
-                      autoCorrect={false}
-                      name='ifsc'
-                      placeholder='Enter Your Bank IFSC Code'
-                      maxLength={11}
-                    />
-                  </>
-                )}
-
-                <SubmitButton title='Register' />
+                  <Text style={{ fontSize: 14, fontWeight: "700" }}>
+                    <Text style={{ color: "#47687F" }}>
+                      Already have an account?
+                    </Text>{" "}
+                    <Text style={{ color: "#3FBDE3" }}>Sign In</Text>
+                  </Text>
+                </TouchableOpacity>
+                <View style={{ top: 50 }}>
+                  <SubmitButton title="Get Started" />
+                </View>
               </>
             )}
           </Formik>
         </View>
-      </ScrollView>
+      </View>
     </>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginHorizontal: 30,
-    marginTop: 60,
+    marginHorizontal: 0,
+    backgroundColor: "#FFFFFF",
+    // justifyContent: "center",
   },
-})
+  text1: {
+    color: "#47687F",
+    fontFamily: "Proxima Nova",
+    fontWeight: "700",
+    fontSize: 12,
+    textAlign: "center",
+    paddingRight: "5%",
+    paddingLeft: "5%",
+  },
+});
 
-export default RegisterScreen
+export default RegisterScreen;

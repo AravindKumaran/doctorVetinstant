@@ -6,17 +6,33 @@ import AppTextInput from "./AppTextInput";
 import ErrorMessage from "./ErrorMessage";
 import AppText from "./AppText";
 
-const AppFormField = ({ name, label, numberOfLines, ...rest }) => {
-  const { setFieldTouched, handleChange, errors, touched } = useFormikContext();
+const AppFormField = ({ name, label, numberOfLines, contStyle, ...rest }) => {
+  const { setFieldTouched, handleChange, errors, touched, values } =
+    useFormikContext();
   return (
-    <View style={styles.container}>
-      {label && <AppText>{label}</AppText>}
+    <View style={[styles.container, contStyle]}>
       <AppTextInput
         onBlur={() => setFieldTouched(name)}
         onChangeText={handleChange(name)}
         numberOfLines={numberOfLines}
+        value={values[name]}
         {...rest}
       />
+      {label && (
+        <AppText
+          style={{
+            left: 40,
+            top: -6,
+            fontSize: 14,
+            position: "absolute",
+            color: "#3FBDE3",
+            fontWeight: "700",
+            backgroundColor: "#FFFFFF",
+          }}
+        >
+          {label}
+        </AppText>
+      )}
 
       <ErrorMessage error={errors[name]} visible={touched[name]} />
     </View>
@@ -26,6 +42,7 @@ const AppFormField = ({ name, label, numberOfLines, ...rest }) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "column",
+    width: "100%",
   },
 });
 

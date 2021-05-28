@@ -1,83 +1,75 @@
-import React, { useState, useContext, useEffect } from 'react'
-import { StyleSheet, View, Text } from 'react-native'
+import React, { useState, useContext, useEffect } from "react";
+import { StyleSheet, View, Text } from "react-native";
 import {
   GoogleSignin,
   statusCodes,
-} from '@react-native-community/google-signin'
+} from "@react-native-community/google-signin";
 
-import AppButton from '../components/AppButton'
+import AppButton from "../components/AppButton";
 
-import authStorage from '../components/utils/authStorage'
-import AuthContext from '../context/authContext'
-import LoadingIndicator from '../components/LoadingIndicator'
+import authStorage from "../components/utils/authStorage";
+import AuthContext from "../context/authContext";
+import LoadingIndicator from "../components/LoadingIndicator";
 
-import authApi from '../api/auth'
-import usersApi from '../api/users'
+import authApi from "../api/auth";
+import usersApi from "../api/users";
 
 const AuthScreen = ({ route, navigation }) => {
-  const [loading, setLoading] = useState()
+  const [loading, setLoading] = useState();
 
-  const { title } = route.params
+  const { title } = route.params;
 
-  const { setUser } = useContext(AuthContext)
-
-  const handlePress = () => {
-    navigation.navigate(`${title}`)
-  }
-
-  useEffect(() => {
-    navigation.setOptions({ title })
-  }, [])
+  const { setUser } = useContext(AuthContext);
 
   const signIn = async () => {
     await GoogleSignin.configure({
       androidClientId:
-        '320113619885-r1botebnmi0rpu76q2ktjbt89niha3ht.apps.googleusercontent.com',
-    })
+        "320113619885-r1botebnmi0rpu76q2ktjbt89niha3ht.apps.googleusercontent.com",
+    });
     try {
-      setLoading(true)
-      await GoogleSignin.hasPlayServices()
-      const userInfo = await GoogleSignin.signIn()
+      setLoading(true);
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
       // console.log('User', userInfo.user)
-      const password = userInfo.user.id + Date.now()
+      const password = userInfo.user.id + Date.now();
       const res = await authApi.saveGoogleUser(
         userInfo.user.name,
         userInfo.user.email,
         password
-      )
+      );
       if (!res.ok) {
-        setLoading(false)
-        alert(res.data?.msg)
-        console.log(res)
-        return
+        setLoading(false);
+        alert(res.data?.msg);
+        console.log(res);
+        return;
       }
-      if (title === 'Login') {
-        authStorage.storeToken(res.data.token)
-        const userRes = await usersApi.getLoggedInUser()
-        setUser(userRes.data.user)
-        setLoading(false)
+      if (title === "Login") {
+        authStorage.storeToken(res.data.token);
+        const userRes = await usersApi.getLoggedInUser();
+        setUser(userRes.data.user);
+        setLoading(false);
       } else {
-        authStorage.storeToken(res.data.token)
-        setLoading(false)
-        alert("Please add doctor Details! Don't Press back button")
-        navigation.navigate('AddDoctor', {
-          msg: 'Registration  Successfull. Please wait for admin approval',
-        })
+        authStorage.storeToken(res.data.token);
+        setLoading(false);
+        alert("Please add doctor Details! Don't Press back button");
+        navigation.navigate("AddDoctor", {
+          msg: "Registration  Successfull. Please wait for admin approval",
+        });
         // alert()
       }
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        console.log('e 1')
+        console.log("e 1");
       } else if (error.code === statusCodes.IN_PROGRESS) {
-        console.log('e 2')
+        console.log("e 2");
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        console.log('e 3')
+        console.log("e 3");
       } else {
-        console.log('Eror', error)
+        console.log("Eror", error);
       }
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <>
@@ -88,19 +80,19 @@ const AuthScreen = ({ route, navigation }) => {
           <Text style={styles.title}>{title}</Text>
         </View>
 
-        <AppButton title='Continue with Email ID' onPress={handlePress} />
+        <AppButton title="Continue with Email ID" onPress={handlePress} />
 
-        <AppButton title='Continue with Google' onPress={signIn} />
+        <AppButton title="Continue with Google" onPress={signIn} />
       </View>
     </>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 15,
   },
   text: {
@@ -108,8 +100,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
-})
+});
 
-export default AuthScreen
+export default AuthScreen;

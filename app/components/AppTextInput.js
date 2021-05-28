@@ -2,20 +2,13 @@ import React from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-const AppTextInput = ({ icon, numberOfLines = 1, ...rest }) => {
+const AppTextInput = ({ icon, numberOfLines = 1, width, value, ...rest }) => {
   return (
     <View style={[styles.container]}>
-      {icon && (
-        <MaterialCommunityIcons
-          name={icon}
-          size={20}
-          color='#6e6969'
-          style={styles.icon}
-        />
-      )}
       <TextInput
         style={styles.textInput}
         numberOfLines={numberOfLines}
+        value={value}
         {...rest}
       />
     </View>
@@ -24,22 +17,28 @@ const AppTextInput = ({ icon, numberOfLines = 1, ...rest }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 50,
     flexDirection: "row",
     alignItems: "center",
-    padding: 15,
+    justifyContent: "center",
+    padding: 5,
     marginVertical: 10,
+    marginRight: 5,
     overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(21, 56, 95, 0.3)",
   },
   icon: {
     marginRight: 10,
   },
   textInput: {
-    fontSize: 18,
-    color: "#0c0c0c",
+    fontSize: 15,
+    color: "#47687F",
     flex: 1,
-    textAlignVertical: "top",
+    textAlignVertical: "center",
+    width: "100%",
+    backgroundColor: "#FFFFFF",
   },
 });
 
