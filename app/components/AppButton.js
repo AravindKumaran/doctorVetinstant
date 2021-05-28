@@ -1,34 +1,48 @@
-import React from 'react'
+import React from "react";
 
-import { StyleSheet, Text, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import { Feather } from "@expo/vector-icons";
 
-const AppButton = ({ title, onPress, btnStyle, txtStyle }) => {
+import LinearGradient from "react-native-linear-gradient";
+
+const AppButton = ({ title, onPress, btnStyle, txtStyle, iconName }) => {
   return (
     <TouchableOpacity style={[styles.button, btnStyle]} onPress={onPress}>
-      {title && <Text style={[styles.text, txtStyle]}>{title}</Text>}
+      {title && (
+        <LinearGradient
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          colors={["#76F8B9", "#41CE8A"]}
+          style={styles.button}
+        >
+          <Text style={[styles.text, txtStyle]}>{title}</Text>
+        </LinearGradient>
+      )}
     </TouchableOpacity>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#fc5c65',
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 10,
-    marginTop: 20,
-    marginBottom: 15,
-    width: '100%',
+    borderRadius: 50,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 15,
+    marginVertical: 0,
+    width: "100%",
+  },
+  icon: {
+    marginRight: 10,
   },
   text: {
-    color: '#fff',
-    fontSize: 18,
-    textTransform: 'uppercase',
-    fontWeight: 'bold',
-    width: '100%',
-    textAlign: 'center',
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
+    width: "100%",
+    textAlign: "center",
   },
-})
+});
 
-export default AppButton
+export default AppButton;
