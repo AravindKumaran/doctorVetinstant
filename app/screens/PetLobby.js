@@ -104,12 +104,12 @@ const PetLobby = () => {
                   }}
                 >
                   <Image
-                    source={require("../components/assets/images/pet.png")}
-                    style={styles.image1}
+                    source={require("../components/assets/images/doctor1.png")}
+                    style={[styles.image1, { left: 7.5 }]}
                   />
                   <Image
                     source={require("../components/assets/images/pet.png")}
-                    style={styles.image1}
+                    style={[styles.image1, { right: 7.5 }]}
                   />
                 </View>
                 <Text>
@@ -182,12 +182,12 @@ const PetLobby = () => {
                   }}
                 >
                   <Image
-                    source={require("../components/assets/images/pet.png")}
-                    style={styles.image1}
+                    source={require("../components/assets/images/doctor1.png")}
+                    style={[styles.image1, { left: 7.5 }]}
                   />
                   <Image
                     source={require("../components/assets/images/pet.png")}
-                    style={styles.image1}
+                    style={[styles.image1, { right: 7.5 }]}
                   />
                 </View>
                 <Text>
@@ -237,12 +237,12 @@ const PetLobby = () => {
                   }}
                 >
                   <Image
-                    source={require("../components/assets/images/pet.png")}
-                    style={styles.image1}
+                    source={require("../components/assets/images/doctor1.png")}
+                    style={[styles.image1, { left: 7.5 }]}
                   />
                   <Image
                     source={require("../components/assets/images/pet.png")}
-                    style={styles.image1}
+                    style={[styles.image1, { right: 7.5 }]}
                   />
                 </View>
                 <Text>
@@ -252,6 +252,130 @@ const PetLobby = () => {
               </View>
             </View>
             <AppButton title="Enter Room" />
+            <View
+              style={{
+                borderWidth: 1,
+                borderColor: "#DCE1E7",
+                marginVertical: 10,
+              }}
+            />
+          </View>
+          <View>
+            <View style={{ flexDirection: "row" }}>
+              <View>
+                <Text style={styles.text1}>Dr. Kumar & Bruno</Text>
+                <Text style={styles.text2}>Status:</Text>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Feather name="check-circle" color="#67F296" size={15} />
+                  <Text style={[styles.text3, { paddingLeft: 5 }]}>
+                    Payment
+                  </Text>
+                </View>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Feather name="alert-octagon" color="#E5AF44" size={15} />
+                  <Text
+                    style={[styles.text3, { color: "#E5AF44", paddingLeft: 5 }]}
+                  >
+                    Prescription pending
+                  </Text>
+                </View>
+                <Text style={styles.text2}>Room:</Text>
+                <Text style={styles.text3}>No one is in the room</Text>
+              </View>
+              <View
+                style={{
+                  flexDirection: "column",
+                  flex: 1,
+                  alignItems: "flex-end",
+                  alignSelf: "center",
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                  }}
+                >
+                  <Image
+                    source={require("../components/assets/images/doctor1.png")}
+                    style={[styles.image1, { left: 7.5 }]}
+                  />
+                  <Image
+                    source={require("../components/assets/images/pet.png")}
+                    style={[styles.image1, { right: 7.5 }]}
+                  />
+                </View>
+                <Text>
+                  <Text style={styles.text3}>Expires in</Text>{" "}
+                  <Text style={styles.text2}>42h 21m</Text>
+                </Text>
+              </View>
+            </View>
+            <AppButton title="Enter Room" />
+            <View
+              style={{
+                borderWidth: 1,
+                borderColor: "#DCE1E7",
+                marginVertical: 10,
+              }}
+            />
+          </View>
+          <View>
+            <View style={{ flexDirection: "row" }}>
+              <View>
+                <Text style={styles.text1}>Dr. Kumar & Bruno</Text>
+                <Text style={styles.text2}>Status:</Text>
+                <Text style={styles.text3}>Payment</Text>
+                <Text>
+                  <Text style={styles.text3}>Call Scheduled at</Text>{" "}
+                  <Text style={[styles.text2, { color: "#4AC4F1" }]}>
+                    3rd June 03:00PM
+                  </Text>
+                </Text>
+                <Text style={styles.text2}>Room:</Text>
+                <Text style={styles.text3}>No one is in the room</Text>
+              </View>
+              <View
+                style={{
+                  flexDirection: "column",
+                  flex: 1,
+                  alignItems: "flex-end",
+                  alignSelf: "center",
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                  }}
+                >
+                  <Image
+                    source={require("../components/assets/images/doctor1.png")}
+                    style={[styles.image1, { left: 7.5 }]}
+                  />
+                  <Image
+                    source={require("../components/assets/images/pet.png")}
+                    style={[styles.image1, { right: 7.5 }]}
+                  />
+                </View>
+                <Text>
+                  <Text style={styles.text3}>Expires in</Text>{" "}
+                  <Text style={styles.text2}>42h 21m</Text>
+                </Text>
+              </View>
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                marginVertical: 25,
+              }}
+            >
+              <Image
+                source={require("../components/assets/images/loader.png")}
+              />
+              <Text style={[styles.text2, { marginHorizontal: 10 }]}>
+                Awaiting payment from the pet parent
+              </Text>
+            </View>
             <View
               style={{
                 borderWidth: 1,
@@ -273,6 +397,7 @@ const styles = StyleSheet.create({
   },
   container1: {
     margin: 20,
+    marginBottom: 50,
   },
   text1: {
     fontFamily: "Proxima Nova",

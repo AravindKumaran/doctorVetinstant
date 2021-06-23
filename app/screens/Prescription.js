@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Text,
   Image,
+  TextInput,
 } from "react-native";
 import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
@@ -21,6 +22,7 @@ import ChoosePicker from "../components/forms/ChoosePicker";
 import { Formik } from "formik";
 import RBSheet from "react-native-raw-bottom-sheet";
 import PetMedication from "./PetMedication";
+import ToggleSwitch from "toggle-switch-react-native";
 
 const pet = [
   { label: "Bruno", value: "Bruno" },
@@ -64,13 +66,27 @@ const Prescription = ({ navigation }) => {
       <View style={styles.container1}>
         <View>
           <View>
-            <View style={{ flexDirection: "row", marginTop: 20 }}>
-              <View>
-                <Text style={styles.text1}>
-                  Call scheduled between Dr. Kumar and Bruno has ended. Please
-                  upload the prescription.
-                </Text>
-              </View>
+            <View style={{ margin: 20 }}>
+              <ToggleSwitch
+                isOn={true}
+                onColor="#4DD1EF"
+                offColor="#47687F"
+                label="Include digital signature"
+                labelStyle={styles.text5}
+                onToggle={(isOn) => console.log("changed to : ", isOn)}
+              />
+              <View
+                style={{
+                  borderWidth: 0.75,
+                  borderColor: "#DCE1E7",
+                  marginVertical: 10,
+                }}
+              />
+              <Text style={styles.text5}>Doctor Notes/Diagnosis</Text>
+              <TextInput style={styles.textinput1} numberOfLines={4} />
+            </View>
+            <View style={{ margin: 20 }}>
+              <Text style={styles.text5}>Medications</Text>
             </View>
             <View
               style={{
@@ -253,7 +269,7 @@ const Prescription = ({ navigation }) => {
           </View>
         </View>
 
-        <View>
+        <View style={{ margin: 20 }}>
           <TouchableOpacity
             style={{
               margin: 10,
@@ -303,11 +319,15 @@ const Prescription = ({ navigation }) => {
             <PetMedication />
           </RBSheet>
           <Text style={styles.text1}>Add Medication</Text>
+          <Text style={styles.text5}>Diagnostic prescription</Text>
+          <TextInput style={styles.textinput1} numberOfLines={4} />
+          <Text style={styles.text5}>Advice/Remarks</Text>
+          <TextInput style={styles.textinput1} numberOfLines={4} />
         </View>
         <View style={{ margin: 25 }}>
           <AppButton
-            title="Add to Prescription"
-            // onPress={() => navigation.navigate("Video")}
+            title="Generate Prescription"
+            onPress={() => navigation.navigate("PrescriptionPreview")}
           />
         </View>
       </View>
@@ -341,6 +361,23 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     textAlign: "center",
     marginVertical: 5,
+  },
+  text5: {
+    fontFamily: "Proxima Nova",
+    fontWeight: "700",
+    fontSize: 14,
+    color: "#47687F",
+    marginVertical: 10,
+  },
+  textinput1: {
+    height: 100,
+    width: "100%",
+    borderColor: "#B9C4CF",
+    borderWidth: 1,
+    color: "#47687F",
+    borderRadius: 15,
+    fontSize: 16,
+    marginVertical: 10,
   },
 });
 

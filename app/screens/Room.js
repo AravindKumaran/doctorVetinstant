@@ -31,6 +31,7 @@ const ActiveStyle = () => (
 
 const Room = () => {
   const [active, setActive] = useState("problem");
+  const [isvideo, setVideo] = useState(true);
 
   const handleActive = (value) => {
     setActive(value);
@@ -97,11 +98,11 @@ const Room = () => {
           <View style={styles.catItem2}>
             <Image
               source={require("../components/assets/images/doctor1.png")}
-              style={styles.image1}
+              style={[styles.image1, { left: 10 }]}
             />
             <Image
               source={require("../components/assets/images/pet.png")}
-              style={styles.image1}
+              style={[styles.image1, { right: 10 }]}
             />
             <View styles={{ flexDirection: "column" }}>
               <Text
@@ -184,38 +185,93 @@ const Room = () => {
           }}
         />
         {active === "videocall" && (
-          <View style={{ alignItems: "center", padding: 30 }}>
-            <Text
-              style={{
-                margin: 10,
-              }}
-            >
-              <Text
-                style={{ color: "#47687F", fontWeight: "400", fontSize: 14 }}
-              >
-                Call Scheduled at
-              </Text>{" "}
-              <Text
-                style={{ color: "#4AC4F1", fontWeight: "700", fontSize: 14 }}
-              >
-                11th April 07:00 pm
-              </Text>
-            </Text>
-            <Image
-              source={require("../components/assets/images/doctor1.png")}
-              style={styles.image1}
-            />
-            <Text
-              style={{
-                margin: 10,
-              }}
-            >
-              Dr.Kumar has joined the call
-            </Text>
-            <AppButton
-              title="Join Video call"
-              onPress={() => navigation.navigate("Video")}
-            />
+          <View>
+            {!isvideo ? (
+              <View style={{ alignItems: "center", margin: 30 }}>
+                <Text
+                  style={{
+                    margin: 10,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#47687F",
+                      fontWeight: "400",
+                      fontSize: 14,
+                    }}
+                  >
+                    Call Scheduled at
+                  </Text>{" "}
+                  <Text
+                    style={{
+                      color: "#4AC4F1",
+                      fontWeight: "700",
+                      fontSize: 14,
+                    }}
+                  >
+                    11th April 07:00 pm
+                  </Text>
+                </Text>
+                <Image
+                  source={require("../components/assets/images/doctor1.png")}
+                  style={styles.image1}
+                />
+                <Text
+                  style={{
+                    margin: 10,
+                  }}
+                >
+                  Dr.Kumar has joined the call
+                </Text>
+                <AppButton
+                  title="Join Video call"
+                  onPress={() => navigation.navigate("Video")}
+                  onPress={() => setVideo(true)}
+                />
+              </View>
+            ) : (
+              <View style={{ alignItems: "center", margin: 50 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 10,
+                  }}
+                >
+                  <View
+                    style={{
+                      marginLeft: "15%",
+                      flex: 1,
+                      height: 1,
+                      backgroundColor: "#C5CACF",
+                      marginHorizontal: 10,
+                    }}
+                  />
+                  <View>
+                    <Text style={styles.text4}>No one in the room</Text>
+                  </View>
+                  <View
+                    style={{
+                      flex: 1,
+                      height: 1,
+                      backgroundColor: "#C5CACF",
+                      marginRight: "15%",
+                      marginHorizontal: 10,
+                    }}
+                  />
+                </View>
+                <AppButton
+                  title="Join Video call"
+                  onPress={() => navigation.navigate("Video")}
+                  onPress={() => setVideo(false)}
+                />
+                <AppButton
+                  title="Generate Prescription"
+                  onPress={() => navigation.navigate("Video")}
+                  onPress={() => setVideo(false)}
+                />
+              </View>
+            )}
           </View>
         )}
         {active === "chat" && <ChatScreen />}
@@ -257,6 +313,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "400",
   },
+  text4: {
+    color: "#47687F",
+    fontSize: 14,
+    fontWeight: "400",
+    marginVertical: 15,
+  },
   catItem2: {
     borderRadius: 30,
     flexDirection: "row",
@@ -264,8 +326,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   image1: {
-    height: 70,
-    width: 70,
+    height: 75,
+    width: 75,
     borderWidth: 5,
     borderColor: "#FFFFFF",
     borderRadius: 50,

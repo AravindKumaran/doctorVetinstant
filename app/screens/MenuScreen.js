@@ -61,63 +61,61 @@ const MenuScreen = () => {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.container1}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.cat}>
-            {doctors.map((c, i) => (
-              <View
-                key={`${c.name}-${i}`}
-                style={{
-                  margin: 25,
-                }}
-              >
-                <TouchableOpacity
-                  // onPress={() => handleCategory(c.name)}
-                  style={styles.catItem}
-                >
-                  <Text>
-                    <Image
-                      source={c.src}
-                      size={15}
-                      style={{ height: 15, width: 15 }}
-                    />
-                    {"      "}
-                    <Text
-                      style={{
-                        color: "#47687F",
-                        fontWeight: "700",
-                        fontFamily: "Proxima Nova",
-                        fontSize: 14,
-                      }}
-                    >
-                      {c.name}
-                    </Text>
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
-          <TouchableOpacity
-            style={{
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-              marginVertical: 50,
-            }}
-          >
-            <Image source={require("../components/assets/images/logout.png")} />
-            <Text
+        <View style={styles.cat}>
+          {doctors.map((c, i) => (
+            <View
+              key={`${c.name}-${i}`}
               style={{
-                color: "#FF5348",
-                fontWeight: "700",
-                fontFamily: "Proxima Nova",
-                fontSize: 14,
-                marginHorizontal: 20,
+                margin: 25,
               }}
             >
-              Logout
-            </Text>
-          </TouchableOpacity>
-        </ScrollView>
+              <TouchableOpacity
+                // onPress={() => handleCategory(c.name)}
+                style={styles.catItem}
+              >
+                <Text>
+                  <Image
+                    source={c.src}
+                    size={15}
+                    style={{ height: 15, width: 15 }}
+                  />
+                  {"      "}
+                  <Text
+                    style={{
+                      color: "#47687F",
+                      fontWeight: "700",
+                      fontFamily: "Proxima Nova",
+                      fontSize: 14,
+                    }}
+                  >
+                    {c.name}
+                  </Text>
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+        <TouchableOpacity
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+            marginVertical: 50,
+          }}
+        >
+          <Image source={require("../components/assets/images/logout.png")} />
+          <Text
+            style={{
+              color: "#FF5348",
+              fontWeight: "700",
+              fontFamily: "Proxima Nova",
+              fontSize: 14,
+              marginHorizontal: 20,
+            }}
+          >
+            Logout
+          </Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );

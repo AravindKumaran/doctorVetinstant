@@ -20,6 +20,7 @@ import WalletScreen from "../screens/WalletScreen";
 import Prescription from "../screens/Prescription";
 import PetMedication from "../screens/PetMedication";
 import ProfileSetup from "../screens/ProfileSetup";
+import PrescriptionPreview from "../screens/PrescriptionPreview";
 import { Feather } from "@expo/vector-icons";
 
 const Stack = createStackNavigator();
@@ -67,6 +68,10 @@ const AppNavigator = ({ navigation }) => {
       <Stack.Screen name="Prescriptionnnnn" component={Prescription} />
       <Stack.Screen name="PetMedication" component={PetMedication} />
       <Stack.Screen name="ProfileSetup" component={ProfileSetup} />
+      <Stack.Screen
+        name="PrescriptionPreview"
+        component={PrescriptionPreview}
+      />
       <Stack.Screen
         name="VideoCall"
         component={VideoCallScreen}
