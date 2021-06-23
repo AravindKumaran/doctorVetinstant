@@ -28,12 +28,13 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "rgba(21, 56, 95, 0.3)",
+    paddingLeft: 45,
   },
   icon: {
     marginRight: 10,
   },
   textInput: {
-    fontSize: 15,
+    fontSize: 18,
     color: "#47687F",
     flex: 1,
     textAlignVertical: "center",

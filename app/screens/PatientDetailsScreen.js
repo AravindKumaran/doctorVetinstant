@@ -280,7 +280,7 @@ const PatientDetailsScreen = ({ navigation, route }) => {
           {/* <AppButton title='Video Call' onPress={handleVideoCall} /> */}
           <AppButton
             title='Send Prescription'
-            onPress={() => navigation.navigate('Prescription')}
+            onPress={() => navigation.navigate('PrescriptionScreen')}
           />
         </>
       )}

@@ -25,7 +25,7 @@ const AppFormField = ({ name, label, numberOfLines, contStyle, ...rest }) => {
             top: -6,
             fontSize: 14,
             position: "absolute",
-            color: "#3FBDE3",
+            color: "#9AA5B0",
             fontWeight: "700",
             backgroundColor: "#FFFFFF",
           }}

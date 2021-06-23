@@ -1,12 +1,12 @@
-import React from 'react'
+import React from "react";
 
-import { useFormikContext } from 'formik'
+import { useFormikContext } from "formik";
 
-import ErrorMessage from '../ErrorMessage'
-import AppFilePicker from './AppFilePicker'
+import ErrorMessage from "../ErrorMessage";
+import AppFilePicker from "./AppFilePicker";
 
 const FormFilePicker = ({ name, size }) => {
-  const { errors, setFieldValue, touched, values } = useFormikContext()
+  const { errors, setFieldValue, touched, values } = useFormikContext();
 
   return (
     <>
@@ -16,7 +16,7 @@ const FormFilePicker = ({ name, size }) => {
       />
       <ErrorMessage error={errors[name]} visible={!values[name]} />
     </>
-  )
-}
+  );
+};
 
-export default FormFilePicker
+export default FormFilePicker;

@@ -1,6 +1,5 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-
 import AuthScreen from "../screens/AuthScreen";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
@@ -8,11 +7,23 @@ import WelcomeScreen from "../screens/WelcomeScreen";
 import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 import DoctorScreen from "../screens/DoctorScreen";
+import VerificationScreen from "../screens/VerificationScreen";
+import VerificationCodeScreen from "../screens/VerificationCodeScreen";
 
 const Stack = createStackNavigator();
 
 const AuthNavigator = () => (
-  <Stack.Navigator>
+  <Stack.Navigator
+    screenOptions={{
+      headerStyle: {
+        backgroundColor: "#FFFFFF",
+        elevation: 5,
+        borderBottomStartRadius: 15,
+        borderBottomEndRadius: 15,
+      },
+      headerTitleAlign: "center",
+    }}
+  >
     <Stack.Screen
       options={{
         headerShown: false,
@@ -75,6 +86,28 @@ const AuthNavigator = () => (
       }}
       name="ResetPassword"
       component={ResetPasswordScreen}
+    />
+    <Stack.Screen
+      options={{
+        title: "Verification",
+        headerTitleStyle: {
+          color: "#476880",
+        },
+        headerTitleAlign: "center",
+      }}
+      name="Verification"
+      component={VerificationScreen}
+    />
+    <Stack.Screen
+      options={{
+        title: "Verification",
+        headerTitleStyle: {
+          color: "#476880",
+        },
+        headerTitleAlign: "center",
+      }}
+      name="VerificationCode"
+      component={VerificationCodeScreen}
     />
   </Stack.Navigator>
 );

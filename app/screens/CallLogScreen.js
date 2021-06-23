@@ -1,24 +1,24 @@
-import React, { useState, useEffect, useContext } from 'react'
-import { ScrollView, StyleSheet, View } from 'react-native'
-import { Feather } from '@expo/vector-icons'
+import React, { useState, useEffect, useContext } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { Feather } from "@expo/vector-icons";
 
-import AppText from '../components/AppText'
-import AppButton from '../components/AppButton'
-import callLogsApi from '../api/callLog'
-import AuthContext from '../context/authContext'
-import LoadingIndicator from '../components/LoadingIndicator'
+import AppText from "../components/AppText";
+import AppButton from "../components/AppButton";
+import callLogsApi from "../api/callLog";
+import AuthContext from "../context/authContext";
+import LoadingIndicator from "../components/LoadingIndicator";
 
 const CallLogScreen = ({ navigation, route }) => {
-  const { user } = useContext(AuthContext)
+  const { user } = useContext(AuthContext);
   // console.log('Routew', route)
-  const [missedCall, setMissedCall] = useState([])
-  const [completedCall, setCompletedCall] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [missedCall, setMissedCall] = useState([]);
+  const [completedCall, setCompletedCall] = useState([]);
+  const [loading, setLoading] = useState(false);
   // const [pendingCalls, setPendingCalls] = useState([])
 
   useEffect(() => {
-    navigation.setOptions({ title: 'Call Log' })
-  }, [])
+    navigation.setOptions({ title: "Call Log" });
+  }, []);
 
   // useEffect(() => {
   //   console.log('I am called')
@@ -29,51 +29,51 @@ const CallLogScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     const getMissedCall = async () => {
-      setLoading(true)
-      const res = await callLogsApi.getCallLog(user._id)
+      setLoading(true);
+      const res = await callLogsApi.getCallLog(user._id);
       if (!res.ok) {
-        setLoading(false)
-        console.log('Call', res)
-        return
+        setLoading(false);
+        console.log("Call", res);
+        return;
       }
-      const callLogsArray = res.data.callLogs
-      const msCall = []
-      const cmCall = []
+      const callLogsArray = res.data.callLogs;
+      const msCall = [];
+      const cmCall = [];
       callLogsArray.forEach((log) => {
         if (log.callPending) {
-          msCall.push(log)
+          msCall.push(log);
         } else {
-          cmCall.push(log)
+          cmCall.push(log);
         }
-      })
+      });
 
-      setMissedCall(msCall)
-      setCompletedCall(cmCall)
-      setLoading(false)
-    }
+      setMissedCall(msCall);
+      setCompletedCall(cmCall);
+      setLoading(false);
+    };
 
-    getMissedCall()
-  }, [])
+    getMissedCall();
+  }, []);
 
   return (
-    <ScrollView>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <LoadingIndicator visible={loading} />
-      <View style={styles.container}>
+      <View style={styles.container1}>
         <View style={{ margin: 15, padding: 10 }}>
           <AppButton
-            title='See Pending Calls'
-            onPress={() => navigation.navigate('PendingCalls')}
+            title="See Pending Calls"
+            onPress={() => navigation.navigate("PendingCalls")}
           />
         </View>
 
         <View style={styles.titleWrapper}>
           <Feather
             style={{ marginLeft: 25 }}
-            name='phone-missed'
+            name="phone-missed"
             size={22}
-            color='#af8282'
+            color="#af8282"
           />
-          <AppText style={{ fontSize: 25, paddingLeft: 5, color: '#000' }}>
+          <AppText style={{ fontSize: 25, paddingLeft: 5, color: "#000" }}>
             Missed Call
           </AppText>
         </View>
@@ -82,24 +82,24 @@ const CallLogScreen = ({ navigation, route }) => {
           <View style={styles.card} key={call._id}>
             <View
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
               }}
             >
               <AppText
                 style={{
-                  textTransform: 'capitalize',
+                  textTransform: "capitalize",
                   fontSize: 20,
-                  color: '#344247',
+                  color: "#344247",
                 }}
               >
                 {call.senderId.name}
               </AppText>
               <AppButton
-                title='Schedule'
-                onPress={() => navigation.navigate('ScheduleCall', { call })}
+                title="Schedule"
+                onPress={() => navigation.navigate("ScheduleCall", { call })}
                 style={{
                   width: 150,
                   marginTop: 5,
@@ -111,29 +111,29 @@ const CallLogScreen = ({ navigation, route }) => {
 
             <View
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
               }}
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Feather
                   style={{ marginLeft: 15 }}
-                  name='calendar'
+                  name="calendar"
                   size={22}
-                  color='#D1D5da'
+                  color="#D1D5da"
                 />
                 <AppText>
                   {new Date(call.updatedAt).toLocaleDateString()}
                 </AppText>
               </View>
 
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Feather
                   style={{ marginLeft: 15 }}
-                  name='clock'
+                  name="clock"
                   size={22}
-                  color='#D1D5da'
+                  color="#D1D5da"
                 />
                 <AppText>
                   {new Date(call.updatedAt).toLocaleTimeString()}
@@ -146,11 +146,11 @@ const CallLogScreen = ({ navigation, route }) => {
         <View style={styles.titleWrapper}>
           <Feather
             style={{ marginLeft: 25 }}
-            name='phone'
+            name="phone"
             size={22}
-            color='#af8282'
+            color="#af8282"
           />
-          <AppText style={{ fontSize: 25, paddingLeft: 5, color: '#000' }}>
+          <AppText style={{ fontSize: 25, paddingLeft: 5, color: "#000" }}>
             Completed Call
           </AppText>
         </View>
@@ -158,38 +158,38 @@ const CallLogScreen = ({ navigation, route }) => {
           <View style={styles.card} key={call._id}>
             <AppText
               style={{
-                textTransform: 'capitalize',
+                textTransform: "capitalize",
                 fontSize: 20,
-                color: '#344247',
+                color: "#344247",
               }}
             >
               {call.senderId.name}
             </AppText>
             <View
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
               }}
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Feather
                   style={{ marginLeft: 15 }}
-                  name='calendar'
+                  name="calendar"
                   size={22}
-                  color='#D1D5da'
+                  color="#D1D5da"
                 />
                 <AppText>
                   {new Date(call.updatedAt).toLocaleDateString()}
                 </AppText>
               </View>
 
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Feather
                   style={{ marginLeft: 15 }}
-                  name='clock'
+                  name="clock"
                   size={22}
-                  color='#D1D5da'
+                  color="#D1D5da"
                 />
                 <AppText>
                   {new Date(call.updatedAt).toLocaleTimeString()}
@@ -200,27 +200,30 @@ const CallLogScreen = ({ navigation, route }) => {
         ))}
       </View>
     </ScrollView>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+  container1: {
     marginVertical: 20,
     marginHorizontal: 10,
   },
   titleWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 10,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: "#FFFFFF",
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginVertical: 10,
     borderRadius: 10,
   },
-})
+});
 
-export default CallLogScreen
+export default CallLogScreen;

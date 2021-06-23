@@ -7,16 +7,16 @@ import {
   TouchableWithoutFeedback,
   Image,
   Alert,
+  TouchableOpacity,
 } from "react-native";
 
 import RBSheet from "react-native-raw-bottom-sheet";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 
 import AppText from "../AppText";
 import AppButton from "../AppButton";
 
-const ImagePickerBottomSheet = ({ imageUri, onChangeImage, imageList }) => {
+const ImagePicker = ({ imageUri, onChangeImage, imageList }) => {
   const refRBSheet = useRef();
 
   const openCamera = async () => {
@@ -91,10 +91,19 @@ const ImagePickerBottomSheet = ({ imageUri, onChangeImage, imageList }) => {
   return (
     <View>
       {/* <AppText> Hello{imageUri}</AppText> */}
-      <TouchableWithoutFeedback onPress={handlePress}>
+      <TouchableOpacity onPress={handlePress}>
         <View style={styles.container}>
           {!imageUri && (
-            <MaterialCommunityIcons name="camera" size={40} color="#000" />
+            <Text
+              style={{
+                color: "#47687F",
+                fontSize: 12,
+                fontWeight: "400",
+                alignSelf: "center",
+              }}
+            >
+              Upload your photo
+            </Text>
           )}
           {imageUri && (
             <Image
@@ -104,7 +113,7 @@ const ImagePickerBottomSheet = ({ imageUri, onChangeImage, imageList }) => {
             />
           )}
         </View>
-      </TouchableWithoutFeedback>
+      </TouchableOpacity>
       <RBSheet
         ref={refRBSheet}
         height={400}
@@ -159,16 +168,15 @@ const ImagePickerBottomSheet = ({ imageUri, onChangeImage, imageList }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 150,
-    justifyContent: "center",
-    alignItems: "center",
-    height: 150,
     overflow: "hidden",
-    width: 150,
-    borderWidth: 5,
-    borderColor: "white",
-    elevation: 10,
+    height: 40,
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#4DD1EF",
+    borderRadius: 30,
+    justifyContent: "center",
+    alignSelf: "center",
+    marginBottom: 10,
   },
   image: {
     width: "100%",
@@ -176,4 +184,31 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ImagePickerBottomSheet;
+export default ImagePicker;
+
+{
+  /* <TouchableOpacity
+style={{
+  height: 40,
+  width: "100%",
+  borderWidth: 1,
+  borderColor: "#41CE8A",
+  borderRadius: 30,
+  justifyContent: "center",
+  alignSelf: "center",
+  marginBottom: 10,
+}}
+onPress={photo}
+>
+<Text
+  style={{
+    color: "#47687F",
+    fontSize: 12,
+    fontWeight: "400",
+    alignSelf: "center",
+  }}
+>
+  Upload your photo
+</Text>
+</TouchableOpacity> */
+}

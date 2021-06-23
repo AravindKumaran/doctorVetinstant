@@ -1,23 +1,28 @@
 import React, { useState, useContext } from "react";
-import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+} from "react-native";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import {
   GoogleSignin,
   statusCodes,
 } from "@react-native-community/google-signin";
-
 import AppFormField from "../components/AppFormField";
 import SubmitButton from "../components/SubmitButton";
 import ErrorMessage from "../components/ErrorMessage";
-
 import authApi from "../api/auth";
 import AuthContext from "../context/authContext";
 import authStorage from "../components/utils/authStorage";
 import LoadingIndicator from "../components/LoadingIndicator";
 import socket from "../components/utils/socket";
-
 import usersApi from "../api/users";
+import LinearGradient from "react-native-linear-gradient";
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required().label("Name"),
@@ -101,7 +106,7 @@ const RegisterScreen = ({ navigation }) => {
   return (
     <>
       <LoadingIndicator visible={loading} />
-      <View style={styles.container}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* <AppText
           style={{
             textAlign: 'center',
@@ -113,24 +118,29 @@ const RegisterScreen = ({ navigation }) => {
           Register
         </AppText> */}
 
-        <View style={{ marginTop: 60, marginHorizontal: 30 }}>
-          <TouchableOpacity
-            onPress={signIn}
-            style={{
-              backgroundColor: "#F6F6F6",
-              borderRadius: 75,
-              justifyContent: "center",
-              alignItems: "center",
-              alignContent: "center",
-              alignSelf: "center",
-              padding: 10,
-              width: 320,
-              height: 60,
-              marginBottom: 20,
-              elevation: 10,
-            }}
-          >
-            <Image source={require("../components/assets/images/google.png")} />
+        <View style={{ marginVertical: 30, marginHorizontal: 30 }}>
+          <TouchableOpacity onPress={signIn}>
+            <LinearGradient
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              colors={["#F6F6F6", "#FFFFFF"]}
+              style={{
+                borderRadius: 75,
+                justifyContent: "center",
+                alignItems: "center",
+                alignContent: "center",
+                alignSelf: "center",
+                padding: 10,
+                width: 320,
+                height: 60,
+                marginBottom: 20,
+                elevation: 10,
+              }}
+            >
+              <Image
+                source={require("../components/assets/images/google.png")}
+              />
+            </LinearGradient>
           </TouchableOpacity>
 
           <View
@@ -175,7 +185,8 @@ const RegisterScreen = ({ navigation }) => {
                   autoCapitalize="none"
                   autoCorrect={false}
                   name="name"
-                  label="Name"
+                  label="Username"
+                  // placeholder="Username"
                 />
 
                 <AppFormField
@@ -185,6 +196,7 @@ const RegisterScreen = ({ navigation }) => {
                   keyboardType="email-address"
                   name="email"
                   label="Email ID"
+                  // placeholder="Email ID"
                 />
 
                 <AppFormField
@@ -194,6 +206,7 @@ const RegisterScreen = ({ navigation }) => {
                   name="password"
                   secureTextEntry
                   label="Password"
+                  // placeholder="Password"
                 />
 
                 <AppFormField
@@ -203,6 +216,7 @@ const RegisterScreen = ({ navigation }) => {
                   name="cnfPassword"
                   secureTextEntry
                   label="Confirm Password"
+                  // placeholder="Confirm Password"
                 />
 
                 <TouchableOpacity
@@ -216,14 +230,14 @@ const RegisterScreen = ({ navigation }) => {
                     <Text style={{ color: "#3FBDE3" }}>Sign In</Text>
                   </Text>
                 </TouchableOpacity>
-                <View style={{ top: 50 }}>
-                  <SubmitButton title="Get Started" />
+                <View style={{ top: 0 }}>
+                  <SubmitButton title="Next" />
                 </View>
               </>
             )}
           </Formik>
         </View>
-      </View>
+      </ScrollView>
     </>
   );
 };
@@ -231,9 +245,7 @@ const RegisterScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginHorizontal: 0,
     backgroundColor: "#FFFFFF",
-    // justifyContent: "center",
   },
   text1: {
     color: "#47687F",

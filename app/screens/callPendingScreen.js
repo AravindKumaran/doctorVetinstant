@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useContext, useRef } from 'react'
-import RBSheet from 'react-native-raw-bottom-sheet'
-import dayjs from 'dayjs'
-import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
-dayjs.extend(isSameOrAfter)
+import React, { useState, useEffect, useContext, useRef } from "react";
+import RBSheet from "react-native-raw-bottom-sheet";
+import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+dayjs.extend(isSameOrAfter);
 
 import {
   StyleSheet,
@@ -14,125 +14,130 @@ import {
   ScrollView,
   Dimensions,
   Image,
-} from 'react-native'
+} from "react-native";
 
-import AppText from '../components/AppText'
-import AppButton from '../components/AppButton'
+import AppText from "../components/AppText";
+import AppButton from "../components/AppButton";
 
-import pendingsApi from '../api/callPending'
-import roomsApi from '../api/room'
-import usersApi from '../api/users'
-import petsApi from '../api/pets'
-import LoadingIndicator from '../components/LoadingIndicator'
-import AuthContext from '../context/authContext'
-import * as Notifications from 'expo-notifications'
-import { removeValue, getObjectData } from '../components/utils/reminderStorage'
+import pendingsApi from "../api/callPending";
+import roomsApi from "../api/room";
+import usersApi from "../api/users";
+import petsApi from "../api/pets";
+import LoadingIndicator from "../components/LoadingIndicator";
+import AuthContext from "../context/authContext";
+import * as Notifications from "expo-notifications";
+import {
+  removeValue,
+  getObjectData,
+} from "../components/utils/reminderStorage";
 
 const CallPendingScreen = ({ navigation }) => {
-  const refRBSheet = useRef()
-  const { user } = useContext(AuthContext)
-  const [pendingCalls, setPendingCalls] = useState([])
-  const [currentProblem, setCurrentProblem] = useState(null)
-  const [previousProblem, setPreviousProblem] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [refreshing, setRefreshing] = useState(false)
-  const [pet, setPet] = useState(null)
+  const refRBSheet = useRef();
+  const { user } = useContext(AuthContext);
+  const [pendingCalls, setPendingCalls] = useState([]);
+  const [currentProblem, setCurrentProblem] = useState(null);
+  const [previousProblem, setPreviousProblem] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [pet, setPet] = useState(null);
 
   const sendPushToken = async (token, title, message) => {
     if (token) {
-      setLoading(true)
+      setLoading(true);
 
       const pushRes = await usersApi.sendPushNotification({
         targetExpoPushToken: token,
         title: ` Dr. ${user.name} ${title} `,
         message: message || `Open the pending calls page for further action`,
         datas: { token: user.token || null },
-      })
+      });
 
       if (!pushRes.ok) {
-        setLoading(false)
-        console.log('Error', pushRes)
-        return
+        setLoading(false);
+        console.log("Error", pushRes);
+        return;
       }
-      setLoading(false)
+      setLoading(false);
     } else {
-      alert('Something Went Wrong. Try Again Later')
+      alert("Something Went Wrong. Try Again Later");
     }
-  }
+  };
 
   const getUserPendingCalls = async () => {
-    console.log('I am called')
-    setLoading(true)
-    const pres = await pendingsApi.getCallPendingByDoctor(user._id)
+    console.log("I am called");
+    setLoading(true);
+    const pres = await pendingsApi.getCallPendingByDoctor(user._id);
     if (!pres.ok) {
-      console.log('Error', pres)
-      setLoading(false)
-      setRefreshing(false)
-      return
+      console.log("Error", pres);
+      setLoading(false);
+      setRefreshing(false);
+      return;
     }
     // console.log('Ress', pres.data)
     const allDeniedCalls = pres.data.calls.filter(
-      (call) => call.status === 'deny'
-    )
+      (call) => call.status === "deny"
+    );
 
     allDeniedCalls.forEach(async (call) => {
-      const d = new Date(call.extraInfo)
+      const d = new Date(call.extraInfo);
       const rmr = await getObjectData(
         `${d.toLocaleDateString()}-${d.toLocaleTimeString()}`
-      )
+      );
 
       // console.log('Rmr', rmr.docName)
       if (rmr) {
-        await removeValue(`${d.toLocaleDateString()}-${d.toLocaleTimeString()}`)
-        await Notifications.cancelScheduledNotificationAsync(rmr.identifier)
+        await removeValue(
+          `${d.toLocaleDateString()}-${d.toLocaleTimeString()}`
+        );
+        await Notifications.cancelScheduledNotificationAsync(rmr.identifier);
       }
-    })
+    });
 
-    const expiredCalls = []
+    const expiredCalls = [];
     const allCalls = pres.data.calls.filter((call) => {
       if (call?.deleteAfter) {
         if (dayjs().isSameOrAfter(dayjs(call.deleteAfter))) {
-          expiredCalls.push(call)
-          return
+          expiredCalls.push(call);
+          return;
         } else {
-          return call
+          return call;
         }
       } else {
-        return call
+        return call;
       }
-    })
+    });
 
-    console.log('Expired', expiredCalls)
+    console.log("Expired", expiredCalls);
 
     expiredCalls.forEach(async (call) => {
-      await pendingsApi.deleteCallPendingAfter(call._id)
-    })
-    setPendingCalls(allCalls)
-    setLoading(false)
-    setRefreshing(false)
-  }
+      await pendingsApi.deleteCallPendingAfter(call._id);
+    });
+    setPendingCalls(allCalls);
+    setLoading(false);
+    setRefreshing(false);
+  };
 
   useEffect(() => {
-    getUserPendingCalls()
-  }, [])
+    getUserPendingCalls();
+  }, []);
 
   const handleBtns = async (item, str) => {
-    const allPCalls = [...pendingCalls]
-    const pCall = allPCalls.find((p) => p._id === item._id)
+    const allPCalls = [...pendingCalls];
+    const pCall = allPCalls.find((p) => p._id === item._id);
     if (pCall) {
-      pCall.status = str
+      pCall.status = str;
     }
-    setLoading(true)
-    const pRes = await pendingsApi.updateCallPending(item._id, pCall)
+    setLoading(true);
+    const pRes = await pendingsApi.updateCallPending(item._id, pCall);
     if (!pRes.ok) {
-      console.log('Error', pRes)
-      setLoading(false)
-      return
+      console.log("Error", pRes);
+      setLoading(false);
+      return;
     }
-    await sendPushToken(pRes.data.calls.userMobToken, ` ${str} your request`)
-    setLoading(false)
-    setPendingCalls(allPCalls)
-  }
+    await sendPushToken(pRes.data.calls.userMobToken, ` ${str} your request`);
+    setLoading(false);
+    setPendingCalls(allPCalls);
+  };
 
   const handleVideo = async (item) => {
     const roomRes = await roomsApi.createRoom({
@@ -140,390 +145,282 @@ const CallPendingScreen = ({ navigation }) => {
       senderName: item.userName,
       receiverId: item.docId,
       petId: item.petId,
-    })
+    });
     if (!roomRes.ok) {
-      console.log(roomRes)
-      setLoading(false)
-      return
+      console.log(roomRes);
+      setLoading(false);
+      return;
     }
     const tokenRes = await usersApi.getVideoToken({
       userName: user.name,
       roomName: roomRes.data.room.name,
-    })
-    console.log('Video Token', tokenRes)
+    });
+    console.log("Video Token", tokenRes);
     if (!tokenRes.ok) {
-      setLoading(false)
-      console.log('Error', tokenRes)
+      setLoading(false);
+      console.log("Error", tokenRes);
     }
-    const d = new Date(item.extraInfo)
+    const d = new Date(item.extraInfo);
     const rmr = await getObjectData(
       `${d.toLocaleDateString()}-${d.toLocaleTimeString()}`
-    )
+    );
     if (rmr) {
-      await removeValue(`${d.toLocaleDateString()}-${d.toLocaleTimeString()}`)
+      await removeValue(`${d.toLocaleDateString()}-${d.toLocaleTimeString()}`);
     }
     await sendPushToken(
       item.userMobToken,
       ` has joined the video call`,
-      'Please join it ASAP'
-    )
-    setLoading(false)
+      "Please join it ASAP"
+    );
+    setLoading(false);
 
-    navigation.navigate('Home', {
-      screen: 'VideoCall',
+    navigation.navigate("Home", {
+      screen: "VideoCall",
       params: {
         name: user.name,
         token: tokenRes.data,
         item,
       },
-    })
-  }
+    });
+  };
 
   const getPetDetails = async (id) => {
-    setPet(null)
-    refRBSheet.current.open()
-    setLoading(true)
-    const petRes = await petsApi.getPetDetails(id)
+    setPet(null);
+    refRBSheet.current.open();
+    setLoading(true);
+    const petRes = await petsApi.getPetDetails(id);
     if (!petRes.ok) {
-      console.log('Error', petRes)
-      alert('Pet Not Found!')
-      setPet(null)
-      setLoading(false)
-      refRBSheet.current.close()
-      return
+      console.log("Error", petRes);
+      alert("Pet Not Found!");
+      setPet(null);
+      setLoading(false);
+      refRBSheet.current.close();
+      return;
     }
-    setLoading(false)
-    setPet(petRes.data.exPet)
+    setLoading(false);
+    setPet(petRes.data.exPet);
     if (petRes.data.exPet.problems?.length > 0) {
-      const allProb = petRes.data.exPet.problems.reverse()
+      const allProb = petRes.data.exPet.problems.reverse();
       const curProbIndex = allProb.findIndex(
         (prob) => prob.docname === user.name
-      )
+      );
       if (curProbIndex !== -1) {
-        const cur = allProb[curProbIndex]
-        setCurrentProblem(cur)
-        allProb.splice(curProbIndex, 1)
-        setPreviousProblem(allProb)
+        const cur = allProb[curProbIndex];
+        setCurrentProblem(cur);
+        allProb.splice(curProbIndex, 1);
+        setPreviousProblem(allProb);
       } else {
-        setPreviousProblem(allProb)
+        setPreviousProblem(allProb);
       }
     }
-  }
+  };
 
   const _renderItem = ({ item, index }) => (
     <View style={styles.card}>
       <View
         style={{
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          flexDirection: "row",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
         <AppText
           style={{
-            textTransform: 'capitalize',
+            textTransform: "capitalize",
             fontSize: 22,
-            color: '#344247',
+            color: "#344247",
           }}
         >
           {item.userName}
         </AppText>
         <AppButton
-          title='Pet Details'
+          title="Pet Details"
           btnStyle={{
-            width: '50%',
+            width: "50%",
             marginRight: 5,
             borderRadius: 30,
-            backgroundColor: 'transparent',
-            borderColor: '#fc5c65',
+            backgroundColor: "transparent",
+            borderColor: "#fc5c65",
             borderWidth: 2,
           }}
-          txtStyle={{ textAlign: 'center', width: '-100%', color: '#706868' }}
+          txtStyle={{ textAlign: "center", width: "-100%", color: "#706868" }}
           onPress={() => getPetDetails(item.petId)}
         />
       </View>
-      {item.status === 'requested' && (
+      {item.status === "requested" && (
         <>
-          <AppText style={{ fontWeight: 'bold' }}>Status:</AppText>
+          <AppText style={{ fontWeight: "bold" }}>Status:</AppText>
           <AppText>Patient Requested</AppText>
           <AppButton
-            title='Schedule'
+            title="Schedule"
             onPress={() =>
-              navigation.navigate('ScheduleCall', {
+              navigation.navigate("ScheduleCall", {
                 sdata: item,
                 scheduled: true,
               })
             }
           />
-          <View style={{ flexDirection: 'row' }}>
+          <View style={{ flexDirection: "row" }}>
             <AppButton
-              title='Deny'
-              btnStyle={{ width: '50%', marginRight: 5 }}
-              txtStyle={{ textAlign: 'center', width: '-100%' }}
-              onPress={() => handleBtns(item, 'deny')}
+              title="Deny"
+              btnStyle={{ width: "50%", marginRight: 5 }}
+              txtStyle={{ textAlign: "center", width: "-100%" }}
+              onPress={() => handleBtns(item, "deny")}
             />
             <AppButton
-              title='Accept'
-              btnStyle={{ width: '50%', marginRight: 5 }}
-              txtStyle={{ textAlign: 'center', width: '-100%' }}
-              onPress={() => handleBtns(item, 'accepted')}
+              title="Accept"
+              btnStyle={{ width: "50%", marginRight: 5 }}
+              txtStyle={{ textAlign: "center", width: "-100%" }}
+              onPress={() => handleBtns(item, "accepted")}
             />
           </View>
         </>
       )}
-      {item.status === 'accepted' && (
+      {item.status === "accepted" && (
         <>
-          <AppText style={{ fontWeight: 'bold' }}>Status:</AppText>
+          <AppText style={{ fontWeight: "bold" }}>Status:</AppText>
           <AppText>Waiting for payment</AppText>
         </>
       )}
-      {item.status === 'paymentDone' && item.paymentDone && (
+      {item.status === "paymentDone" && item.paymentDone && (
         <>
-          <AppText style={{ fontWeight: 'bold' }}>Status:</AppText>
+          <AppText style={{ fontWeight: "bold" }}>Status:</AppText>
           <AppText>Payment Done Successfully.</AppText>
           <AppText>Please join the call</AppText>
-          <AppButton title='Join Now' onPress={() => handleVideo(item)} />
+          <AppButton title="Join Now" onPress={() => handleVideo(item)} />
         </>
       )}
-      {item.status === 'scheduled' && (
+      {item.status === "scheduled" && (
         <>
-          <AppText style={{ fontWeight: 'bold' }}>Status:</AppText>
+          <AppText style={{ fontWeight: "bold" }}>Status:</AppText>
           <AppText>Waiting for payment</AppText>
           <AppText>You have scheduled the call at</AppText>
           <AppText>
-            <AppText style={{ fontWeight: 'bold' }}>
-              {dayjs(item.extraInfo).format('hh:mm A')}
+            <AppText style={{ fontWeight: "bold" }}>
+              {dayjs(item.extraInfo).format("hh:mm A")}
             </AppText>
             on
-            <AppText style={{ fontWeight: 'bold' }}>
-              {dayjs(item.extraInfo).format('DD/MM/YYYY')}
+            <AppText style={{ fontWeight: "bold" }}>
+              {dayjs(item.extraInfo).format("DD/MM/YYYY")}
             </AppText>
           </AppText>
         </>
       )}
-      {item.status === 'scheduledPayment' && item.paymentDone && (
+      {item.status === "scheduledPayment" && item.paymentDone && (
         <>
-          <AppText style={{ fontWeight: 'bold' }}>Status:</AppText>
+          <AppText style={{ fontWeight: "bold" }}>Status:</AppText>
           <AppText>Payment Done</AppText>
           <AppText>
             Call Scheduled at
-            <AppText style={{ fontWeight: 'bold' }}>
-              {dayjs(item.extraInfo).format('hh:mm A')}
+            <AppText style={{ fontWeight: "bold" }}>
+              {dayjs(item.extraInfo).format("hh:mm A")}
             </AppText>
             on
-            <AppText style={{ fontWeight: 'bold' }}>
-              {dayjs(item.extraInfo).format('DD/MM/YYYY')}
+            <AppText style={{ fontWeight: "bold" }}>
+              {dayjs(item.extraInfo).format("DD/MM/YYYY")}
             </AppText>
           </AppText>
-          <AppButton title='Join Now' onPress={() => handleVideo(item)} />
+          <AppButton title="Join Now" onPress={() => handleVideo(item)} />
           {/* {dayjs().isSameOrAfter(dayjs(item.extraInfo)) && (
 
           )} */}
         </>
       )}
-      {item.status === 'deny' && (
+      {item.status === "deny" && (
         <>
-          <AppText style={{ fontWeight: 'bold' }}>Status: </AppText>
+          <AppText style={{ fontWeight: "bold" }}>Status: </AppText>
           <AppText>Call has been denied</AppText>
         </>
       )}
     </View>
-  )
+  );
 
   const handleRefresh = () => {
-    setRefreshing(true)
-    getUserPendingCalls()
-  }
+    setRefreshing(true);
+    getUserPendingCalls();
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      {loading && <LoadingIndicator visible={loading} />}
-      {pendingCalls.length === 0 && (
-        <AppText style={{ textAlign: 'center', fontSize: 25 }}>
-          No Pending Calls
-        </AppText>
-      )}
-      <FlatList
-        data={pendingCalls}
-        renderItem={_renderItem}
-        keyExtractor={(item) => item._id.toString()}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }
-      />
-      <RBSheet
-        ref={refRBSheet}
-        height={Dimensions.get('window').height - 150}
-        animationType='fade'
-        closeOnDragDown={false}
-        customStyles={{
-          wrapper: {
-            backgroundColor: 'rgba(0,0,0,.6)',
-          },
-          draggableIcon: {
-            backgroundColor: '#000',
-          },
-          container: {
-            backgroundColor: '#fff',
-            borderTopRightRadius: 25,
-            borderTopLeftRadius: 25,
-          },
-        }}
-      >
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={{
-            marginHorizontal: 20,
-            marginBottom: 10,
+      <View style={styles.container1}>
+        {loading && <LoadingIndicator visible={loading} />}
+        {pendingCalls.length === 0 && (
+          <AppText style={{ textAlign: "center", fontSize: 25 }}>
+            No Pending Calls
+          </AppText>
+        )}
+        <FlatList
+          data={pendingCalls}
+          renderItem={_renderItem}
+          keyExtractor={(item) => item._id.toString()}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
+        />
+        <RBSheet
+          ref={refRBSheet}
+          height={Dimensions.get("window").height - 150}
+          animationType="fade"
+          closeOnDragDown={false}
+          customStyles={{
+            wrapper: {
+              backgroundColor: "rgba(0,0,0,.6)",
+            },
+            draggableIcon: {
+              backgroundColor: "#000",
+            },
+            container: {
+              backgroundColor: "#fff",
+              borderTopRightRadius: 25,
+              borderTopLeftRadius: 25,
+            },
           }}
         >
-          {loading && <LoadingIndicator visible={loading} />}
-          <AppText
+          <ScrollView
+            showsVerticalScrollIndicator={false}
             style={{
-              fontSize: 24,
-              fontWeight: '500',
-              marginVertical: 20,
-              textAlign: 'center',
+              marginHorizontal: 20,
+              marginBottom: 10,
             }}
           >
-            Pet Details :-
-          </AppText>
-          {pet && (
-            <>
-              <View style={styles.card2}>
-                <AppText>
-                  Date: {new Date(pet.createdAt).toLocaleDateString()}
-                </AppText>
-                <AppText>
-                  Time: {new Date(pet.createdAt).toLocaleTimeString()}
-                </AppText>
-                <AppText>Weight: {pet.weight} Kg</AppText>
-                <AppText>
-                  Age: {pet.years !== 0 && `${pet.years} years`}{' '}
-                  {pet.months !== 0 && `${pet.months} months`}
-                </AppText>
-                <AppText>Gender: {pet.gender} </AppText>
-                <AppText>Breed: {pet.breed} </AppText>
-                <AppText>Pet Type: {pet.type} </AppText>
-                {pet.petHistoryImages?.length > 0 && (
-                  <>
-                    <AppText>Pet History Images: </AppText>
-                    <ScrollView horizontal style={{ marginVertical: 20 }}>
-                      {pet.petHistoryImages.map((img, i) => (
-                        <View key={`${img}-${i}`} style={{ marginRight: 20 }}>
-                          <Image
-                            // source={{
-                            //   uri: `https://vetinstantbe.azurewebsites.net/img/${img}`,
-                            // }}
-                            source={{
-                              uri: `${img}`,
-                            }}
-                            style={{
-                              width: 150,
-                              height: 150,
-                              borderRadius: 75,
-                            }}
-                          />
-                        </View>
-                      ))}
-                    </ScrollView>
-                  </>
-                )}
-                {pet.prescriptions?.length > 0 && (
-                  <AppText>Pet Prescriptions:</AppText>
-                )}
-                {pet.prescriptions?.length > 0 &&
-                  pet.prescriptions.map((pbm, index) => (
-                    <View key={index} style={styles.cardBordered}>
-                      <AppText>Prescription: {pbm.prescription}</AppText>
-                      <AppText>Doctor name: {pbm.docname}</AppText>
-                      <AppText>
-                        Date: {new Date(pbm.date).toLocaleDateString()}
-                      </AppText>
-                      <AppText>
-                        Time: {new Date(pbm.date).toLocaleTimeString()}
-                      </AppText>
-                      {pbm.img && (
-                        <>
-                          <AppText>Prescription Image:</AppText>
-                          <Image
-                            // source={{
-                            //   uri: `http://192.168.43.242:8000/img/${pbm.img}`,
-                            // }}
-                            source={{
-                              uri: `${pbm.img}`,
-                            }}
-                            style={{
-                              width: 150,
-                              height: 150,
-                              borderRadius: 75,
-                            }}
-                          />
-                        </>
-                      )}
-                    </View>
-                  ))}
-                {currentProblem && <AppText>Current Pet Problem:</AppText>}
-                {currentProblem && (
-                  <View style={styles.cardBordered}>
-                    <AppText>Problem: {currentProblem.problem}</AppText>
-                    <AppText>Doctor name: {currentProblem.docname}</AppText>
-                    <AppText>Time Period: {currentProblem.time}</AppText>
-                    <AppText>Appetite: {currentProblem.Appetite}</AppText>
-                    <AppText>Behaviour: {currentProblem.Behaviour}</AppText>
-                    <AppText>Eyes: {currentProblem.Eyes}</AppText>
-                    <AppText>Gait: {currentProblem.Gait}</AppText>
-                    <AppText>Mucous: {currentProblem.Mucous}</AppText>
-                    <AppText>Comment: {currentProblem.comment}</AppText>
-                    {currentProblem.Ears?.length > 0 && (
-                      <AppText style={{ fontSize: 22 }}>Ears: </AppText>
-                    )}
-
-                    {currentProblem.Ears?.length > 0 &&
-                      currentProblem.Ears.map((er, i) => (
-                        <AppText key={`${i}-Ears`}> {er}</AppText>
-                      ))}
-
-                    {currentProblem.Feces?.length > 0 && (
-                      <AppText style={{ fontSize: 22 }}>Faces: </AppText>
-                    )}
-
-                    {currentProblem.Feces?.length > 0 &&
-                      currentProblem.Feces.map((fc, i) => (
-                        <AppText key={`Feces ${i}`}> {fc}</AppText>
-                      ))}
-                    {currentProblem.Urine?.length > 0 && (
-                      <AppText style={{ fontSize: 22 }}>Urines: </AppText>
-                    )}
-
-                    {currentProblem.Urine?.length > 0 &&
-                      currentProblem.Urine.map((ur, i) => (
-                        <AppText key={`Urines ${i}`}> {ur}</AppText>
-                      ))}
-                    {currentProblem.Skin?.length > 0 && (
-                      <AppText style={{ fontSize: 22 }}>Skins: </AppText>
-                    )}
-
-                    {currentProblem.Skin?.length > 0 &&
-                      currentProblem.Skin.map((sk, i) => (
-                        <AppText key={`Skins ${i}`}> {sk}</AppText>
-                      ))}
-
-                    {currentProblem?.images?.length > 0 && (
-                      <AppText>Pet Problem image</AppText>
-                    )}
-                    <ScrollView
-                      horizontal
-                      showsHorizontalScrollIndicator={false}
-                    >
-                      {currentProblem?.images?.length > 0 &&
-                        currentProblem?.images.map((img, i) => (
-                          <>
+            {loading && <LoadingIndicator visible={loading} />}
+            <AppText
+              style={{
+                fontSize: 24,
+                fontWeight: "500",
+                marginVertical: 20,
+                textAlign: "center",
+              }}
+            >
+              Pet Details :-
+            </AppText>
+            {pet && (
+              <>
+                <View style={styles.card2}>
+                  <AppText>
+                    Date: {new Date(pet.createdAt).toLocaleDateString()}
+                  </AppText>
+                  <AppText>
+                    Time: {new Date(pet.createdAt).toLocaleTimeString()}
+                  </AppText>
+                  <AppText>Weight: {pet.weight} Kg</AppText>
+                  <AppText>
+                    Age: {pet.years !== 0 && `${pet.years} years`}{" "}
+                    {pet.months !== 0 && `${pet.months} months`}
+                  </AppText>
+                  <AppText>Gender: {pet.gender} </AppText>
+                  <AppText>Breed: {pet.breed} </AppText>
+                  <AppText>Pet Type: {pet.type} </AppText>
+                  {pet.petHistoryImages?.length > 0 && (
+                    <>
+                      <AppText>Pet History Images: </AppText>
+                      <ScrollView horizontal style={{ marginVertical: 20 }}>
+                        {pet.petHistoryImages.map((img, i) => (
+                          <View key={`${img}-${i}`} style={{ marginRight: 20 }}>
                             <Image
-                              key={i + img}
                               // source={{
-                              //   uri: `http://192.168.43.242:8000/img/${img}`,
+                              //   uri: `https://vetinstantbe.azurewebsites.net/img/${img}`,
                               // }}
                               source={{
                                 uri: `${img}`,
@@ -532,72 +429,102 @@ const CallPendingScreen = ({ navigation }) => {
                                 width: 150,
                                 height: 150,
                                 borderRadius: 75,
-                                marginHorizontal: 5,
+                              }}
+                            />
+                          </View>
+                        ))}
+                      </ScrollView>
+                    </>
+                  )}
+                  {pet.prescriptions?.length > 0 && (
+                    <AppText>Pet Prescriptions:</AppText>
+                  )}
+                  {pet.prescriptions?.length > 0 &&
+                    pet.prescriptions.map((pbm, index) => (
+                      <View key={index} style={styles.cardBordered}>
+                        <AppText>Prescription: {pbm.prescription}</AppText>
+                        <AppText>Doctor name: {pbm.docname}</AppText>
+                        <AppText>
+                          Date: {new Date(pbm.date).toLocaleDateString()}
+                        </AppText>
+                        <AppText>
+                          Time: {new Date(pbm.date).toLocaleTimeString()}
+                        </AppText>
+                        {pbm.img && (
+                          <>
+                            <AppText>Prescription Image:</AppText>
+                            <Image
+                              // source={{
+                              //   uri: `http://192.168.43.242:8000/img/${pbm.img}`,
+                              // }}
+                              source={{
+                                uri: `${pbm.img}`,
+                              }}
+                              style={{
+                                width: 150,
+                                height: 150,
+                                borderRadius: 75,
                               }}
                             />
                           </>
-                        ))}
-                    </ScrollView>
-                  </View>
-                )}
-                {previousProblem?.length > 0 && (
-                  <AppText>Previous Pet Problems:</AppText>
-                )}
-                {previousProblem?.length > 0 &&
-                  previousProblem.map((pb, index) => (
-                    <View key={pb._id} style={styles.cardBordered}>
-                      <AppText>Problem: {pb.problem}</AppText>
-                      <AppText>Doctor name: {pb.docname}</AppText>
-                      <AppText>Time Period: {pb.time}</AppText>
-                      <AppText>Appetite: {pb.Appetite}</AppText>
-                      <AppText>Behaviour: {pb.Behaviour}</AppText>
-                      <AppText>Eyes: {pb.Eyes}</AppText>
-                      <AppText>Gait: {pb.Gait}</AppText>
-                      <AppText>Mucous: {pb.Mucous}</AppText>
-                      <AppText>Comment: {pb.comment}</AppText>
-                      {pb.Ears?.length > 0 && (
+                        )}
+                      </View>
+                    ))}
+                  {currentProblem && <AppText>Current Pet Problem:</AppText>}
+                  {currentProblem && (
+                    <View style={styles.cardBordered}>
+                      <AppText>Problem: {currentProblem.problem}</AppText>
+                      <AppText>Doctor name: {currentProblem.docname}</AppText>
+                      <AppText>Time Period: {currentProblem.time}</AppText>
+                      <AppText>Appetite: {currentProblem.Appetite}</AppText>
+                      <AppText>Behaviour: {currentProblem.Behaviour}</AppText>
+                      <AppText>Eyes: {currentProblem.Eyes}</AppText>
+                      <AppText>Gait: {currentProblem.Gait}</AppText>
+                      <AppText>Mucous: {currentProblem.Mucous}</AppText>
+                      <AppText>Comment: {currentProblem.comment}</AppText>
+                      {currentProblem.Ears?.length > 0 && (
                         <AppText style={{ fontSize: 22 }}>Ears: </AppText>
                       )}
 
-                      {pb.Ears?.length > 0 &&
-                        pb.Ears.map((er, i) => (
+                      {currentProblem.Ears?.length > 0 &&
+                        currentProblem.Ears.map((er, i) => (
                           <AppText key={`${i}-Ears`}> {er}</AppText>
                         ))}
 
-                      {pb.Feces?.length > 0 && (
+                      {currentProblem.Feces?.length > 0 && (
                         <AppText style={{ fontSize: 22 }}>Faces: </AppText>
                       )}
 
-                      {pb.Feces?.length > 0 &&
-                        pb.Feces.map((fc, i) => (
+                      {currentProblem.Feces?.length > 0 &&
+                        currentProblem.Feces.map((fc, i) => (
                           <AppText key={`Feces ${i}`}> {fc}</AppText>
                         ))}
-                      {pb.Urine?.length > 0 && (
+                      {currentProblem.Urine?.length > 0 && (
                         <AppText style={{ fontSize: 22 }}>Urines: </AppText>
                       )}
 
-                      {pb.Urine?.length > 0 &&
-                        pb.Urine.map((ur, i) => (
+                      {currentProblem.Urine?.length > 0 &&
+                        currentProblem.Urine.map((ur, i) => (
                           <AppText key={`Urines ${i}`}> {ur}</AppText>
                         ))}
-                      {pb.Skin?.length > 0 && (
+                      {currentProblem.Skin?.length > 0 && (
                         <AppText style={{ fontSize: 22 }}>Skins: </AppText>
                       )}
 
-                      {pb.Skin?.length > 0 &&
-                        pb.Skin.map((sk, i) => (
+                      {currentProblem.Skin?.length > 0 &&
+                        currentProblem.Skin.map((sk, i) => (
                           <AppText key={`Skins ${i}`}> {sk}</AppText>
                         ))}
 
-                      {pb?.images?.length > 0 && (
+                      {currentProblem?.images?.length > 0 && (
                         <AppText>Pet Problem image</AppText>
                       )}
                       <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
                       >
-                        {pb?.images?.length > 0 &&
-                          pb?.images.map((img, i) => (
+                        {currentProblem?.images?.length > 0 &&
+                          currentProblem?.images.map((img, i) => (
                             <>
                               <Image
                                 key={i + img}
@@ -618,25 +545,111 @@ const CallPendingScreen = ({ navigation }) => {
                           ))}
                       </ScrollView>
                     </View>
-                  ))}
-              </View>
-            </>
-          )}
-          <AppButton title='Close' onPress={() => refRBSheet.current.close()} />
-        </ScrollView>
-      </RBSheet>
+                  )}
+                  {previousProblem?.length > 0 && (
+                    <AppText>Previous Pet Problems:</AppText>
+                  )}
+                  {previousProblem?.length > 0 &&
+                    previousProblem.map((pb, index) => (
+                      <View key={pb._id} style={styles.cardBordered}>
+                        <AppText>Problem: {pb.problem}</AppText>
+                        <AppText>Doctor name: {pb.docname}</AppText>
+                        <AppText>Time Period: {pb.time}</AppText>
+                        <AppText>Appetite: {pb.Appetite}</AppText>
+                        <AppText>Behaviour: {pb.Behaviour}</AppText>
+                        <AppText>Eyes: {pb.Eyes}</AppText>
+                        <AppText>Gait: {pb.Gait}</AppText>
+                        <AppText>Mucous: {pb.Mucous}</AppText>
+                        <AppText>Comment: {pb.comment}</AppText>
+                        {pb.Ears?.length > 0 && (
+                          <AppText style={{ fontSize: 22 }}>Ears: </AppText>
+                        )}
+
+                        {pb.Ears?.length > 0 &&
+                          pb.Ears.map((er, i) => (
+                            <AppText key={`${i}-Ears`}> {er}</AppText>
+                          ))}
+
+                        {pb.Feces?.length > 0 && (
+                          <AppText style={{ fontSize: 22 }}>Faces: </AppText>
+                        )}
+
+                        {pb.Feces?.length > 0 &&
+                          pb.Feces.map((fc, i) => (
+                            <AppText key={`Feces ${i}`}> {fc}</AppText>
+                          ))}
+                        {pb.Urine?.length > 0 && (
+                          <AppText style={{ fontSize: 22 }}>Urines: </AppText>
+                        )}
+
+                        {pb.Urine?.length > 0 &&
+                          pb.Urine.map((ur, i) => (
+                            <AppText key={`Urines ${i}`}> {ur}</AppText>
+                          ))}
+                        {pb.Skin?.length > 0 && (
+                          <AppText style={{ fontSize: 22 }}>Skins: </AppText>
+                        )}
+
+                        {pb.Skin?.length > 0 &&
+                          pb.Skin.map((sk, i) => (
+                            <AppText key={`Skins ${i}`}> {sk}</AppText>
+                          ))}
+
+                        {pb?.images?.length > 0 && (
+                          <AppText>Pet Problem image</AppText>
+                        )}
+                        <ScrollView
+                          horizontal
+                          showsHorizontalScrollIndicator={false}
+                        >
+                          {pb?.images?.length > 0 &&
+                            pb?.images.map((img, i) => (
+                              <>
+                                <Image
+                                  key={i + img}
+                                  // source={{
+                                  //   uri: `http://192.168.43.242:8000/img/${img}`,
+                                  // }}
+                                  source={{
+                                    uri: `${img}`,
+                                  }}
+                                  style={{
+                                    width: 150,
+                                    height: 150,
+                                    borderRadius: 75,
+                                    marginHorizontal: 5,
+                                  }}
+                                />
+                              </>
+                            ))}
+                        </ScrollView>
+                      </View>
+                    ))}
+                </View>
+              </>
+            )}
+            <AppButton
+              title="Close"
+              onPress={() => refRBSheet.current.close()}
+            />
+          </ScrollView>
+        </RBSheet>
+      </View>
     </SafeAreaView>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+  container1: {
     marginVertical: 20,
     marginHorizontal: 10,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: "#FFFFFF",
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginVertical: 10,
@@ -644,17 +657,17 @@ const styles = StyleSheet.create({
   },
   card2: {
     padding: 15,
-    backgroundColor: '#fff',
+    backgroundColor: "#FFFFFF",
     borderRadius: 10,
   },
   cardBordered: {
-    borderColor: '#dfd9d9',
+    borderColor: "#dfd9d9",
     borderWidth: 1,
     paddingVertical: 10,
     paddingHorizontal: 8,
     marginVertical: 5,
     borderRadius: 5,
   },
-})
+});
 
-export default CallPendingScreen
+export default CallPendingScreen;

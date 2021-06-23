@@ -1,24 +1,28 @@
 import React, { useState, useContext } from "react";
-import { StyleSheet, View, TouchableOpacity, Text, Image } from "react-native";
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Text,
+  Image,
+  ScrollView,
+} from "react-native";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import {
   GoogleSignin,
   statusCodes,
 } from "@react-native-community/google-signin";
-
 import AppText from "../components/AppText";
 import AppFormField from "../components/AppFormField";
 import SubmitButton from "../components/SubmitButton";
 import ErrorMessage from "../components/ErrorMessage";
-
 import authApi from "../api/auth";
 import usersApi from "../api/users";
 import AuthContext from "../context/authContext";
 import authStorage from "../components/utils/authStorage";
 import LoadingIndicator from "../components/LoadingIndicator";
 import socket from "../components/utils/socket";
-
 import LinearGradient from "react-native-linear-gradient";
 
 const validationSchema = Yup.object().shape({
@@ -109,8 +113,8 @@ const LoginScreen = ({ navigation, route }) => {
   return (
     <>
       <LoadingIndicator visible={loading} />
-      <View style={styles.container}>
-        <View style={{ marginTop: 60, marginHorizontal: 30 }}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <View style={{ marginVertical: 30, marginHorizontal: 30 }}>
           <TouchableOpacity onPress={signIn}>
             <LinearGradient
               start={{ x: 0, y: 0 }}
@@ -210,14 +214,14 @@ const LoginScreen = ({ navigation, route }) => {
                     <Text style={{ color: "#3FBDE3" }}>Sign Up</Text>
                   </Text>
                 </TouchableOpacity>
-                <View style={{ top: 150 }}>
+                <View style={{ top: 0 }}>
                   <SubmitButton title="Login" />
                 </View>
               </>
             )}
           </Formik>
         </View>
-      </View>
+      </ScrollView>
     </>
   );
 };

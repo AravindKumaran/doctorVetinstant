@@ -105,7 +105,7 @@ const VideoCallScreen = ({ navigation, route }) => {
         onPress: async () => {
           // handleDeleteCall()
           twilioVideo.current.disconnect()
-          navigation.navigate('Prescription')
+          navigation.navigate('PrescriptionScreen')
         },
       },
     ])
@@ -124,7 +124,7 @@ const VideoCallScreen = ({ navigation, route }) => {
           onPress: () => {
             // handleDeleteCall()
             twilioVideo.current.disconnect()
-            navigation.navigate('Prescription')
+            navigation.navigate('PrescriptionScreen')
           },
         },
       ])
