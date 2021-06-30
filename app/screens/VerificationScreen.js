@@ -8,7 +8,7 @@ import {
   ScrollView,
   Dimensions,
 } from "react-native";
-import { Formik } from "formik";
+import { Formik, useFormikContext } from "formik";
 import * as Yup from "yup";
 import {
   GoogleSignin,
@@ -20,6 +20,8 @@ import SubmitButton from "../components/SubmitButton";
 import ErrorMessage from "../components/ErrorMessage";
 
 import authApi from "../api/auth";
+import hospitalsApi from "../api/hospitals";
+import doctorsApi from "../api/doctors";
 import AuthContext from "../context/authContext";
 import authStorage from "../components/utils/authStorage";
 import LoadingIndicator from "../components/LoadingIndicator";
@@ -32,7 +34,7 @@ import ImagePicker from "../components/forms/ImagePicker";
 import RBSheet from "react-native-raw-bottom-sheet";
 
 const validationSchema = Yup.object().shape({
-  image: Yup.string().required().label("Image"),
+  image: Yup.string().label("Image"),
   name: Yup.string().required().label("Name"),
   hospital: Yup.string().required().label("Hospital"),
   address: Yup.string().required().label("Address"),
@@ -43,6 +45,71 @@ const VerificationScreen = ({ navigation }) => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const refRBSheet = useRef();
+  const [profile, setImage] = useState();
+
+  const handleSubmit = async ({ image, name, hospital, address, file }) => {
+    if(!profile) {
+      setError('Image is required!')
+      return;
+    }
+
+    setLoading(true);
+    //save hospital name
+    const hospitalRes = await hospitalsApi.saveHospitalName(hospital, address);
+
+    if (!hospitalRes.ok) {
+      setLoading(false);
+      console.log("Ress Regs", hospitalRes);
+      setError(hospitalRes.data?.msg ? hospitalRes.data.msg : "Something Went Wrong");
+      return;
+    }
+
+    const hospitalId = hospitalRes.data.newHospital._id;
+
+    //save user name, profile image and attach hospital id
+    const userform = new FormData();
+    userform.append("hospitalId", hospitalId);
+    userform.append("name", name);
+    userform.append("image", {
+      name: "image",
+      type: "image/" + profile.split('.').reverse()[0],
+      uri: profile,
+    });
+    console.log('image uri', profile)
+    const userRes = await usersApi.updateDoctorHosp(userform);
+
+    if (!userRes.ok) {
+      setLoading(false);
+      console.log("Ress Regs in updateDoctorHosp", userRes);
+      setError(userRes.data?.msg ? userRes.data.msg : "Something Went Wrong");
+      return;
+    }
+
+    //upload pdf
+    const pdfform = new FormData();
+    pdfform.append("hospital", hospitalId);
+    pdfform.append('file', {
+      name: file.split('.').reverse()[0],
+      type: 'application/pdf',
+      uri: file
+    });
+
+    const pdfRes = await doctorsApi.saveDoctor(pdfform);
+
+    if (!pdfRes.ok) {
+      setLoading(false);
+      console.log("Ress Regs in saveDoctor", pdfRes);
+      setError(pdfRes.data?.msg ? pdfRes.data.msg : "Something Went Wrong");
+      return;
+    }
+    setLoading(false);
+    refRBSheet.current.open();
+    // setTimeout(() => refRBSheet.current.close(), 5000)
+    // navigation.navigate("Login", {
+    //   msg: "Registration  Successfull. Please wait for admin approval",
+    // });
+    setError(null);
+  };
 
   return (
     <>
@@ -59,12 +126,15 @@ const VerificationScreen = ({ navigation }) => {
               address: "",
               file: "",
             }}
+            onSubmit={handleSubmit}
             validationSchema={validationSchema}
           >
             {() => (
               <>
                 <Image
-                  source={require("../components/assets/images/user.png")}
+                  source={{
+                    uri: profile ? profile : Image.resolveAssetSource(require("../components/assets/images/user.png")).uri
+                  }}
                   style={{
                     height: 150,
                     width: 200,
@@ -73,7 +143,11 @@ const VerificationScreen = ({ navigation }) => {
                     marginBottom: 10,
                   }}
                 />
-                <ImagePicker name="image" />
+                <ImagePicker
+                  name="image"
+                  onChangeImage={(uri) => setImage(uri)}
+                />
+                
                 <AppFormField
                   icon="account"
                   autoCapitalize="none"
@@ -116,6 +190,9 @@ const VerificationScreen = ({ navigation }) => {
                 </TouchableOpacity> */}
                 <RBSheet
                   ref={refRBSheet}
+                  closeOnDragDown={true}
+                  closeOnPressMask={true}
+                  onClose={() => navigation.navigate("Login")}
                   height={200}
                   animationType="fade"
                   customStyles={{

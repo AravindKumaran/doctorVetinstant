@@ -23,6 +23,7 @@ import LoadingIndicator from "../components/LoadingIndicator";
 import socket from "../components/utils/socket";
 import usersApi from "../api/users";
 import LinearGradient from "react-native-linear-gradient";
+import { Alert, Modal, Pressable } from "react-native";
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required().label("Name"),
@@ -40,6 +41,8 @@ const RegisterScreen = ({ navigation }) => {
 
   const { setUser } = useContext(AuthContext);
 
+  const [modalVisible, setModalVisible] = useState(false);
+
   const handleSubmit = async ({ email, password, name }) => {
     setLoading(true);
     const res = await authApi.register(name, email, password);
@@ -51,14 +54,21 @@ const RegisterScreen = ({ navigation }) => {
     }
     setError(null);
     authStorage.storeToken(res.data.token);
-    const userRes = await usersApi.getLoggedInUser();
-    if (!userRes.ok) {
-      setLoading(false);
-      console.log(userRes);
-      return;
-    }
-    socket.emit("online", userRes.data.user._id);
-    setUser(userRes.data.user);
+
+    navigation.navigate("Verification", {
+      msg: "Registration  Successfull. Please wait for admin approval",
+    });
+
+    // setModalVisible(true)
+
+    // const userRes = await usersApi.getLoggedInUser();
+    // if (!userRes.ok) {
+    //   setLoading(false);
+    //   console.log(userRes);
+    //   return;
+    // }
+    // socket.emit("online", userRes.data.user._id);
+    // setUser(userRes.data.user);
     setLoading(false);
   };
 
@@ -78,17 +88,37 @@ const RegisterScreen = ({ navigation }) => {
         userInfo.user.email,
         password
       );
-      if (!res.ok) {
+      if (!res.ok && res.status !== 403 && res.data?.msg !== "You're blocked! Please contact admin") {
+        console.log('response status',  res.status)
         setLoading(false);
         // setError(res.data.msg);
-        console.log(res);
+        alert(res.data?.msg);
+        console.log('response not ok', res);
         return;
       }
       authStorage.storeToken(res.data.token);
-      const userRes = await usersApi.getLoggedInUser();
-      setUser(userRes.data.user);
 
       setLoading(false);
+      navigation.navigate("Verification", {
+        msg: "Registration  Successfull. Please wait for admin approval",
+      });
+      
+      // const userRes = await usersApi.getLoggedInUser();
+      // if(userRes.ok) {
+      //   console.log('User response', userRes.data)
+      //   setUser(userRes.data.user);
+      //   setLoading(false);
+      //   //alert("Please add doctor Details! Don't Press back button");
+
+      //   navigation.navigate("Verification", {
+      //     msg: "Registration  Successfull. Please wait for admin approval",
+      //   });
+      // } else {
+      //   setLoading(false);
+      //   navigation.navigate("Verification", {
+      //     msg: "Registration  Successfull. Please wait for admin approval",
+      //   });
+      // }
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         console.log("e 1");
@@ -236,6 +266,34 @@ const RegisterScreen = ({ navigation }) => {
               </>
             )}
           </Formik>
+          {/* <Popup visible={modal} /> */}
+        </View>
+         
+        <View style={styles.centeredView}>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+              Alert.alert("Modal has been closed.");
+              setModalVisible(!modalVisible);
+            }}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text style={styles.modalText}>Kindly wait for admin approval</Text>
+                <Pressable
+                  style={[styles.button, styles.buttonClose]}
+                  onPress={() => {
+                    setModalVisible(!modalVisible);
+                    navigation.navigate("Login");
+                  }}
+                >
+                  <Text style={styles.textStyle}>OK</Text>
+                </Pressable>
+              </View>
+            </View>
+          </Modal>
         </View>
       </ScrollView>
     </>
@@ -256,6 +314,54 @@ const styles = StyleSheet.create({
     paddingRight: "5%",
     paddingLeft: "5%",
   },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 150
+  },
+  modalView: {
+    width: 340,
+    height: 170,
+    margin: 20,
+    // backgroundColor: "#3FBDE3",
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#3FBDE3",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 10
+  },
+  button: {
+    borderRadius: 15,
+    padding: 15,
+    paddingHorizontal: 20,
+    elevation: 2,
+    marginTop: 20
+  },
+  buttonOpen: {
+    backgroundColor: "#3FBDE3",
+  },
+  buttonClose: {
+    backgroundColor: "#3FBDE3",
+  },
+  textStyle: {
+    color: "#fff",
+    fontWeight: "bold",
+    textAlign: "center"
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+    color: "#000",
+    fontSize: 20
+  }
 });
 
 export default RegisterScreen;

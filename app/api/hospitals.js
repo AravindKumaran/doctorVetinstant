@@ -4,7 +4,7 @@ const endPoint = "/hospitals";
 
 const getHospitals = () => client.get(endPoint);
 
-const saveHospitalName = (name) => client.post(endPoint, { name });
+const saveHospitalName = (name, address) => client.post(endPoint, { name, address });
 export default {
   getHospitals,
   saveHospitalName,

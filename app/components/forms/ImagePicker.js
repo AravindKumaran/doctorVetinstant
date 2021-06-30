@@ -44,7 +44,7 @@ const ImagePicker = ({ imageUri, onChangeImage, imageList }) => {
         }
 
         if (res.fileSize <= 1000000) {
-          //  console.log(res.uri)
+          console.log(res.uri)
           onChangeImage(res.uri);
         } else {
           alert("Please select image of size less than 1mb");
@@ -60,6 +60,7 @@ const ImagePicker = ({ imageUri, onChangeImage, imageList }) => {
   const openImageLibrary = () => {
     const options = {};
     launchImageLibrary(options, (res) => {
+      console.log('launchImageLibrary', res)
       if (res.didCancel) return;
 
       if (res.errorMessage) {

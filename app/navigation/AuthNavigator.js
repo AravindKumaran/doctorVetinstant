@@ -89,7 +89,7 @@ const AuthNavigator = () => (
     />
     <Stack.Screen
       options={{
-        title: "Verification",
+        title: "Register",
         headerTitleStyle: {
           color: "#476880",
         },

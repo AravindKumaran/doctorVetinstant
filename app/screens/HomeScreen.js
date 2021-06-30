@@ -15,6 +15,7 @@ import AuthContext from "../context/authContext";
 import authStorage from "../components/utils/authStorage";
 import LoadingIndicator from "../components/LoadingIndicator";
 import usersApi from "../api/users";
+import doctorsApi from "../api/doctors";
 import * as Notifications from "expo-notifications";
 import * as Permissions from "expo-permissions";
 import { Header } from "react-native-elements";
@@ -49,7 +50,7 @@ const doctors = [
   },
 ];
 
-const HomeScrren = () => {
+const HomeScreen = () => {
   const { user, setUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
 
@@ -59,6 +60,8 @@ const HomeScrren = () => {
   };
 
   const navigation = useNavigation();
+
+  console.log('user', user)
 
   const MyCustomLeftComponent = () => {
     return (
@@ -92,6 +95,7 @@ const HomeScrren = () => {
   };
 
   useEffect(() => {
+
     const saveNotificationToken = async () => {
       const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
       if (status !== "granted") {
@@ -121,7 +125,6 @@ const HomeScrren = () => {
       }
     };
     saveNotificationToken();
-
     if (Platform.OS === "android") {
       Notifications.setNotificationChannelAsync("default", {
         name: "default",
@@ -276,7 +279,7 @@ const HomeScrren = () => {
         <View style={{ margin: 20, marginBottom: 20 }}>
           {doctors.map((c, i) => (
             <>
-              <View key={`${c.name}-${i}`} style={styles.catItem}>
+              <View key={`${c.name}-${Date.now()}`} style={styles.catItem}>
                 <Image
                   source={c.src}
                   size={15}
@@ -409,7 +412,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScrren;
+export default HomeScreen;
 
 {
   /* <LoadingIndicator visible={loading} />

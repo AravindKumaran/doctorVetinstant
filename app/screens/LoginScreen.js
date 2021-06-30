@@ -36,6 +36,8 @@ const LoginScreen = ({ navigation, route }) => {
 
   const { setUser } = useContext(AuthContext);
 
+  const title = route.name;
+
   const handleSubmit = async ({ email, password }) => {
     setLoading(true);
     const res = await authApi.login(email, password);
@@ -69,24 +71,37 @@ const LoginScreen = ({ navigation, route }) => {
       setLoading(true);
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      // console.log('User', userInfo.user)
+      console.log('User', userInfo.user)
       const password = userInfo.user.id + Date.now();
       const res = await authApi.saveGoogleUser(
         userInfo.user.name,
         userInfo.user.email,
         password
       );
-      if (!res.ok) {
-        setLoading(false);
-        alert(res.data?.msg);
-        console.log(res);
-        return;
-      }
+      authStorage.storeToken(res.data.token);
+      // if (!res.ok) {
+      //   setLoading(false);
+      //   alert(res.data?.msg);
+      //   console.log('response not ok', res);
+      //   return;
+      // }
       if (title === "Login") {
-        authStorage.storeToken(res.data.token);
         const userRes = await usersApi.getLoggedInUser();
-        setUser(userRes.data.user);
-        setLoading(false);
+        console.log('User response msg', userRes.data.msg)
+        
+        if(userRes.ok) {
+          console.log('User response', userRes.data)
+          setUser(userRes.data.user);
+          setLoading(false);
+          alert("Please add doctor Details! Don't Press back button");
+
+          navigation.navigate("AddDoctor", {
+            msg: "Registration  Successfull. Please wait for admin approval",
+          });
+        } else {
+          alert(userRes.data.msg);
+          setLoading(false);
+        }
       } else {
         authStorage.storeToken(res.data.token);
         setLoading(false);

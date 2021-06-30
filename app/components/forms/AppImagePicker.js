@@ -8,10 +8,11 @@ import ImagePickerBottomSheet from './ImagePickerBottomSheet'
 
 const AppImagePicker = ({ name }) => {
   const { errors, setFieldValue, touched, values } = useFormikContext()
+
   return (
     <View>
       <ImagePickerBottomSheet
-        imageUri={values[name]}
+        // imageUri={values[name]}
         onChangeImage={(uri) => setFieldValue(name, uri)}
       />
       <ErrorMessage error={errors[name]} visible={touched[name]} />
