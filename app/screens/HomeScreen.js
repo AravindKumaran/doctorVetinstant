@@ -31,6 +31,20 @@ Notifications.setNotificationHandler({
   }),
 });
 
+const capitalize = (str) => {
+  const words = str.trim().split(' ');
+  const cap_arr = []
+  for(const word of words) {
+  	let w = word.split('')
+    let firstL = w[0].toUpperCase();
+    let restL = w.slice(1, w.length)
+    restL.unshift(firstL)
+    let capitalized = restL.join('');
+    cap_arr.push(capitalized);
+  }
+  return cap_arr.join(" ")
+}
+
 const doctors = [
   {
     src: require("../components/assets/images/pet.png"),
@@ -50,9 +64,30 @@ const doctors = [
   },
 ];
 
+
 const HomeScreen = () => {
   const { user, setUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
+  const [doctor, setDoctor] = useState(user.name);
+  const [qlf, setQual] = useState();
+  const [profile, setProfile] = useState(user.profile_image);
+  const [contact, setContact] = useState();
+  const [teleConsultationFee, setTeleConsultationFee] = useState();
+  const [hospital, setHosp] = useState();
+  const [todaysAppointments, setTodaysAppointments] = useState(0);
+  const [pendingAppointments, setPendingAppointments] = useState(0);
+  const [completedAppointments, setCompletedAppointments] = useState(0);
+  const [nextAppointment, setNextAppointment] = useState(false);
+  const [notifications, setNotifications] = useState(false);
+  const params = {
+    doctor,
+    qlf,
+    profile,
+    hospital,
+    contact,
+    teleConsultationFee
+  } 
+  console.log('qlf', qlf)
 
   const handleLogout = () => {
     setUser();
@@ -60,8 +95,6 @@ const HomeScreen = () => {
   };
 
   const navigation = useNavigation();
-
-  console.log('user', user)
 
   const MyCustomLeftComponent = () => {
     return (
@@ -95,7 +128,21 @@ const HomeScreen = () => {
   };
 
   useEffect(() => {
+    const getDoctor = async() => {
+      setDoctor(`Dr.${user.name}`);
+      
+      const doctorRes = await doctorsApi.getLoggedInDoctor(user._id);
+      setQual(doctorRes.data.doctor.qlf);
+      setContact(doctorRes.data.doctor.phone);
+      setTeleConsultationFee(doctorRes.data.doctor.fee);
 
+      let hospname = capitalize(doctorRes.data.doctor.hospital.name)
+      setHosp(hospname);
+    }
+    getDoctor();
+  },[])
+
+  useEffect(() => {
     const saveNotificationToken = async () => {
       const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
       if (status !== "granted") {
@@ -169,7 +216,9 @@ const HomeScreen = () => {
             }}
           >
             <Image
-              source={require("../components/assets/images/doctor1.png")}
+              source={{
+                uri: profile ? profile : Image.resolveAssetSource(require("../components/assets/images/doctor1.png")).uri
+              }}
               style={{
                 height: 100,
                 width: 100,
@@ -179,9 +228,15 @@ const HomeScreen = () => {
               }}
             />
           </View>
-          <Text style={styles.text1}>Dr. Raj Kumar</Text>
-          <Text style={styles.text2}>PetCare Veteneriary Hospital</Text>
-          <LinearGradient
+            <Text style={styles.text1} onPress={() => {
+                navigation.navigate("VetProfile", {
+                  ...params
+                });
+              }}>{doctor}</Text>
+            <Text style={styles.text2}>{hospital}</Text>
+          
+            {nextAppointment ? 
+            <LinearGradient
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             colors={["#59E3FC", "#2090C7"]}
@@ -224,6 +279,8 @@ const HomeScreen = () => {
               />
             </View>
           </LinearGradient>
+          : null}
+
           <View
             style={{
               borderWidth: 1,
@@ -244,7 +301,7 @@ const HomeScreen = () => {
                   <Text
                     style={[styles.text5, { fontSize: 30, color: "#47687F" }]}
                   >
-                    5
+                    {todaysAppointments}
                   </Text>
                 </View>
               </View>
@@ -254,7 +311,7 @@ const HomeScreen = () => {
                   <Text
                     style={[styles.text5, { fontSize: 30, color: "#FF8C8C" }]}
                   >
-                    4
+                    {pendingAppointments}
                   </Text>
                 </View>
               </View>
@@ -264,60 +321,61 @@ const HomeScreen = () => {
                   <Text
                     style={[styles.text5, { fontSize: 30, color: "#88DC8B" }]}
                   >
-                    1
+                    {completedAppointments}
                   </Text>
                 </View>
               </View>
             </View>
           </View>
-          <View style={{ marginVertical: 20 }}>
-            <Text style={[styles.text1, { textAlign: "center" }]}>
-              Notifications
-            </Text>
-          </View>
         </View>
+        <View style={{ marginVertical: 20 }}>
+          <Text style={[styles.text1, { textAlign: "center" }]}>
+              Notifications
+          </Text>
+        </View>
+        {notifications ? 
         <View style={{ margin: 20, marginBottom: 20 }}>
-          {doctors.map((c, i) => (
-            <>
-              <View key={`${c.name}-${Date.now()}`} style={styles.catItem}>
-                <Image
-                  source={c.src}
-                  size={15}
-                  style={{
-                    height: 100,
-                    width: 100,
-                    borderRadius: 50,
-                    borderWidth: 10,
-                    borderColor: "#FFFFFF",
-                  }}
-                />
-                <Text style={[styles.catItemText, { marginTop: -10 }]}>
-                  {c.name}
-                </Text>
-                <View style={styles.Rectangle}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      navigation.navigate("VetProfile");
-                    }}
-                  >
-                    <Text style={styles.text6}>View</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-              <View
+        {doctors.map((c, i) => (
+          <>
+            <View key={`${c.name}-${Date.now()}`} style={styles.catItem}>
+              <Image
+                source={c.src}
+                size={15}
                 style={{
-                  height: 1,
-                  width: "95%",
-                  borderWidth: 1,
-                  borderColor: "#DCE1E7",
-                  alignSelf: "center",
-                  marginVertical: 15,
-                  bottom: 20,
+                  height: 100,
+                  width: 100,
+                  borderRadius: 50,
+                  borderWidth: 10,
+                  borderColor: "#FFFFFF",
                 }}
               />
-            </>
-          ))}
-        </View>
+              <Text style={[styles.catItemText, { marginTop: -10 }]}>
+                {c.name}
+              </Text>
+              <View style={styles.Rectangle}>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate("VetProfile");
+                  }}
+                >
+                  <Text style={styles.text6}>View</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View
+              style={{
+                height: 1,
+                width: "95%",
+                borderWidth: 1,
+                borderColor: "#DCE1E7",
+                alignSelf: "center",
+                marginVertical: 15,
+                bottom: 20,
+              }}
+            />
+          </>
+        ))}
+      </View>: null}
       </ScrollView>
     </>
   );

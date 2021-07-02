@@ -75,7 +75,6 @@ const VerificationScreen = ({ navigation }) => {
       type: "image/" + profile.split('.').reverse()[0],
       uri: profile,
     });
-    console.log('image uri', profile)
     const userRes = await usersApi.updateDoctorHosp(userform);
 
     if (!userRes.ok) {

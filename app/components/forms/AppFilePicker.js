@@ -6,8 +6,8 @@ import { StyleSheet, View, TouchableOpacity } from "react-native";
 
 import AppText from "../AppText";
 
-const AppFilePicker = ({ onChangeUri, size }) => {
-  const [fileName, setFileName] = useState(null);
+const AppFilePicker = ({ onChangeUri, size, initialUrl }) => {
+  const [fileName, setFileName] = useState(initialUrl);
 
   const selectFile = async () => {
     try {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -10,21 +10,99 @@ import {
 } from "react-native";
 import { Formik } from "formik";
 import AppButton from "../components/AppButton";
+import SubmitButton from "../components/SubmitButton";
 import AppFormField from "../components/AppFormField";
 import AppImagePicker from "../components/forms/AppImagePicker";
 import FormFilePicker from "../components/forms/FormFilePicker";
 import ToggleSwitch from "toggle-switch-react-native";
 import Feather from "react-native-vector-icons/Feather";
+import usersApi from "../api/users";
+import doctorsApi from "../api/doctors"
+import hospitalsApi from "../api/hospitals"
+import LoadingIndicator from "../components/LoadingIndicator";
 
-const EditVetProfile = () => {
+const EditVetProfile = ({navigation, route}) => {
+  const [pdf, setPdf] = useState();
+  const [loading, setLoading] = useState(false);
+  let initialPdf, isFileUploadedInitially=false;
+  const { 
+    vetName,
+    qualification,
+    hospital,
+    profile,
+    contact,
+    hospitalContact,
+    teleConsultationFee  
+  } = route.params;
+
+  useEffect(() => {
+    const getPdf = async() => {
+      const doctorsRes = await doctorsApi.getLoggedInDoctor();
+
+      const file = doctorsRes.data.doctor.file;
+      if(file) {
+        initialPdf = file;
+        isFileUploadedInitially = true;
+        setPdf(file)
+      };
+    }
+    getPdf();
+  },[])
+
+  const handleSubmit = async({ name, qual, Hospital, Contact, HospitalContact, fee, discountAmount, file }) => {
+    console.log("submit", { name, qual, Hospital, Contact, HospitalContact, fee });
+    setLoading(true);
+    //1.update doctor phone, qlf, fee, pdf
+    const loggedInDoctor = await doctorsApi.getLoggedInDoctor();
+
+    if (!loggedInDoctor.ok) {
+      setLoading(false);
+      console.log("loggedInDoctor", loggedInDoctor);
+      setError(loggedInDoctor.data?.msg ? loggedInDoctor.data.msg : "Something Went Wrong");
+      return;
+    }
+    const doctorId = loggedInDoctor.data.doctor._id;
+    console.log('doctorId', doctorId)
+
+    const doctorsForm = new FormData();
+    if(qual) doctorsForm.append('qlf', qual);
+    if(Contact) doctorsForm.append('phone', Contact);
+    if(fee) doctorsForm.append('fee', fee);
+    // pdfform.append('file', {
+    //   name: file.split('.').reverse()[0],
+    //   type: 'application/pdf',
+    //   uri: file
+    // });
+    //console.log('doctorsForm', doctorsForm)
+    const doctorsRes = await doctorsApi.updateDoctor(doctorId, doctorsForm)
+
+    if (!doctorsRes.ok) {
+      setLoading(false);
+      console.log("doctorsRes", doctorsRes);
+      setError(doctorsRes.data?.msg ? doctorsRes.data.msg : "Something Went Wrong");
+      return;
+    }
+    setLoading(false);
+    alert('Updated Successfully!')
+  }
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <Formik
         initialValues={{
-          reminder: "",
+          name: vetName,
+          qual: qualification,
+          Hospital: hospital,
+          Contact: contact,
+          HospitalContact: hospitalContact,
+          fee: teleConsultationFee,
+          discountAmount: ""
         }}
-      >
-        <>
+        onSubmit={handleSubmit}
+      > 
+        {({ handleChange, handleBlur, handleSubmit, values }) => (
+          <>
+          <LoadingIndicator visible={loading} />
           <View
             style={{
               marginVertical: 20,
@@ -39,14 +117,14 @@ const EditVetProfile = () => {
               label="Vet Name"
               autoCapitalize="none"
               autoCorrect={false}
-              name="Name"
-              //   placeholder="Vet Name"
+              name="name"
+              //placeholder="Vet Name"
             />
             <AppFormField
               label="Qualification"
               autoCapitalize="none"
               autoCorrect={false}
-              name="Qualification"
+              name="qual"
               //   placeholder="Qualification"
             />
             <AppFormField
@@ -93,7 +171,7 @@ const EditVetProfile = () => {
                 labelStyle={styles.text5}
                 onToggle={(isOn) => console.log("changed to : ", isOn)}
               />
-              <FormFilePicker name="file" size={1} />
+              <FormFilePicker initialUrl={pdf} name="file" size={1} />
               <Text style={styles.text5}>Tele-Consultation fee:</Text>
               <View
                 style={{
@@ -102,11 +180,14 @@ const EditVetProfile = () => {
                 }}
               >
                 <Text
+
                   style={[styles.text5, { fontSize: 12, fontWeight: "400" }]}
                 >
                   Enter the consultation amount :
                 </Text>
                 <TextInput
+                  name="fee"
+                  onChangeText={handleChange('fee')}
                   style={{
                     height: 50,
                     width: 150,
@@ -146,6 +227,7 @@ const EditVetProfile = () => {
                   Enter the discount amount :
                 </Text>
                 <TextInput
+                  name="discountAmount" 
                   style={{
                     height: 50,
                     width: 100,
@@ -175,10 +257,14 @@ const EditVetProfile = () => {
                   />
                 </TouchableOpacity>
               </View>
-              <AppButton title="Update Vet" />
+              {/* <AppButton title="Update Vet" /> */}
+              <View style={{ top: 0 }}>
+                <SubmitButton title="Update Vet" />
+              </View>
             </View>
           </View>
         </>
+        )}
       </Formik>
     </ScrollView>
   );

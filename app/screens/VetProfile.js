@@ -13,6 +13,18 @@ import AppButton from "../components/AppButton";
 
 const VetProfile = ({ navigation, route }) => {
   const [active, setActive] = useState("Profile");
+  const { doctor, qlf, hospital, profile, contact, hospitalContact, teleConsultationFee, physicalVisitFee } = route.params;
+  console.log('qlf', qlf)
+
+  const params = {
+    vetName: doctor,
+    qualification: qlf,
+    hospital,
+    profile,
+    contact,
+    hospitalContact,
+    teleConsultationFee
+  }
 
   const handleActive = (value) => {
     setActive(value);
@@ -35,19 +47,20 @@ const VetProfile = ({ navigation, route }) => {
                 borderRadius: 100,
                 borderWidth: 10,
                 borderColor: "#FFFFFF",
-                elevation: 10,
+                //elevation: 10,
               }}
               source={require("../components/assets/images/doctor1.png")}
             />
             <Text style={{ textAlign: "center" }}>
-              <Text style={styles.text2}>Dr. Raj Kumar </Text>{" "}
+              <Text style={styles.text2}>{doctor} </Text>{" "}
               <Text
                 style={[
                   styles.text2,
                   { color: "#47687F", fontSize: 18, fontWeight: "400" },
                 ]}
               >
-                M.B.B.S., M.D.
+                {/* M.B.B.S., M.D. */}
+                {qlf}
               </Text>
             </Text>
             <TouchableOpacity
@@ -62,7 +75,9 @@ const VetProfile = ({ navigation, route }) => {
                 marginVertical: 20,
               }}
               onPress={() => {
-                navigation.navigate("EditVetProfile");
+                navigation.navigate("EditVetProfile", {
+                  ...params
+                });
               }}
             >
               <Text
@@ -79,23 +94,23 @@ const VetProfile = ({ navigation, route }) => {
             <View>
               <View style={styles.box}>
                 <Text style={styles.text3}>Hospital</Text>
-                <Text style={styles.text4}>PetCare Chennai Clinic</Text>
+                <Text style={styles.text4}>{hospital}</Text>
               </View>
               <View style={styles.box}>
                 <Text style={styles.text3}>Vet Contact</Text>
-                <Text style={styles.text4}>+91 1234567890</Text>
+                <Text style={styles.text4}>{contact}</Text>
               </View>
               <View style={styles.box}>
                 <Text style={styles.text3}>Hospital Contact</Text>
-                <Text style={styles.text4}>+91 1234567890</Text>
+                <Text style={styles.text4}>{hospitalContact}</Text>
               </View>
               <View style={styles.box}>
                 <Text style={styles.text3}>Tele-Consultation fee</Text>
-                <Text style={styles.text4}>₹ 450/-</Text>
+                <Text style={styles.text4}>{teleConsultationFee}</Text>
               </View>
               <View style={styles.box}>
                 <Text style={styles.text3}>Physical visit fee</Text>
-                <Text style={styles.text4}>₹ 150/-</Text>
+                <Text style={styles.text4}>{physicalVisitFee}</Text>
               </View>
             </View>
             <View>
