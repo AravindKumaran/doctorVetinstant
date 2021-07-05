@@ -6,7 +6,7 @@ import AppTextInput from "./AppTextInput";
 import ErrorMessage from "./ErrorMessage";
 import AppText from "./AppText";
 
-const AppFormField = ({ name, label, numberOfLines, contStyle, ...rest }) => {
+const AppFormField = ({ name, label, numberOfLines, contStyle, defaultValue, ...rest }) => {
   const { setFieldTouched, handleChange, errors, touched, values } =
     useFormikContext();
   return (
@@ -16,6 +16,7 @@ const AppFormField = ({ name, label, numberOfLines, contStyle, ...rest }) => {
         onChangeText={handleChange(name)}
         numberOfLines={numberOfLines}
         value={values[name]}
+        defaultValue={defaultValue}
         {...rest}
       />
       {label && (

@@ -19,7 +19,6 @@ const createPushToken = (token) => {
 }
 
 const updateDoctorHosp = (form) => {
-  console.log('form', form)
   return client.patch(`${endPoint}/updateDoctorHosp`, form)
 }
 

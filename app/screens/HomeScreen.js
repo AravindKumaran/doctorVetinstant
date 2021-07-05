@@ -16,12 +16,14 @@ import authStorage from "../components/utils/authStorage";
 import LoadingIndicator from "../components/LoadingIndicator";
 import usersApi from "../api/users";
 import doctorsApi from "../api/doctors";
+import hospitalsApi from "../api/hospitals";
 import * as Notifications from "expo-notifications";
 import * as Permissions from "expo-permissions";
 import { Header } from "react-native-elements";
 import { useNavigation } from "@react-navigation/native";
 import Feather from "react-native-vector-icons/Feather";
 import LinearGradient from "react-native-linear-gradient";
+import { useIsFocused } from '@react-navigation/native';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -66,6 +68,7 @@ const doctors = [
 
 
 const HomeScreen = () => {
+  const isFocused = useIsFocused();
   const { user, setUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [doctor, setDoctor] = useState(user.name);
@@ -74,20 +77,13 @@ const HomeScreen = () => {
   const [contact, setContact] = useState();
   const [teleConsultationFee, setTeleConsultationFee] = useState();
   const [hospital, setHosp] = useState();
+  const [hospitalContact, setHospContact] = useState();
+  const [discountAmount, setDiscountAmount] = useState();
   const [todaysAppointments, setTodaysAppointments] = useState(0);
   const [pendingAppointments, setPendingAppointments] = useState(0);
   const [completedAppointments, setCompletedAppointments] = useState(0);
   const [nextAppointment, setNextAppointment] = useState(false);
   const [notifications, setNotifications] = useState(false);
-  const params = {
-    doctor,
-    qlf,
-    profile,
-    hospital,
-    contact,
-    teleConsultationFee
-  } 
-  console.log('qlf', qlf)
 
   const handleLogout = () => {
     setUser();
@@ -130,17 +126,30 @@ const HomeScreen = () => {
   useEffect(() => {
     const getDoctor = async() => {
       setDoctor(`Dr.${user.name}`);
-      
       const doctorRes = await doctorsApi.getLoggedInDoctor(user._id);
-      setQual(doctorRes.data.doctor.qlf);
-      setContact(doctorRes.data.doctor.phone);
-      setTeleConsultationFee(doctorRes.data.doctor.fee);
-
-      let hospname = capitalize(doctorRes.data.doctor.hospital.name)
-      setHosp(hospname);
+      if(doctorRes.ok) {
+        setQual(doctorRes.data.doctor.qlf);
+        setContact(doctorRes.data.doctor.phone);
+        setTeleConsultationFee(doctorRes.data.doctor.fee);
+        setDiscountAmount(doctorRes.data.doctor.visitfee);
+        setHospContact(doctorRes.data.doctor?.hospital?.contact);
+        let hospname = capitalize(doctorRes.data.doctor.hospital.name)
+        setHosp(hospname);
+      }
     }
+    const getUser = async() => {
+      const userRes = await usersApi.getLoggedInUser();
+      if(userRes.ok) {
+        const user = userRes.data.user;
+        setDoctor(`Dr.${user.name}`);
+        if(user.profile_image) {
+          setProfile(user.profile_image)
+        };
+      }
+    }
+    getUser();
     getDoctor();
-  },[])
+  },[isFocused])
 
   useEffect(() => {
     const saveNotificationToken = async () => {
@@ -179,7 +188,7 @@ const HomeScreen = () => {
         vibrationPattern: [0, 250, 250, 250],
       });
     }
-  }, []);
+  }, [isFocused]);
 
   useEffect(() => {
     const subscription = Notifications.addNotificationResponseReceivedListener(
@@ -188,7 +197,7 @@ const HomeScreen = () => {
       }
     );
     return () => subscription.remove();
-  }, []);
+  }, [isFocused]);
 
   return (
     <>
@@ -229,9 +238,7 @@ const HomeScreen = () => {
             />
           </View>
             <Text style={styles.text1} onPress={() => {
-                navigation.navigate("VetProfile", {
-                  ...params
-                });
+                navigation.navigate("VetProfile");
               }}>{doctor}</Text>
             <Text style={styles.text2}>{hospital}</Text>
           

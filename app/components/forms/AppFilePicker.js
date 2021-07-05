@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as DocumentPicker from "expo-document-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -43,7 +43,7 @@ const AppFilePicker = ({ onChangeUri, size, initialUrl }) => {
           </AppText>
         </View>
       </TouchableOpacity>
-      {fileName && <AppText>{fileName}</AppText>}
+      {fileName ? <AppText>{fileName}</AppText> : <AppText>{initialUrl}</AppText>}
     </View>
   );
 };

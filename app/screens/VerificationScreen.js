@@ -88,7 +88,7 @@ const VerificationScreen = ({ navigation }) => {
     const pdfform = new FormData();
     pdfform.append("hospital", hospitalId);
     pdfform.append('file', {
-      name: file.split('.').reverse()[0],
+      name: file.split('.').reverse()[1],
       type: 'application/pdf',
       uri: file
     });

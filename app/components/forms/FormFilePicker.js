@@ -7,7 +7,7 @@ import AppFilePicker from "./AppFilePicker";
 
 const FormFilePicker = ({ name, size, initialUrl }) => {
   const { errors, setFieldValue, touched, values } = useFormikContext();
-
+  
   return (
     <>
       <AppFilePicker

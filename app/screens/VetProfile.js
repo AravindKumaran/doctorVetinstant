@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { useIsFocused } from '@react-navigation/native';
 import {
   StyleSheet,
   View,
@@ -10,25 +11,72 @@ import {
 } from "react-native";
 import { Formik } from "formik";
 import AppButton from "../components/AppButton";
+import AuthContext from "../context/authContext";
+import usersApi from "../api/users";
+import doctorsApi from "../api/doctors"
+import hospitalsApi from "../api/hospitals"
+
+const capitalize = (str) => {
+  const words = str.trim().split(' ');
+  const cap_arr = []
+  for(const word of words) {
+  	let w = word.split('')
+    let firstL = w[0].toUpperCase();
+    let restL = w.slice(1, w.length)
+    restL.unshift(firstL)
+    let capitalized = restL.join('');
+    cap_arr.push(capitalized);
+  }
+  return cap_arr.join(" ")
+}
 
 const VetProfile = ({ navigation, route }) => {
+  const isFocused = useIsFocused();
+  const { user, setUser } = useContext(AuthContext);
   const [active, setActive] = useState("Profile");
-  const { doctor, qlf, hospital, profile, contact, hospitalContact, teleConsultationFee, physicalVisitFee } = route.params;
-  console.log('qlf', qlf)
-
-  const params = {
-    vetName: doctor,
-    qualification: qlf,
-    hospital,
-    profile,
-    contact,
-    hospitalContact,
-    teleConsultationFee
-  }
+  //const { doctor, qlf, hospital, profile, contact, hospitalContact, teleConsultationFee, physicalVisitFee, discountAmount } = route.params;
+  const [profile, setImage] = useState(null);
+  const [vetName, setDoctor] = useState();
+  const [qualification, setQual] = useState();
+  const [hospital, setHosp] = useState();
+  const [contact, setContact] = useState();
+  const [hospitalContact, setHospitalContact] = useState();
+  const [teleConsultationfee, setTeleConsultationFee] = useState();
+  const [visitFee, setVisitFee] = useState();
 
   const handleActive = (value) => {
     setActive(value);
   };
+
+  const getUser = async() => {
+    const userRes = await usersApi.getLoggedInUser();
+    if(userRes.ok) {
+      const user = userRes.data.user;
+      setDoctor(`Dr.${user.name}`);
+      if(user.profile_image) {
+        setImage(user.profile_image)
+      };
+    }
+  }
+
+  const getDoctor = async() => {
+    const doctorRes = await doctorsApi.getLoggedInDoctor(user._id);
+    console.log(doctorRes.data);
+    if(doctorRes.ok) {
+      setQual(doctorRes.data.doctor.qlf);
+      setContact(doctorRes.data.doctor.phone);
+      setTeleConsultationFee(doctorRes.data.doctor.fee);
+      setVisitFee(doctorRes.data.doctor.visitFee);
+      setHospitalContact(doctorRes.data.doctor?.hospital?.contact);
+      let hospname = capitalize(doctorRes.data.doctor.hospital.name)
+      setHosp(hospname);
+    }  
+  }
+  
+  useEffect(() => {
+    getDoctor();
+    getUser();
+  },[isFocused])
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -49,10 +97,13 @@ const VetProfile = ({ navigation, route }) => {
                 borderColor: "#FFFFFF",
                 //elevation: 10,
               }}
-              source={require("../components/assets/images/doctor1.png")}
+              //source={require("../components/assets/images/doctor1.png")}
+              source={{
+                uri: profile ? profile : Image.resolveAssetSource(require("../components/assets/images/doctor1.png")).uri
+              }}
             />
             <Text style={{ textAlign: "center" }}>
-              <Text style={styles.text2}>{doctor} </Text>{" "}
+              <Text style={styles.text2}>{vetName} </Text>{" "}
               <Text
                 style={[
                   styles.text2,
@@ -60,7 +111,7 @@ const VetProfile = ({ navigation, route }) => {
                 ]}
               >
                 {/* M.B.B.S., M.D. */}
-                {qlf}
+                {qualification}
               </Text>
             </Text>
             <TouchableOpacity
@@ -75,9 +126,7 @@ const VetProfile = ({ navigation, route }) => {
                 marginVertical: 20,
               }}
               onPress={() => {
-                navigation.navigate("EditVetProfile", {
-                  ...params
-                });
+                navigation.navigate("EditVetProfile");
               }}
             >
               <Text
@@ -106,11 +155,11 @@ const VetProfile = ({ navigation, route }) => {
               </View>
               <View style={styles.box}>
                 <Text style={styles.text3}>Tele-Consultation fee</Text>
-                <Text style={styles.text4}>{teleConsultationFee}</Text>
+                <Text style={styles.text4}>{teleConsultationfee}</Text>
               </View>
               <View style={styles.box}>
                 <Text style={styles.text3}>Physical visit fee</Text>
-                <Text style={styles.text4}>{physicalVisitFee}</Text>
+                <Text style={styles.text4}>{visitFee}</Text>
               </View>
             </View>
             <View>
