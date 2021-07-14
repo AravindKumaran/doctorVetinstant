@@ -17,6 +17,7 @@ import ScheduleCallScreen from "./ScheduleCallScreen";
 import AuthContext from "../context/authContext";
 import reminderStorage from "../components/utils/reminderStorage";
 import callPendingApi from "../api/callPending";
+import roomApi from "../api/room";
 import BackgroundTimer from 'react-native-background-timer';
 
 const PetLobby = () => {
@@ -164,7 +165,16 @@ const PetLobby = () => {
     setFetchCalls(true);
   }
 
-  const renderElement = ({status, id, paymentDone, petId, docName, userName}) => {
+  const createRoom = async(userId, docId, petId, userName) => {
+    await roomApi.createRoom({
+      name: `${userId}-${docId}`, 
+      senderName: userName, 
+      receiverId: docId, 
+      petId
+    });
+  }
+
+  const renderElement = ({status, id, paymentDone, petId, docName, userName, docId, userId}) => {
     if(status === "requested") {
       return  <View style={{ flexDirection: "row", width: "50%" }}>
                 <AppButton title="Accept" onPress={() => handleAccept(id)} />
@@ -186,13 +196,15 @@ const PetLobby = () => {
               </Text>
             </View>
     } else if(status === "paymentDone" && paymentDone) {
+      createRoom(userId._id, docId._id, petId, userName);
       return <AppButton
                 title="Enter Room"
                 // onPress={() => refRBSheet.current.open()}
                 onPress={() => navigation.navigate("Room", {
                   petId,
                   docName,
-                  userName
+                  userName,
+                  docId: docId._id
                 })}
               />
     }

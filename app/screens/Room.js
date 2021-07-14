@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,  } from "react";
 import {
   Image,
   Text,
@@ -11,11 +11,12 @@ import {
 import Feather from "react-native-vector-icons/Feather";
 import { Header } from "react-native-elements";
 import AppButton from "../components/AppButton";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 import ChatScreen from "./ChatScreen";
 import MedicalHistory from "./MedicalHistory";
 import PatientScreen from "./PatientScreen";
 import petsApi from "../api/pets";
+import roomApi from "../api/room";
 import { clockRunning, cos } from "react-native-reanimated";
 import AppText from '../components/AppText'
 import { removePushTokenSubscription } from "expo-notifications";
@@ -41,8 +42,10 @@ const Room = ({ navigation, route }) => {
   const [isvideo, setVideo] = useState(true);
   const [petProblems, setPetProblems] = useState();
   const [petName, setPetName] = useState();
-  const { petId, docName, userName } = route?.params?.petId ? route.params : { petId: null, docName: null, userName: null };
-  console.log('Room Component Route Params', route.params)
+  const { petId, docName, userName, docId } = route?.params?.petId ? route.params : { petId: null, docName: null, userName: null };
+  const [room, setRoom] = useState();
+  const isFocused = useIsFocused();
+  console.log('route params', route.params)
 
   useEffect(() => {
     const getPetProblems = async() => {
@@ -51,12 +54,25 @@ const Room = ({ navigation, route }) => {
         const petProbs = petsRes.data?.exPet.problems;
         setPetProblems(petProbs.find(item => item.docname === docName))
         setPetName(petsRes.data?.exPet.name);
-        console.log('pet Name', petName);
-        console.log('pet problems', petProblems);
       }
     }
     if(petId) getPetProblems();
-  }, [navigation]);
+  }, [isFocused]);
+
+  useEffect(() => {
+    const getReceiverRoom = async() => {
+      const roomApiRes = await roomApi.getReceiverRoom(docId);
+      if(roomApiRes.ok) {
+        setRoom(roomApiRes.data.room[0]);
+      }
+    }
+    if(docId) getReceiverRoom();
+  }, [isFocused]);
+
+  useEffect(() => {
+    console.log('petname', petName)
+    console.log('room', room)
+  }, [petName, room]);
 
   const handleActive = (value) => {
     setActive(value);

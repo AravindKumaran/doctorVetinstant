@@ -109,6 +109,11 @@ const ChatScreen = ({ navigation, route }) => {
   };
 
   const onSend = useCallback((messages = [], image) => {
+    console.log("on send")
+    socket.emit("chat", {
+      room: 'test',
+      msg: 'test'
+    });
     setMessages((previousMessages) =>
       GiftedChat.append(previousMessages, messages, image)
     );
