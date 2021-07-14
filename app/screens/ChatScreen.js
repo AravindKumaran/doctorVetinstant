@@ -1,5 +1,12 @@
 import React, { useEffect, useState, useContext, useCallback } from "react";
-import { StyleSheet, View, Image } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  Keyboard,
+} from "react-native";
 import {
   GiftedChat,
   Bubble,
@@ -22,6 +29,37 @@ const ChatScreen = ({ navigation, route }) => {
   const { user } = useContext(AuthContext);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const [touched, setTouched] = useState(false);
+
+  const { keyboardHidesTabBars } = useState(true);
+  const [didKeyboardShow, setKeyboardShow] = useState(false);
+
+  const toggleTouched = () => {
+    setTouched(!touched);
+  };
+
+  const seeProfile = () => {
+    navigation.navigate("PetLobby");
+  };
+
+  useEffect(() => {
+    Keyboard.addListener("keyboardDidShow", _keyboardDidShow);
+    Keyboard.addListener("keyboardDidHide", _keyboardDidHide);
+
+    return () => {
+      Keyboard.removeListener("keyboardDidShow", _keyboardDidShow);
+      Keyboard.removeListener("keyboardDidHide", _keyboardDidHide);
+    };
+  }, []);
+
+  const _keyboardDidShow = () => {
+    setKeyboardShow(true);
+  };
+
+  const _keyboardDidHide = () => {
+    setKeyboardShow(false);
+  };
 
   // console.log("Route", route.params);
 
@@ -119,23 +157,23 @@ const ChatScreen = ({ navigation, route }) => {
     );
   }, []);
 
-  useEffect(() => {
-    setMessages([
-      {
-        _id: 1,
-        text: "Type your message here...",
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: "React Native",
-          avatar: "https://placeimg.com/140/140/any",
-        },
-        // image: "https://placeimg.com/140/140/any",
-        // video:
-        //   "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-      },
-    ]);
-  }, []);
+  // useEffect(() => {
+  //   setMessages([
+  //     {
+  //       _id: 1,
+  //       text: "Type your message here...",
+  //       createdAt: new Date(),
+  //       user: {
+  //         _id: 2,
+  //         name: "React Native",
+  //         avatar: "https://placeimg.com/140/140/any",
+  //       },
+  //       // image: "https://placeimg.com/140/140/any",
+  //       // video:
+  //       //   "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+  //     },
+  //   ]);
+  // }, []);
 
   const selectFile = async () => {
     try {
@@ -227,6 +265,51 @@ const ChatScreen = ({ navigation, route }) => {
   //   setLoading(false);
   // };
 
+  const renderInputToolbar = (props) => {
+    return (
+      <View
+        style={{
+          flexDirection: "column",
+          bottom: didKeyboardShow ? -10 : 70,
+          alignItems: "center",
+          alignContent: "center",
+          alignSelf: "center",
+          justifyContent: "center",
+        }}
+      >
+        <TouchableOpacity
+          style={{
+            position: "absolute",
+            right: 110,
+            zIndex: 1,
+          }}
+          onPress={selectFile}
+        >
+          <IconButton icon="plus" size={45} color="#4AC4F1" />
+        </TouchableOpacity>
+        <TextInput
+          style={{
+            width: "90%",
+            borderColor: "#B9C4CF",
+            borderWidth: 1.5,
+            borderRadius: 30,
+            alignSelf: "center",
+            position: "absolute",
+            paddingLeft: 50,
+            paddingRight: 50,
+          }}
+          multiline={true}
+        />
+        <TouchableOpacity
+          style={{ position: "absolute", left: 110 }}
+          onPress={onSend}
+        >
+          <IconButton icon="send-circle" size={45} color="#4AC4F1" />
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <LoadingIndicator visible={loading} />
@@ -256,59 +339,59 @@ const ChatScreen = ({ navigation, route }) => {
         minInputToolbarHeight={40}
         // renderSend={renderSend}
         // renderActions={renderActions}
-        // renderInputToolbar={renderInputToolbar}
+        renderInputToolbar={renderInputToolbar}
         // renderMessageVideo={renderMessageVideo}
         renderMessageImage={renderMessageImage}
-        renderInputToolbar={(props) => (
-          <InputToolbar {...props} containerStyle={{ borderTopWidth: 0 }} />
-        )}
-        renderSend={(props) => (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              height: 40,
-            }}
-          >
-            <Actions
-              {...props}
-              options={{
-                ["Send Files"]: selectFile,
-              }}
-              icon={() => (
-                <Feather
-                  name={"plus"}
-                  size={35}
-                  color={"#4AC4F1"}
-                  style={{
-                    left: 0,
-                    width: 35,
-                    bottom: 10,
-                    borderRadius: 30,
-                    backgroundColor: "#FFFFFF",
-                    elevation: 10,
-                  }}
-                />
-              )}
-              onSend={(messages) => {
-                GiftedChat.append(messages);
-              }}
-            />
-            <Send {...props}>
-              <IconButton
-                icon="send-circle"
-                size={41}
-                color="#4AC4F1"
-                style={{
-                  top: 5,
-                  right: 0,
-                  elevation: 50,
-                  backgroundColor: "transparent",
-                }}
-              />
-            </Send>
-          </View>
-        )}
+        // renderInputToolbar={(props) => (
+        //   <InputToolbar {...props} containerStyle={{ borderTopWidth: 0 }} />
+        // )}
+        // renderSend={(props) => (
+        //   <View
+        //     style={{
+        //       flexDirection: "row",
+        //       alignItems: "center",
+        //       height: 40,
+        //     }}
+        //   >
+        //     <Actions
+        //       {...props}
+        //       options={{
+        //         ["Send Files"]: selectFile,
+        //       }}
+        //       icon={() => (
+        //         <Feather
+        //           name={"plus"}
+        //           size={35}
+        //           color={"#4AC4F1"}
+        //           style={{
+        //             left: 0,
+        //             width: 35,
+        //             bottom: 10,
+        //             borderRadius: 30,
+        //             backgroundColor: "#FFFFFF",
+        //             elevation: 10,
+        //           }}
+        //         />
+        //       )}
+        //       onSend={(messages) => {
+        //         GiftedChat.append(messages);
+        //       }}
+        //     />
+        //     <Send {...props}>
+        //       <IconButton
+        //         icon="send-circle"
+        //         size={41}
+        //         color="#4AC4F1"
+        //         style={{
+        //           top: 5,
+        //           right: 0,
+        //           elevation: 50,
+        //           backgroundColor: "transparent",
+        //         }}
+        //       />
+        //     </Send>
+        //   </View>
+        // )}
       />
     </View>
   );

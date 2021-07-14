@@ -79,15 +79,29 @@ const BottomTab = ({ navigation }) => {
         name={"PetLobby"}
         component={PetLobby}
         options={{
+          // tabBarIcon: ({ focused, color }) => (
+          //   <>
+          //     {!didKeyboardShow && (
+          //       <Feather
+          //         style={{
+          //           color: focused ? "#4AC4F1" : "#47687F",
+          //         }}
+          //         name={"phone-call"}
+          //         size={25}
+          //       />
+          //     )}
+          //   </>
+          // ),
           tabBarIcon: ({ focused, color }) => (
             <>
               {!didKeyboardShow && (
-                <Feather
+                <Image
+                  source={require("../components/assets/images/middleicon.png")}
                   style={{
-                    color: focused ? "#4AC4F1" : "#47687F",
+                    width: 100,
+                    height: 100,
+                    bottom: didKeyboardShow ? -20 : 20,
                   }}
-                  name={"phone-call"}
-                  size={25}
                 />
               )}
             </>
@@ -109,7 +123,7 @@ const BottomTab = ({ navigation }) => {
               />
             </>
           ),
-          tabBarVisible: false,
+          // tabBarVisible: false,
         }}
       />
     </Tab.Navigator>
