@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   TouchableWithoutFeedback,
+  ScrollView
 } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
 import { Header } from "react-native-elements";
@@ -13,6 +14,11 @@ import AppButton from "../components/AppButton";
 import { useNavigation } from "@react-navigation/native";
 import ChatScreen from "./ChatScreen";
 import MedicalHistory from "./MedicalHistory";
+import PatientScreen from "./PatientScreen";
+import petsApi from "../api/pets";
+import { clockRunning, cos } from "react-native-reanimated";
+import AppText from '../components/AppText'
+import { removePushTokenSubscription } from "expo-notifications";
 
 const ActiveStyle = () => (
   <View
@@ -26,18 +32,35 @@ const ActiveStyle = () => (
       borderBottomWidth: 2,
       alignSelf: "center",
     }}
-  ></View>
+  >
+  </View>
 );
 
-const Room = () => {
+const Room = ({ navigation, route }) => {
   const [active, setActive] = useState("problem");
   const [isvideo, setVideo] = useState(true);
+  const [petProblems, setPetProblems] = useState();
+  const [petName, setPetName] = useState();
+  const { petId, docName, userName } = route?.params?.petId ? route.params : { petId: null, docName: null, userName: null };
+  console.log('Room Component Route Params', route.params)
+
+  useEffect(() => {
+    const getPetProblems = async() => {
+      const petsRes = await petsApi.getPetDetails(petId);
+      if(petsRes.ok) {
+        const petProbs = petsRes.data?.exPet.problems;
+        setPetProblems(petProbs.find(item => item.docname === docName))
+        setPetName(petsRes.data?.exPet.name);
+        console.log('pet Name', petName);
+        console.log('pet problems', petProblems);
+      }
+    }
+    if(petId) getPetProblems();
+  }, [navigation]);
 
   const handleActive = (value) => {
     setActive(value);
   };
-
-  const navigation = useNavigation();
 
   const MyCustomLeftComponent = () => {
     return (
@@ -71,6 +94,54 @@ const Room = () => {
       </TouchableOpacity>
     );
   };
+
+  const renderText = (data) => {
+    const constructedPetProbs = {
+      "Pet Name": petName,
+      "Problem": data.problem,
+      "Day": data.day,
+      "Month": data.month,
+      "Appetite": data.Appetite,
+      "Behaviour": data.Behaviour,
+      "Activity": data.Activity,
+      "Faeces": data?.Feces.length > 0 ? data.Feces : "-",
+      "Urine": data?.Feces.length > 0 ? data.Urine : "-",
+      "Ears": data?.Feces.length > 0 ? data.Ears : "-",
+      "Skin": data?.Feces.length > 0 ? data.Skin : "-",
+      "Faeces Comment": data.feces_comment,
+      "Urine Comment": data.urine_comment,
+      "Eyes": data.Eyes,
+      "Mucous": data.Mucous,
+      "Nose": data.Nose,
+      "Skin Comment": data.skin_comment,
+      "Gait": data.Gait,
+      "General Comment": data.general_comment
+    }
+    const arr = [];
+    for( const [key, value] of Object.entries(constructedPetProbs)) {
+      let val = value;
+      if(!val) {
+        val = "-"
+      }
+      if(val instanceof Array) {
+        val = val.join();
+        val = val.replace(/\[|\]|"/g, "");
+      }
+      arr.push({ key, val })
+    }
+    return arr.map((c, i) => (
+      <>
+        <AppText key={`${c.key}-${i}`}>
+          <Text style={{fontWeight: "bold"}}>
+            {c.key}:
+          </Text>
+          <Text>
+            &nbsp;{c.val}
+          </Text>
+        </AppText>
+      </>
+    ))
+  }
 
   return (
     <>
@@ -108,7 +179,10 @@ const Room = () => {
               <Text
                 style={{ fontSize: 14, color: "#47687F", fontWeight: "700" }}
               >
-                Dr. Kumar & Bruno ‘s room
+                Dr. {docName} & 
+              </Text>
+              <Text style={{ fontSize: 14, color: "#47687F", fontWeight: "700" }}>
+                {userName} ‘s room
               </Text>
               <Text
                 style={{ fontSize: 12, color: "#A3B1BF", fontWeight: "400" }}
@@ -184,6 +258,13 @@ const Room = () => {
             elevation: 5,
           }}
         />
+        {active === "problem" && petProblems ? 
+          <ScrollView>
+            <View style={{padding: 10}}>
+              {renderText(petProblems)}
+            </View>
+          </ScrollView>
+        : null}
         {active === "videocall" && (
           <View>
             {!isvideo ? (

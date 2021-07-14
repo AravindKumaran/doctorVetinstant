@@ -6,6 +6,8 @@ const login = (emailID, password) =>
 const register = (name, emailID, password, role = 'doctor') =>
   client.post('/auth/signup', { name, emailID, password, role })
 
+const verifyOtp = (data) => client.post(`/auth/verify`, data)
+
 const saveGoogleUser = (name, emailID, password, role = 'doctor') =>
   client.post('/auth/saveGoogle', { name, emailID, password, role })
 
@@ -21,4 +23,5 @@ export default {
   saveGoogleUser,
   sendForgotPasswordMail,
   resetPassword,
+  verifyOtp
 }

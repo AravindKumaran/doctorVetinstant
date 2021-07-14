@@ -76,7 +76,7 @@ const VerificationScreen = ({ navigation }) => {
       uri: profile,
     });
     const userRes = await usersApi.updateDoctorHosp(userform);
-
+    
     if (!userRes.ok) {
       setLoading(false);
       console.log("Ress Regs in updateDoctorHosp", userRes);
@@ -102,6 +102,10 @@ const VerificationScreen = ({ navigation }) => {
       return;
     }
     setLoading(false);
+    
+    //update isRegistered field in backend
+    await usersApi.updateMe({ isRegistered: true });
+
     refRBSheet.current.open();
     // setTimeout(() => refRBSheet.current.close(), 5000)
     // navigation.navigate("Login", {
@@ -191,7 +195,7 @@ const VerificationScreen = ({ navigation }) => {
                   ref={refRBSheet}
                   closeOnDragDown={true}
                   closeOnPressMask={true}
-                  onClose={() => navigation.navigate("Login")}
+                  onClose={() => navigation.navigate("VerificationCode")}
                   height={200}
                   animationType="fade"
                   customStyles={{

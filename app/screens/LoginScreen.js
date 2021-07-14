@@ -93,7 +93,6 @@ const LoginScreen = ({ navigation, route }) => {
           console.log('User response', userRes.data)
           setUser(userRes.data.user);
           setLoading(false);
-          alert("Please add doctor Details! Don't Press back button");
 
           navigation.navigate("AddDoctor", {
             msg: "Registration  Successfull. Please wait for admin approval",

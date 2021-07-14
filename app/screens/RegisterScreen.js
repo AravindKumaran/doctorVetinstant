@@ -48,13 +48,12 @@ const RegisterScreen = ({ navigation }) => {
     const res = await authApi.register(name, email, password);
     if (!res.ok) {
       setLoading(false);
-      console.log("Ress Regs", res);
+      console.log("Ress Regs Not Ok", res);
       setError(res.data?.msg ? res.data.msg : "Something Went Wrong");
       return;
     }
     setError(null);
     authStorage.storeToken(res.data.token);
-
     navigation.navigate("Verification", {
       msg: "Registration  Successfull. Please wait for admin approval",
     });

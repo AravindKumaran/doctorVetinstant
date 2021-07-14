@@ -172,7 +172,9 @@ const EditVetProfile = ({navigation, route}) => {
   }
     setLoading(false);
     alert('Updated Successfully!');
-    navigation.navigate("Home");
+    navigation.navigate("Home", {
+      fromScreen: 'EditProfile'
+    });
   }
 
   return (

@@ -17,7 +17,7 @@ const storeObjectData = async (key, value) => {
   }
 }
 
-const getStringData = async () => {
+const getStringData = async (key) => {
   try {
     const value = await AsyncStorage.getItem(key)
     if (value !== null) {
@@ -64,7 +64,7 @@ const clearAll = async () => {
   }
 }
 
-export {
+export default {
   storeStringData,
   storeObjectData,
   getObjectData,

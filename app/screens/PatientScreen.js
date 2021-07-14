@@ -22,6 +22,7 @@ const PatientScreen = () => {
         // console.log(res);
         return
       }
+      console.log('res.data.doctor.patientDetails', res.data.doctor.patientDetails)
       setPatients(res.data.doctor.patientDetails)
       setLoading(false)
     }
