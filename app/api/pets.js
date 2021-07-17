@@ -1,16 +1,18 @@
-import client from './client'
+import client from "./client";
 
-const endPoint = '/pets'
+const endPoint = "/pets";
 
 const sendPetPrescription = (data, id) => {
-  return client.patch(`${endPoint}/prescription/${id}`, data)
-}
+  return client.patch(`${endPoint}/prescription/${id}`, data);
+};
 
 const getPetDetails = (petId) => {
-  return client.get(`${endPoint}/${petId}`)
-}
+  return client.get(`${endPoint}/${petId}`);
+};
+const getSinglePet = (id) => client.get(`${endPoint}/${id}`);
 
 export default {
   sendPetPrescription,
   getPetDetails,
-}
+  getSinglePet,
+};
