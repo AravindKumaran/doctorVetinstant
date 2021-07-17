@@ -92,9 +92,9 @@ const HomeScreen = ({ navigation, route }) => {
   let [userId, setUserID] = useState();
   let [refresh, setReload] = useState();
 
-  if(route?.params?.fromScreen) {
-    setReload(true)
-  }
+  // if(route?.params?.fromScreen) {
+  //   setReload(true)
+  // }
 
   const handleLogout = () => {
     setUser();
@@ -135,19 +135,30 @@ const HomeScreen = ({ navigation, route }) => {
   };
 
   const formatTime = (hour, min) => {
+    let minutes = min;
+    if(min < 10) {
+      minutes = '0' + min;
+    }
     if(hour > 12) {
       hour = hour % 12;
-      return `${hour}:${min}PM`
+      return `${hour}:${minutes}PM`
     }
-    return `${hour}:${min}AM`
+    return `${hour}:${minutes}AM`
   }
 
-  const formatDate = (date) => {
+  const formatDate = (date, scheduled) => {
     let day, hh, mm;
     const week = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     day = week[date.getDay()];
     hh = date.getHours();
     mm = date.getMinutes();
+    if(scheduled) {
+      const currentDate = new Date();
+      if(currentDate.getDay() == date.getDay()) {
+        day = 'today';
+      }
+      return `${formatTime(hh, mm)} ${day}`
+    }
     return `${day} ${formatTime(hh, mm)}`;
   }
 
@@ -194,6 +205,14 @@ const HomeScreen = ({ navigation, route }) => {
           })
           setCallers(calls);
           setRequestedCalls(requested);
+
+          let scheduled = calls.filter(call => call.status === 'scheduled')
+          scheduled = scheduled.map(call => {
+            const date = new Date(scheduled[0]?.extraInfo); 
+            call.date = formatDate(date, true);
+            return call;
+          })
+          setScheduledCalls(scheduled);
           console.log('callers list', callers);
         }
       }
@@ -201,7 +220,7 @@ const HomeScreen = ({ navigation, route }) => {
     getUser();
     getDoctor();
     getCallNotifications();
-  },[isFocused])
+  },[isFocused]);
 
   useEffect(() => {
     const saveNotificationToken = async () => {
@@ -413,6 +432,55 @@ const HomeScreen = ({ navigation, route }) => {
               />
               <Text key={`${Math.random()}-${i}`} style={[styles.catItemText, { marginTop: -10 }]}>
               Video call request from <Text key={`${Math.random()}-${i}`} style={{fontWeight: "bold"}}>{c.userName}</Text> on <Text key={`${Math.random()}-${i}`} style={{fontWeight: "bold"}}>{c.date}</Text>
+              </Text>
+              <View key={`${Math.random()}-${i}`} style={styles.Rectangle}>
+                <TouchableOpacity
+                  key={`${Math.random()}-${i}`}
+                  onPress={() => {
+                    navigation.navigate("VetProfile");
+                  }}
+                >
+                  <Text key={`${Math.random()}-${i}`} style={styles.text6}>View</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View
+              key={`${Math.random()}-${(new Date())}`}
+              style={{
+                height: 1,
+                width: "95%",
+                borderWidth: 1,
+                borderColor: "#DCE1E7",
+                alignSelf: "center",
+                marginVertical: 15,
+                bottom: 20,
+              }}
+            />
+          </>
+        ))}
+      </View>: null}
+
+      {scheduledCalls.length > 0 ? 
+        <View style={{ margin: 20, marginBottom: 20 }}>
+        {scheduledCalls.map((c, i) => (
+          <>
+            <View key={c._id} style={styles.catItem}>
+              <Image
+                key={`${Math.random()}-${i}`}
+                source={{
+                  uri: c.userId?.profile_image
+                }}
+                size={15}
+                style={{
+                  height: 100,
+                  width: 100,
+                  borderRadius: 50,
+                  borderWidth: 10,
+                  borderColor: "#FFFFFF",
+                }}
+              />
+              <Text key={`${Math.random()}-${i}`} style={[styles.catItemText, { marginTop: -10 }]}>
+                Video call from <Text style={{fontWeight: "bold"}}>{c.userName}</Text> has been scheduled at <Text style={{fontWeight: "bold"}}>{c.date}</Text>
               </Text>
               <View key={`${Math.random()}-${i}`} style={styles.Rectangle}>
                 <TouchableOpacity

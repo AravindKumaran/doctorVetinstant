@@ -24,8 +24,10 @@ import socket from "../components/utils/socket";
 import DocumentPicker from "react-native-document-picker";
 import { IconButton } from "react-native-paper";
 import Feather from "react-native-vector-icons/Feather";
+import { cos } from "react-native-reanimated";
+import pets from "../api/pets";
 
-const ChatScreen = ({ navigation, route }) => {
+const ChatScreen = ({ navigation, route, pat }) => {
   const { user } = useContext(AuthContext);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -34,6 +36,7 @@ const ChatScreen = ({ navigation, route }) => {
 
   const { keyboardHidesTabBars } = useState(true);
   const [didKeyboardShow, setKeyboardShow] = useState(false);
+  const [text, setText] = useState();
 
   const toggleTouched = () => {
     setTouched(!touched);
@@ -61,14 +64,30 @@ const ChatScreen = ({ navigation, route }) => {
     setKeyboardShow(false);
   };
 
-  // console.log("Route", route.params);
+  console.log("Route", pat);
+
+  // useEffect(() => {
+  //   setMessages([
+  //     {
+  //       _id: 10,
+  //       text: 'Hello developer',
+  //       createdAt: new Date(),
+  //       user: {
+  //         _id: 2,
+  //         name: 'React Native',
+  //         avatar: 'https://placeimg.com/140/140/any',
+  //       },
+  //     },
+  //   ])
+  // }, [])
 
   useEffect(() => {
     const getAllChats = async () => {
-      setLoading(false);
+      console.log("room name is", pat.name)
+      setLoading(false); 
       const chatRes = await chatsApi.getRoomAllChat(
-        route.params?.pat.name,
-        route.params?.pat.petId
+        pat.name,
+        pat.petId
       );
       if (!chatRes.ok) {
         console.log(chatRes);
@@ -80,18 +99,24 @@ const ChatScreen = ({ navigation, route }) => {
       );
       // const chatMessages = chatRes.data.chats
       const newMessages = sortedChat.map((msg) => {
+        let userId = 2;
+        if(msg.isDoctorMsg) {
+          userId = 1;
+        }
         return {
           ...msg,
           user: {
-            _id: msg.userId,
+            //_id: msg.userId,
+           _id: userId,
             name: msg.userName,
           },
         };
       });
+      console.log('newMessages', newMessages.find(item => item._id == "60f19cd4537b7f27e0e5b1fa"))
       setMessages(newMessages);
       setLoading(false);
 
-      socket.emit("room", route.params?.pat.name);
+      socket.emit("room", pat.name);
       socket.on("chat", (data) => {
         const sortedData = data.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
@@ -101,8 +126,12 @@ const ChatScreen = ({ navigation, route }) => {
     };
 
     getAllChats();
-    navigation?.setOptions({ title: route.params?.pat.senderName });
+    navigation?.setOptions({ title: pat.senderName });
   }, []);
+
+  useEffect(() => {
+    //console.log('messages', messages[0].text)
+  }, [messages])
 
   const renderBubble = (props) => {
     return (
@@ -146,16 +175,59 @@ const ChatScreen = ({ navigation, route }) => {
     );
   };
 
-  const onSend = useCallback((messages = [], image) => {
-    console.log("on send")
-    socket.emit("chat", {
-      room: 'test',
-      msg: 'test'
-    });
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, messages, image)
-    );
-  }, []);
+  // const onSend = ((messages = [], image) => {
+  //   console.log("on send", messages.text)
+  //   // socket.emit("chat", {
+  //   //   room: 'test',
+  //   //   msg: 'test'
+  //   // });
+  //   // setMessages((previousMessages) =>
+  //   //   GiftedChat.append(previousMessages, messages, image)
+  //   // );
+  // }, []);
+
+  // const onSend = (messages = [], image) => {
+  //   console.log("on send", messages)
+  //   // socket.emit("chat", {
+  //   //   room: 'test',
+  //   //   msg: 'test'
+  //   // });
+  //   // setMessages((previousMessages) =>
+  //   //   GiftedChat.append(previousMessages, messages, image)
+  //   // );
+  // };
+
+  // const onSend = async (newMsg = [], image) => {
+  //   console.log('pat', pat)
+  //   console.log('newMsg', newMsg[0])
+  //   // newMsg.roomName = pat.name
+  //   // newMsg.petId = pat.petId
+  //   // newMsg.userId = pat.userId
+  //   // newMsg.userName = pat.userName
+  //   // setLoading(true)
+  //   // const ress = await chatsApi.createChat({
+  //   //   petId: pat.petId,
+  //   //   roomName: pat.name,
+  //   //   text: newMsg.text,
+  //   //   userId: pat.userId,
+  //   //   userName: pat.userName,
+  //   // })
+  //   // if (!ress.ok) {
+  //   //   console.log('ress', ress)
+  //   //   setLoading(false)
+  //   //   return
+  //   // }
+  //   // // console.log('Ress', ress)
+  //   // setLoading(false)
+  //   // socket.emit('chat', {
+  //   //   room: pat.name,
+  //   //   msg: newMsg,
+  //   // })
+    // setMessages((previousMessages) =>
+    //   GiftedChat.append(previousMessages, messages, image)
+    // );
+  //   // setLoading(false)
+  // }
 
   // useEffect(() => {
   //   setMessages([
@@ -210,6 +282,11 @@ const ChatScreen = ({ navigation, route }) => {
     );
   };
 
+  const handleTextInput = (c) => {
+    console.log('handleTextInput', c)
+    setText(c)
+  }
+
   // const renderMessageVideo = (props) => {
   //   console.log("videoprop:", props.currentMessage.video);
   //   return (
@@ -239,31 +316,43 @@ const ChatScreen = ({ navigation, route }) => {
   //   );
   // };
 
-  // const onSend = async (newMsg) => {
-  //   newMsg[0].roomName = route.params?.pat.name;
-  //   newMsg[0].petId = route.params?.pat.petId;
-  //   newMsg[0].userId = user._id;
-  //   newMsg[0].userName = user.name;
-  //   setLoading(true);
-  //   const ress = await chatsApi.createChat({
-  //     petId: route.params?.pat.petId,
-  //     roomName: route.params?.pat.name,
-  //     text: newMsg[0].text,
-  //     userId: user._id,
-  //     userName: user.name,
-  //   });
-  //   if (!ress.ok) {
-  //     console.log("ress", ress);
-  //     setLoading(false);
-  //     return;
-  //   }
-  //   //  console.log('ress', ress)
-  //   socket.emit("chat", {
-  //     room: route.params?.pat.name,
-  //     msg: GiftedChat.append(messages, newMsg),
-  //   });
-  //   setLoading(false);
-  // };
+  //s onsend
+  const onSend = async (text, image) => {
+    let newMsg = {
+      text
+    }
+    newMsg.roomName = pat.name;
+    newMsg.petId = pat.petId;
+    newMsg.userId = pat.userId;
+    newMsg.userName = pat.userName;
+    newMsg.isDoctorMsg = true;
+    setLoading(true);
+    const ress = await chatsApi.createChat(newMsg);
+    if (!ress.ok) {
+      console.log("ress", ress);
+      setLoading(false);
+      return;
+    }
+    let giftedMsg = {
+      _id: `${(new Date()).getTime()}`,
+      text: text,
+      user: {
+        _id: 1,
+        name: pat.userName
+      },
+    }
+    console.log('giftedMsg', giftedMsg)
+    setMessages(GiftedChat.append(messages, giftedMsg));
+    //  console.log('ress', ress)
+    // setMessages((previousMessages) =>
+    //   GiftedChat.append(previousMessages, giftedMsg, image)
+    // )
+    socket.emit("chat", {
+      room: pat.name,
+      msg: GiftedChat.append(messages, giftedMsg),
+    });
+    setLoading(false);
+  };
 
   const renderInputToolbar = (props) => {
     return (
@@ -299,10 +388,11 @@ const ChatScreen = ({ navigation, route }) => {
             paddingRight: 50,
           }}
           multiline={true}
+          onChangeText={handleTextInput}
         />
         <TouchableOpacity
           style={{ position: "absolute", left: 110 }}
-          onPress={onSend}
+          onPress={() => onSend(text)}
         >
           <IconButton icon="send-circle" size={45} color="#4AC4F1" />
         </TouchableOpacity>
@@ -316,13 +406,13 @@ const ChatScreen = ({ navigation, route }) => {
       <GiftedChat
         messages={messages}
         onSend={(message) => onSend(message)}
-        // user={{
-        //   _id: 1,
-        // }}
+        user={{
+          _id: 1,
+        }}
         renderBubble={renderBubble}
         renderSystemMessage={renderSystemMessage}
         showUserAvatar
-        isTyping
+        //isTyping
         placeholder="Type a message"
         alwaysShowSend
         wrapInSafeArea={true}
@@ -335,6 +425,7 @@ const ChatScreen = ({ navigation, route }) => {
           paddingLeft: 10,
           paddingRight: 50,
         }}
+        //bottomOffset
         minComposerHeight={40}
         minInputToolbarHeight={40}
         // renderSend={renderSend}
@@ -393,6 +484,14 @@ const ChatScreen = ({ navigation, route }) => {
         //   </View>
         // )}
       />
+      {/* <GiftedChat
+        messages={messages}
+        onSend={(messages) => onSend(messages)}
+        renderInputToolbar={renderInputToolbar}
+        user={{
+          _id: 1
+        }}
+      /> */}
     </View>
   );
 };

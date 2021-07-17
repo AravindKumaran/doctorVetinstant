@@ -18,7 +18,7 @@ import AuthContext from "../context/authContext";
 import reminderStorage from "../components/utils/reminderStorage";
 import callPendingApi from "../api/callPending";
 import roomApi from "../api/room";
-import BackgroundTimer from 'react-native-background-timer';
+import scheduledCallsApi from "../api/scheduledCall";
 
 const PetLobby = () => {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
@@ -115,7 +115,6 @@ const PetLobby = () => {
   }
 
   const getExpiryTime = (createdTime) => {
-    createdTime.setDate(12);
     const currentTime = new Date();
     const expiryTime = new Date();
     const expiryTimeInMs = createdTime.getTime() + (72 * 60 * 60 * 1000);
@@ -134,14 +133,23 @@ const PetLobby = () => {
     const getIncomingCallRequest = (calls) => {
       //let requested = calls.filter(call => call.status === 'requested')
       return calls.map(call => {
+        //const scheduledCallRes = await scheduledCallsApi.getScheduledCallsByUserAndDoc(call.userId._id, call.docId._id);
+        //const scheduledDate = scheduledCallRes?.data?.scheduledCalls?.date;
         const date = new Date(call.createdAt);
-        call.date = formatDate(date);
+        //call.date = formatDate(date);
+        if(call.extraInfo) {
+          const scheduledDate = new Date(call?.extraInfo);
+          call.date = formatDate(scheduledDate);
+        } else {
+          call.date = "";
+        }
         if(!call.hasExpired) call.expiresIn = getExpiryTime(date);
         if(call.expiresIn == 'Expired') {
           call.hasExpired = true;
         }
+        console.log('call=====', call)
         return call;
-      })
+      });
     }
     const getCallNotifications = async() => {
       const res = await callPendingApi.getCallPendingByDoctor(user._id);
@@ -162,7 +170,6 @@ const PetLobby = () => {
 
   const handleAccept = async(id) => {
     await callPendingApi.updateCallPending(id, { status: 'accepted' });
-    setFetchCalls(true);
   }
 
   const createRoom = async(userId, docId, petId, userName) => {
@@ -174,13 +181,16 @@ const PetLobby = () => {
     });
   }
 
-  const renderElement = ({status, id, paymentDone, petId, docName, userName, docId, userId}) => {
+  const renderElement = ({status, id, paymentDone, petId, docName, userName, docId, userId, petName}) => {
     if(status === "requested") {
       return  <View style={{ flexDirection: "row", width: "50%" }}>
-                <AppButton title="Accept" onPress={() => handleAccept(id)} />
+                <AppButton title="Accept" onPress={() => {
+                  handleAccept(id)
+                  refRBSheet.current.open()
+                }} />
                 <AppButton title="Decline" />
             </View>
-    } else if(status === "accepted") {
+    } else if((status === "accepted" || status === "scheduled") && !paymentDone) {
       return <View
               style={{
                 flexDirection: "row",
@@ -195,16 +205,17 @@ const PetLobby = () => {
                 Awaiting payment from the pet parent
               </Text>
             </View>
-    } else if(status === "paymentDone" && paymentDone) {
+    } else if(paymentDone) {
       createRoom(userId._id, docId._id, petId, userName);
       return <AppButton
                 title="Enter Room"
-                // onPress={() => refRBSheet.current.open()}
                 onPress={() => navigation.navigate("Room", {
                   petId,
+                  petName,
                   docName,
                   userName,
-                  docId: docId._id
+                  docId: docId._id,
+                  userId: userId._id
                 })}
               />
     }
@@ -301,7 +312,7 @@ const PetLobby = () => {
                 },
               }}
             >
-              <ScheduleCallScreen />
+              <ScheduleCallScreen screen="PetLobby" />
             </RBSheet>
             <View
               style={{
@@ -321,9 +332,9 @@ const PetLobby = () => {
                   <View>
                     <View style={{ flexDirection: "row", margin: 0, padding:0 }}>
                   <View key={c._id}>
-                  <Text style={styles.text1}>Dr. {c.docName} & {c.userName}</Text>
+                  <Text style={styles.text1}>Dr. {c.docName} & {c.petName}</Text>
                   <Text style={styles.text2}>Status: {c.status}</Text>
-                  {c.paymentDone && c.status === "paymentDone" ? 
+                  {c.paymentDone ? 
                     <View style={{ flexDirection: "row", alignItems: "center" }}>
                       <Feather name="check-circle" color="#67F296" size={15} />
                       <Text style={[styles.text3, { paddingLeft: 5 }]}>
@@ -381,6 +392,41 @@ const PetLobby = () => {
                 </View>
                   </View>
                   {renderElement(c)}
+                  <RBSheet
+                    ref={refRBSheet}
+                    height={450}
+                    animationType="fade"
+                    customStyles={{
+                      wrapper: {
+                        backgroundColor: "rgba(255, 255, 255, 0.92)",
+                      },
+                      draggableIcon: {
+                        backgroundColor: "#000",
+                      },
+                      container: {
+                        backgroundColor: "#FFFFFF",
+                        borderRadius: 25,
+                        bottom: 150,
+                        width: "90%",
+                        alignSelf: "center",
+                        elevation: 10,
+                      },
+                    }}
+                  >
+                    <ScheduleCallScreen 
+                      screen="PetLobby" 
+                      rBSheet={refRBSheet} 
+                      setFetchCalls={setFetchCalls} 
+                      callData={{
+                        userName: c.userName,
+                        senderId: c.userId._id,
+                        receiverId: c.docId._id,
+                        doctorName: c.docName,
+                        status: c.status,
+                        _id: c._id,
+                      }} 
+                    />
+                  </RBSheet>
                   {/* {c.status == "requested" ? 
                     <View style={{ flexDirection: "row", width: "50%" }}>
                       <AppButton title="Accept" onPress={() => handleAccept(c._id)} />

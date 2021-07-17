@@ -42,9 +42,10 @@ const Room = ({ navigation, route }) => {
   const [isvideo, setVideo] = useState(true);
   const [petProblems, setPetProblems] = useState();
   const [petName, setPetName] = useState();
-  const { petId, docName, userName, docId } = route?.params?.petId ? route.params : { petId: null, docName: null, userName: null };
+  const { petId, docName, userName, docId, userId, petName } = route?.params?.petId ? route.params : { petId: null, docName: null, userName: null };
   const [room, setRoom] = useState();
   const isFocused = useIsFocused();
+  const [roomDet, setRoomDet] = useState({});
   console.log('route params', route.params)
 
   useEffect(() => {
@@ -61,9 +62,22 @@ const Room = ({ navigation, route }) => {
 
   useEffect(() => {
     const getReceiverRoom = async() => {
-      const roomApiRes = await roomApi.getReceiverRoom(docId);
+      let room_name = `${userId}-${docId}`;
+      const roomApiRes = await roomApi.getReceiverRoom(room_name);
       if(roomApiRes.ok) {
-        setRoom(roomApiRes.data.room[0]);
+        const roomData = roomApiRes.data.room[0];
+        console.log('receiver room', roomApiRes.data.room)
+        const roomDetails = {
+          name: roomData.name,
+          petId: roomData.petId,
+          senderName: roomData.senderName,
+          userId: roomData.name.split("-")[0],
+          docId: roomData.name.split("-")[1],
+          userName: roomData.senderName
+        }
+        // console.log('roomDetails', roomDetails)
+        setRoom(roomData);
+        setRoomDet(roomDetails);
       }
     }
     if(docId) getReceiverRoom();
@@ -198,7 +212,7 @@ const Room = ({ navigation, route }) => {
                 Dr. {docName} & 
               </Text>
               <Text style={{ fontSize: 14, color: "#47687F", fontWeight: "700" }}>
-                {userName} ‘s room
+                {petName} ‘s room
               </Text>
               <Text
                 style={{ fontSize: 12, color: "#A3B1BF", fontWeight: "400" }}
@@ -371,7 +385,7 @@ const Room = ({ navigation, route }) => {
             )}
           </View>
         )}
-        {active === "chat" && <ChatScreen />}
+        {active === "chat" && <ChatScreen pat={roomDet} />}
         {active === "sharableassets" && <MedicalHistory />}
       </View>
     </>

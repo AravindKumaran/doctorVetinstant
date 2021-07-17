@@ -6,8 +6,8 @@ const createRoom = (room) => {
   return client.post(endPoint, room)
 }
 
-const getReceiverRoom = (id) => {
-  return client.get(`${endPoint}/receiver/${id}`)
+const getReceiverRoom = (name) => {
+  return client.get(`${endPoint}/receiver/${name}`)
 }
 
 export default {
