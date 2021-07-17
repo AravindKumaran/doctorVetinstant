@@ -5,10 +5,12 @@ const endPoint = '/users'
 const getUsers = () => client.get(endPoint)
 
 const getLoggedInUser = () => {
-  // console.log(client.getBaseURL());
-
   return client.patch(`${endPoint}/me`)
 }
+
+const checkRegisteredUser = () => client.get(`${endPoint}/register/check`)
+
+const updateMe = (data) => client.patch('/me', data)
 
 const getVideoToken = (data) => {
   return client.post(`${endPoint}/getToken`, data)
@@ -19,7 +21,6 @@ const createPushToken = (token) => {
 }
 
 const updateDoctorHosp = (form) => {
-  console.log('form', form)
   return client.patch(`${endPoint}/updateDoctorHosp`, form)
 }
 
@@ -39,4 +40,6 @@ export default {
   sendPushNotification,
   getPushToken,
   updateDoctorHosp,
+  updateMe,
+  checkRegisteredUser
 }

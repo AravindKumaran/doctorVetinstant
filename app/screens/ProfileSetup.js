@@ -1,4 +1,5 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useState, useContext } from "react";
+import { useScrollToTop } from '@react-navigation/native';
 import {
   StyleSheet,
   View,
@@ -14,17 +15,105 @@ import FormFilePicker from "../components/forms/FormFilePicker";
 import ToggleSwitch from "toggle-switch-react-native";
 import Feather from "react-native-vector-icons/Feather";
 import RBSheet from "react-native-raw-bottom-sheet";
+import usersApi from "../api/users";
+import doctorsApi from "../api/doctors"
+import hospitalsApi from "../api/hospitals"
+import LoadingIndicator from "../components/LoadingIndicator";
+import ErrorMessage from "../components/ErrorMessage";
+import * as Yup from "yup";
+import SubmitButton from "../components/SubmitButton";
 
-const ProfileSetup = () => {
+const goToTop = (scrollRef) => {
+  scrollRef.current.scrollTo({
+      y: 0,
+      animated: true,
+  });
+}
+
+const ProfileSetup = ({ navigation }) => {
+  const scrollRef = useRef();
   const refRBSheet = useRef();
+  const alertSheetRef = useRef();
+  const [error, setError] = useState(null);
+  const [pdf, setPdf] = useState(null);
+  const [loading, setLoading] = useState(false);
+  let [doctorId, setDoctorId] = useState(null);
+  let initialPdf = null
+
+  const getPdf = async() => {
+    const doctorsRes = await doctorsApi.getLoggedInDoctor();
+    const file = doctorsRes.data.doctor.file;
+    doctorId = doctorsRes.data.doctor._id;
+    setDoctorId(doctorId);
+    if(file) {
+      initialPdf = file;
+      setPdf(file)
+    };
+  }
+
+  useEffect(() => {
+    getPdf();
+  },[])
+
+const handleSubmit = async({ file, fee, discount, contact }) => {
+  goToTop(scrollRef);
+
+  if(!fee) {
+    return setError('fee is a required field')
+  }
+
+  if(!discount) {
+    return setError('discount is a required field')
+    
+  }
+
+  if(!contact) {
+    return setError('contact is a required field')
+  }
+  
+  console.log("submit", { file, fee, discount, contact });
+  setLoading(true);
+  //1. Update doctor's contact, fee, discount, pdf
+  if(fee && discount && contact) {
+    setError(null);
+    const doctorsForm = new FormData();
+    doctorsForm.append('phone', contact);
+    doctorsForm.append('fee', fee);
+    doctorsForm.append('discount', discount);
+    if(file && initialPdf !== pdf) {
+      doctorsForm.append('file', {
+        name: file.split('.').reverse()[1],
+        type: 'application/pdf',
+        uri: file
+      });
+    }
+    //console.log('doctorsForm', doctorsForm)
+    const doctorsRes = await doctorsApi.updateDoctor(doctorId, doctorsForm)
+
+    if (!doctorsRes.ok) {
+      setLoading(false);
+      console.log("Error doctorsRes", doctorsRes);
+      setError(doctorsRes.data?.msg ? doctorsRes.data.msg : "Something Went Wrong");
+      return;
+    }
+  }
+
+  setLoading(false);
+  alertSheetRef.current.open();
+  // alert('Updated Successfully!');
+  // navigation.navigate("Home");
+}
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView ref={scrollRef} style={styles.container} showsVerticalScrollIndicator={false}>
+      {error && <ErrorMessage error={error} visible={true} />}
       <Formik
         initialValues={{
           reminder: "",
         }}
+        onSubmit={handleSubmit}
       >
+        {({ handleChange, handleBlur, handleSubmit, values }) => (
         <>
           <View
             style={{
@@ -42,7 +131,7 @@ const ProfileSetup = () => {
                 labelStyle={styles.text5}
                 onToggle={(isOn) => console.log("changed to : ", isOn)}
               />
-              <FormFilePicker name="file" size={1} />
+              <FormFilePicker initialUrl={pdf} name="file" size={1} />
               <Text style={styles.text5}>Tele-Consultation fee:</Text>
               <View
                 style={{
@@ -56,6 +145,9 @@ const ProfileSetup = () => {
                   Enter the consultation amount :
                 </Text>
                 <TextInput
+                  label="Fee"
+                  name="fee"
+                  onChangeText={handleChange('fee')}
                   style={{
                     height: 50,
                     width: 150,
@@ -95,6 +187,8 @@ const ProfileSetup = () => {
                   Enter the discount amount :
                 </Text>
                 <TextInput
+                  name="discount"
+                  onChangeText={handleChange('discount')}
                   style={{
                     height: 50,
                     width: 100,
@@ -112,6 +206,7 @@ const ProfileSetup = () => {
                 />
                 <TouchableOpacity>
                   <Feather
+                    onPress={() => refRBSheet.current.open()}
                     name={"info"}
                     size={20}
                     style={{
@@ -131,6 +226,8 @@ const ProfileSetup = () => {
                 Pet parent would contact this number in case of direct visits.
               </Text>
               <TextInput
+                name="contact"
+                onChangeText={handleChange('contact')}
                 style={{
                   height: 60,
                   width: "90%",
@@ -160,12 +257,10 @@ const ProfileSetup = () => {
                 These settings can be changed later
               </Text>
             </View>
-            <AppButton
-              title="Submit"
-              onPress={() => refRBSheet.current.open()}
-            />
             <RBSheet
               ref={refRBSheet}
+              closeOnDragDown={true}
+              closeOnPressMask={true} 
               animationType="fade"
               customStyles={{
                 wrapper: {
@@ -262,8 +357,60 @@ const ProfileSetup = () => {
                 </View>
               </ScrollView>
             </RBSheet>
+            
+            <RBSheet
+                  ref={alertSheetRef}
+                  closeOnDragDown={true}
+                  closeOnPressMask={true}
+                  onClose={() => navigation.navigate("Home")}
+                  height={200}
+                  animationType="fade"
+                  customStyles={{
+                    wrapper: {
+                      backgroundColor: "rgba(255, 255, 255, 0.92)",
+                    },
+                    draggableIcon: {
+                      backgroundColor: "#000",
+                    },
+                    container: {
+                      backgroundColor: "#FFFFFF",
+                      borderRadius: 25,
+                      bottom: 250,
+                      width: "90%",
+                      alignSelf: "center",
+                      elevation: 10,
+                    },
+                  }}
+                >
+                  <View style={{ alignItems: "center", margin: 25 }}>
+                    <Text
+                      style={{
+                        color: "#4DD1EF",
+                        fontSize: 18,
+                        fontWeight: "700",
+                        marginVertical: 10,
+                      }}
+                    >
+                      Success!
+                    </Text>
+                    <Text
+                      style={{
+                        color: "#47687F",
+                        fontSize: 16,
+                        fontWeight: "400",
+                        textAlign: "center",
+                      }}
+                    >
+                      Profile Settings Updated Successfully!
+                    </Text>
+                  </View>
+                </RBSheet>
+            <View style={{ top: 0 }}>
+              <SubmitButton title="Submit" />
+            </View>
           </View>
         </>
+        )}
       </Formik>
     </ScrollView>
   );

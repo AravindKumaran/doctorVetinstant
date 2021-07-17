@@ -19,7 +19,7 @@ const AuthScreen = ({ route, navigation }) => {
 
   const { title } = route.params;
 
-  const { setUser } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
 
   const signIn = async () => {
     await GoogleSignin.configure({

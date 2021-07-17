@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,  } from "react";
 import {
   Image,
   Text,
@@ -6,13 +6,20 @@ import {
   TouchableOpacity,
   StyleSheet,
   TouchableWithoutFeedback,
+  ScrollView
 } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
 import { Header } from "react-native-elements";
 import AppButton from "../components/AppButton";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 import ChatScreen from "./ChatScreen";
 import MedicalHistory from "./MedicalHistory";
+import PatientScreen from "./PatientScreen";
+import petsApi from "../api/pets";
+import roomApi from "../api/room";
+import { clockRunning, cos } from "react-native-reanimated";
+import AppText from '../components/AppText'
+import { removePushTokenSubscription } from "expo-notifications";
 
 const ActiveStyle = () => (
   <View
@@ -26,18 +33,64 @@ const ActiveStyle = () => (
       borderBottomWidth: 2,
       alignSelf: "center",
     }}
-  ></View>
+  >
+  </View>
 );
 
-const Room = () => {
+const Room = ({ navigation, route }) => {
   const [active, setActive] = useState("problem");
   const [isvideo, setVideo] = useState(true);
+  const [petProblems, setPetProblems] = useState();
+  const [petName, setPetName] = useState();
+  const { petId, docName, userName, docId, userId, petName } = route?.params?.petId ? route.params : { petId: null, docName: null, userName: null };
+  const [room, setRoom] = useState();
+  const isFocused = useIsFocused();
+  const [roomDet, setRoomDet] = useState({});
+  console.log('route params', route.params)
+
+  useEffect(() => {
+    const getPetProblems = async() => {
+      const petsRes = await petsApi.getPetDetails(petId);
+      if(petsRes.ok) {
+        const petProbs = petsRes.data?.exPet.problems;
+        setPetProblems(petProbs.find(item => item.docname === docName))
+        setPetName(petsRes.data?.exPet.name);
+      }
+    }
+    if(petId) getPetProblems();
+  }, [isFocused]);
+
+  useEffect(() => {
+    const getReceiverRoom = async() => {
+      let room_name = `${userId}-${docId}`;
+      const roomApiRes = await roomApi.getReceiverRoom(room_name);
+      if(roomApiRes.ok) {
+        const roomData = roomApiRes.data.room[0];
+        console.log('receiver room', roomApiRes.data.room)
+        const roomDetails = {
+          name: roomData.name,
+          petId: roomData.petId,
+          senderName: roomData.senderName,
+          userId: roomData.name.split("-")[0],
+          docId: roomData.name.split("-")[1],
+          userName: roomData.senderName
+        }
+        // console.log('roomDetails', roomDetails)
+        setRoom(roomData);
+        setRoomDet(roomDetails);
+      }
+    }
+    if(docId) getReceiverRoom();
+  }, [isFocused]);
+
+  useEffect(() => {
+    console.log('petname', petName)
+    console.log('room', room)
+  }, [petName, room]);
 
   const handleActive = (value) => {
     setActive(value);
   };
-
-  const navigation = useNavigation();
 
   const MyCustomLeftComponent = () => {
     return (
@@ -71,6 +124,54 @@ const Room = () => {
       </TouchableOpacity>
     );
   };
+
+  const renderText = (data) => {
+    const constructedPetProbs = {
+      "Pet Name": petName,
+      "Problem": data.problem,
+      "Day": data.day,
+      "Month": data.month,
+      "Appetite": data.Appetite,
+      "Behaviour": data.Behaviour,
+      "Activity": data.Activity,
+      "Faeces": data?.Feces.length > 0 ? data.Feces : "-",
+      "Urine": data?.Feces.length > 0 ? data.Urine : "-",
+      "Ears": data?.Feces.length > 0 ? data.Ears : "-",
+      "Skin": data?.Feces.length > 0 ? data.Skin : "-",
+      "Faeces Comment": data.feces_comment,
+      "Urine Comment": data.urine_comment,
+      "Eyes": data.Eyes,
+      "Mucous": data.Mucous,
+      "Nose": data.Nose,
+      "Skin Comment": data.skin_comment,
+      "Gait": data.Gait,
+      "General Comment": data.general_comment
+    }
+    const arr = [];
+    for( const [key, value] of Object.entries(constructedPetProbs)) {
+      let val = value;
+      if(!val) {
+        val = "-"
+      }
+      if(val instanceof Array) {
+        val = val.join();
+        val = val.replace(/\[|\]|"/g, "");
+      }
+      arr.push({ key, val })
+    }
+    return arr.map((c, i) => (
+      <>
+        <AppText key={`${c.key}-${i}`}>
+          <Text style={{fontWeight: "bold"}}>
+            {c.key}:
+          </Text>
+          <Text>
+            &nbsp;{c.val}
+          </Text>
+        </AppText>
+      </>
+    ))
+  }
 
   return (
     <>
@@ -108,7 +209,10 @@ const Room = () => {
               <Text
                 style={{ fontSize: 14, color: "#47687F", fontWeight: "700" }}
               >
-                Dr. Kumar & Bruno ‘s room
+                Dr. {docName} & 
+              </Text>
+              <Text style={{ fontSize: 14, color: "#47687F", fontWeight: "700" }}>
+                {petName} ‘s room
               </Text>
               <Text
                 style={{ fontSize: 12, color: "#A3B1BF", fontWeight: "400" }}
@@ -184,6 +288,13 @@ const Room = () => {
             elevation: 5,
           }}
         />
+        {active === "problem" && petProblems ? 
+          <ScrollView>
+            <View style={{padding: 10}}>
+              {renderText(petProblems)}
+            </View>
+          </ScrollView>
+        : null}
         {active === "videocall" && (
           <View>
             {!isvideo ? (
@@ -274,7 +385,7 @@ const Room = () => {
             )}
           </View>
         )}
-        {active === "chat" && <ChatScreen />}
+        {active === "chat" && <ChatScreen pat={roomDet} />}
         {active === "sharableassets" && <MedicalHistory />}
       </View>
     </>

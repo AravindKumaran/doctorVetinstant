@@ -16,13 +16,19 @@ import AuthContext from "../context/authContext";
 import * as Notifications from "expo-notifications";
 import { storeObjectData } from "../components/utils/reminderStorage";
 
-const ScheduleCallScreen = ({ navigation, route }) => {
+const ScheduleCallScreen = ({ navigation, route, screen, callData, rBSheet, setFetchCalls }) => {
   const [date, setDate] = useState(new Date());
   const { user } = useContext(AuthContext);
   const [mode, setMode] = useState("date");
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   console.log("Ddd", route?.params?.sdata);
+
+  let params = {};
+
+  if(screen && screen === "PetLobby") {
+    params.userName = callData.userName;
+  }
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -134,9 +140,9 @@ const ScheduleCallScreen = ({ navigation, route }) => {
     } else {
       const data = {
         date,
-        userId: route.params.call.senderId._id,
-        doctorId: route.params.call.receiverId._id,
-        doctorName: route.params.call.receiverId.name,
+        userId: route?.params?.call?.senderId._id || callData.senderId,
+        doctorId: route?.params?.call?.receiverId._id || callData.receiverId,
+        doctorName: route?.params?.call?.receiverId.name || callData.doctorName,
       };
 
       // console.log('Data', data)
@@ -153,14 +159,30 @@ const ScheduleCallScreen = ({ navigation, route }) => {
       console.log("res", res);
       setLoading(false);
 
+      const npCall = {
+        ...route?.params?.sdata,
+        status: "scheduled",
+        extraInfo: `${date}`,
+      };
+      // console.log('Callssd', npCall)
+      setLoading(true);
+      await pendingsApi.updateCallPending(
+        route?.params?.sdata._id || callData._id,
+        npCall
+      );
+
       alert("Your call has been scheduled!");
+      if(screen && screen == "PetLobby" && rBSheet && setFetchCalls) {
+        setFetchCalls(true);
+        return rBSheet.current.close();
+      }
       navigation.goBack();
     }
   };
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.container1}>
-        <Text style={styles.text}>Reschedule : Meet with Elano</Text>
+        <Text style={styles.text}>Reschedule : Meet with {params.userName}</Text>
 
         <Text style={styles.text}>Choose Time</Text>
         <TouchableOpacity onPress={showTimepicker} style={styles.dateTime}>

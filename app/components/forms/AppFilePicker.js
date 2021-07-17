@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as DocumentPicker from "expo-document-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -6,8 +6,8 @@ import { StyleSheet, View, TouchableOpacity } from "react-native";
 
 import AppText from "../AppText";
 
-const AppFilePicker = ({ onChangeUri, size }) => {
-  const [fileName, setFileName] = useState(null);
+const AppFilePicker = ({ onChangeUri, size, initialUrl }) => {
+  const [fileName, setFileName] = useState(initialUrl);
 
   const selectFile = async () => {
     try {
@@ -43,7 +43,7 @@ const AppFilePicker = ({ onChangeUri, size }) => {
           </AppText>
         </View>
       </TouchableOpacity>
-      {fileName && <AppText>{fileName}</AppText>}
+      {fileName ? <AppText>{fileName}</AppText> : <AppText>{initialUrl}</AppText>}
     </View>
   );
 };
