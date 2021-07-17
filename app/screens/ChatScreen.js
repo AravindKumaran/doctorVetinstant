@@ -240,9 +240,9 @@ const ChatScreen = ({ navigation, route, pat }) => {
   //         name: "React Native",
   //         avatar: "https://placeimg.com/140/140/any",
   //       },
-  //       // image: "https://placeimg.com/140/140/any",
-  //       // video:
-  //       //   "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+  //       image: "https://placeimg.com/140/140/any",
+  //       video:
+  //         "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
   //     },
   //   ]);
   // }, []);
@@ -359,7 +359,7 @@ const ChatScreen = ({ navigation, route, pat }) => {
       <View
         style={{
           flexDirection: "column",
-          bottom: didKeyboardShow ? -10 : 70,
+          top: didKeyboardShow ? 20 : 20,
           alignItems: "center",
           alignContent: "center",
           alignSelf: "center",
@@ -401,7 +401,7 @@ const ChatScreen = ({ navigation, route, pat }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { bottom: didKeyboardShow ? 10 : 90 }]}>
       <LoadingIndicator visible={loading} />
       <GiftedChat
         messages={messages}
