@@ -27,11 +27,16 @@ import socket from '../components/utils/socket'
 import RBSheet from 'react-native-raw-bottom-sheet'
 import pendingsApi from '../api/callPending'
 import petsApi from '../api/pets'
+import usersApi from '../api/users'
 import LoadingIndicator from '../components/LoadingIndicator'
 
 import AppText from '../components/AppText'
 import AppButton from '../components/AppButton'
 import AuthContext from '../context/authContext'
+import {
+  removeValue,
+  getObjectData,
+} from "../components/utils/reminderStorage";
 
 const VideoCallScreen = ({ navigation, route }) => {
   const [isAudioEnabled, setIsAudioEnabled] = useState(true)
@@ -46,10 +51,11 @@ const VideoCallScreen = ({ navigation, route }) => {
   const [previousProblem, setPreviousProblem] = useState(null)
   const [loading, setLoading] = useState(false)
   const [pet, setPet] = useState(null)
+  const [videoToken, setVideoToken] = useState();
   const refRBSheet = useRef()
 
   const handleDeleteCall = async () => {
-    const callRes = await pendingsApi.singleCallPending(route.params?.item._id)
+    const callRes = await pendingsApi.singleCallPending(route?.params?.item?._id || route?.params?.callId)
     if (callRes.ok) {
       const call = callRes.data.call
       call.userJoined && call.docJoined
@@ -62,15 +68,70 @@ const VideoCallScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     console.log('Inside Effect')
+    console.log('route params in videocall screen', token)
     socket.on('incomingCall', (data) => {
       console.log('Incoming Call', data)
     })
+
+    const sendPushToken = async (token, title, message) => {
+      if (token) {
+        setLoading(true);
+  
+        const pushRes = await usersApi.sendPushNotification({
+          targetExpoPushToken: token,
+          title: ` Dr. ${user.name} ${title} `,
+          message: message || `Open the pending calls page for further action`,
+          datas: { token: token || null },
+        });
+
+        console.log('push res', pushRes)
+  
+        if (!pushRes.ok) {
+          setLoading(false);
+          console.log("Error", pushRes);
+          return;
+        }
+        setLoading(false);
+      } else {
+        alert("Something Went Wrong. Try Again Later");
+      }
+    };
+
+    const getVideoToken = async() => {
+      const tokenRes = await usersApi.getVideoToken({
+        // userName: user.name,
+        userName: route?.params?.petowner?.name,
+        roomName: route?.params?.roomName,
+      });
+      //console.log("Video Token", tokenRes);
+      
+      if (!tokenRes.ok) {
+        console.log("Error fetching token", tokenRes);
+      }
+      console.log('tokenRes?.data', tokenRes?.data)
+      setVideoToken(tokenRes?.data)
+      // const d = new Date(route?.params?.extraInfo || '');
+      // console.log('d', d)
+      // const rmr = await getObjectData(
+      //   `${d.toLocaleDateString()}-${d.toLocaleTimeString()}`
+      // );
+      // if (rmr) {
+      //   await removeValue(`${d.toLocaleDateString()}-${d.toLocaleTimeString()}`);
+      // }
+      console.log('route?.params?.user?.token', route?.params?.petowner?.token)
+      await sendPushToken(
+        route?.params?.petowner?.token,
+        ` has joined the video call`,
+        "Please join it ASAP"
+      );
+    }
+
     const _onConnectButtonPress = async () => {
       if (Platform.OS === 'android') {
         await _requestAudioPermission()
         await _requestCameraPermission()
       }
-      const cRes = await pendingsApi.updateCallPending(route.params?.item._id, {
+      const cRes = await pendingsApi.updateCallPending(route?.params?.item?._id || route?.params?.callId, {
         docJoined: true,
       })
       if (!cRes.ok) {
@@ -78,17 +139,19 @@ const VideoCallScreen = ({ navigation, route }) => {
         return
       }
       twilioVideo.current.connect({
-        accessToken: token,
+        accessToken: videoToken,
         // enableNetworkQualityReporting: true,
       })
       setStatus('connecting')
       console.log('Connecting')
     }
+
+    getVideoToken()
     _onConnectButtonPress()
 
     return () => {
       console.log('Outside Effect')
-      // handleDeleteCall()
+      handleDeleteCall()
       twilioVideo.current.disconnect()
     }
   }, [])
@@ -157,7 +220,7 @@ const VideoCallScreen = ({ navigation, route }) => {
 
   const _onRoomDidConnect = (events) => {
     // console.log(events)
-    console.log('Room')
+    console.log('Room connected....')
     setStatus('connected')
   }
 
@@ -230,7 +293,7 @@ const VideoCallScreen = ({ navigation, route }) => {
   }
 
   const getPetDetails = async () => {
-    const id = route?.params?.item.petId
+    const id = route?.params?.item?.petId || route?.params?.petId
     setPet(null)
     refRBSheet.current.open()
     setLoading(true)

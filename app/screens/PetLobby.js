@@ -18,6 +18,7 @@ import AuthContext from "../context/authContext";
 import reminderStorage from "../components/utils/reminderStorage";
 import callPendingApi from "../api/callPending";
 import roomApi from "../api/room";
+import petsApi from "../api/pets";
 import scheduledCallsApi from "../api/scheduledCall";
 
 const PetLobby = () => {
@@ -32,6 +33,7 @@ const PetLobby = () => {
   const [scheduledCalls, setScheduledCalls] = useState([]);
   const [incomingCallRequest, setIncomingCallRequest] = useState();
   const [fetchCalls, setFetchCalls] = useState(false);
+  const [pet_id, setPetId] = useState();
 
   const MyCustomLeftComponent = () => {
     return (
@@ -115,6 +117,7 @@ const PetLobby = () => {
   }
 
   const getExpiryTime = (createdTime) => {
+    createdTime.setDate(18);
     const currentTime = new Date();
     const expiryTime = new Date();
     const expiryTimeInMs = createdTime.getTime() + (72 * 60 * 60 * 1000);
@@ -130,7 +133,30 @@ const PetLobby = () => {
   }
 
   useEffect(() => {
-    const getIncomingCallRequest = (calls) => {
+    const isPrescriptionGiven = async({ petId, docName }) => {
+      const petRes = await petsApi.getPetDetails(petId);
+      if(petRes.ok) {
+        const prescriptions = petRes.data?.exPet.prescriptions;
+        if(prescriptions.length > 0) {
+          const myPrescriptions = prescriptions.filter(item => item.docname == docName);
+          if(myPrescriptions.length > 0) {
+            return true;  
+          }
+          return false;
+        }
+        console.log('isPrescription given', false)
+        return false;
+      }
+    }
+    const checkForPrescription = async(incomingCallRequest) => {
+      let calls = incomingCallRequest;
+      for(const [index, call] of Object.entries(calls)) {
+        call.isPrescriptionGiven = await isPrescriptionGiven(call);
+        calls.splice(index, 1, call)
+      }
+      return calls;
+    }
+    const getIncomingCallRequest = async(calls) => {
       //let requested = calls.filter(call => call.status === 'requested')
       return calls.map(call => {
         //const scheduledCallRes = await scheduledCallsApi.getScheduledCallsByUserAndDoc(call.userId._id, call.docId._id);
@@ -159,7 +185,8 @@ const PetLobby = () => {
         if(calls.length > 0) {
           setCalls(true)
           setCallers(calls);
-          const incomingCallRequests = getIncomingCallRequest(calls);
+          const incomingCallRequests = await getIncomingCallRequest(calls);
+          await checkForPrescription(incomingCallRequests);
           setRequestedCalls(incomingCallRequests);
         }
       }
@@ -181,11 +208,11 @@ const PetLobby = () => {
     });
   }
 
-  const renderElement = ({status, id, paymentDone, petId, docName, userName, docId, userId, petName}) => {
+  const renderElement = ({status, _id, paymentDone, petId, docName, userName, docId, userId, petName, extraInfo}) => {
     if(status === "requested") {
       return  <View style={{ flexDirection: "row", width: "50%" }}>
                 <AppButton title="Accept" onPress={() => {
-                  handleAccept(id)
+                  handleAccept(_id)
                   refRBSheet.current.open()
                 }} />
                 <AppButton title="Decline" />
@@ -211,11 +238,14 @@ const PetLobby = () => {
                 title="Enter Room"
                 onPress={() => navigation.navigate("Room", {
                   petId,
-                  petName,
+                  petname: petName,
                   docName,
                   userName,
                   docId: docId._id,
-                  userId: userId._id
+                  userId: userId._id,
+                  extraInfo: extraInfo,
+                  callId: _id,
+                  petowner: userId
                 })}
               />
     }
@@ -343,6 +373,19 @@ const PetLobby = () => {
                     </View>
                     :
                     <Text style={styles.text3}>Payment</Text>
+                  }
+                  {
+                    !c.isPrescriptionGiven ?
+                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                      <Feather name="alert-octagon" color="#E5AF44" size={15} />
+                      <Text
+                        style={[styles.text3, { color: "#E5AF44", paddingLeft: 5 }]}
+                      >
+                        Prescription pending
+                      </Text>
+                    </View>
+                    :
+                    null
                   }
                   <Text>
                     <Text style={styles.text3}>Call Scheduled at</Text>{" "}

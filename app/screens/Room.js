@@ -42,7 +42,7 @@ const Room = ({ navigation, route }) => {
   const [isvideo, setVideo] = useState(true);
   const [petProblems, setPetProblems] = useState();
   const [petName, setPetName] = useState();
-  const { petId, docName, userName, docId, userId, petName } = route?.params?.petId ? route.params : { petId: null, docName: null, userName: null };
+  const { petId, docName, userName, docId, userId, petname, extraInfo, callId, petowner } = route?.params?.petId ? route.params : { petId: null, docName: null, userName: null };
   const [room, setRoom] = useState();
   const isFocused = useIsFocused();
   const [roomDet, setRoomDet] = useState({});
@@ -212,7 +212,7 @@ const Room = ({ navigation, route }) => {
                 Dr. {docName} & 
               </Text>
               <Text style={{ fontSize: 14, color: "#47687F", fontWeight: "700" }}>
-                {petName} ‘s room
+                {petname} ‘s room
               </Text>
               <Text
                 style={{ fontSize: 12, color: "#A3B1BF", fontWeight: "400" }}
@@ -336,8 +336,18 @@ const Room = ({ navigation, route }) => {
                 </Text>
                 <AppButton
                   title="Join Video call"
-                  onPress={() => navigation.navigate("Video")}
-                  onPress={() => setVideo(true)}
+                  // onPress={() => navigation.navigate("VideoCall")}
+                  // onPress={() => setVideo(true)}
+                  onPress={() => {
+                    setVideo(true);
+                    navigation.navigate("VideoCall", {
+                      roomName: `${userId}-${docId}`,
+                      extraInfo: extraInfo,
+                      callId: callId,
+                      petowner: petowner,
+                      petId: petId
+                    });
+                  }}
                 />
               </View>
             ) : (
