@@ -1,4 +1,4 @@
-import React, { useState, useEffect,  } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Image,
   Text,
@@ -6,20 +6,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   TouchableWithoutFeedback,
-  ScrollView
 } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
 import { Header } from "react-native-elements";
 import AppButton from "../components/AppButton";
-import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import ChatScreen from "./ChatScreen";
 import MedicalHistory from "./MedicalHistory";
-import PatientScreen from "./PatientScreen";
-import petsApi from "../api/pets";
-import roomApi from "../api/room";
-import { clockRunning, cos } from "react-native-reanimated";
-import AppText from '../components/AppText'
-import { removePushTokenSubscription } from "expo-notifications";
 
 const ActiveStyle = () => (
   <View
@@ -33,11 +26,10 @@ const ActiveStyle = () => (
       borderBottomWidth: 2,
       alignSelf: "center",
     }}
-  >
-  </View>
+  ></View>
 );
 
-const Room = ({ navigation, route }) => {
+const Room = () => {
   const [active, setActive] = useState("problem");
   const [isvideo, setVideo] = useState(true);
   const [petProblems, setPetProblems] = useState();
@@ -92,6 +84,8 @@ const Room = ({ navigation, route }) => {
     setActive(value);
   };
 
+  const navigation = useNavigation();
+
   const MyCustomLeftComponent = () => {
     return (
       <TouchableOpacity
@@ -124,54 +118,6 @@ const Room = ({ navigation, route }) => {
       </TouchableOpacity>
     );
   };
-
-  const renderText = (data) => {
-    const constructedPetProbs = {
-      "Pet Name": petName,
-      "Problem": data.problem,
-      "Day": data.day,
-      "Month": data.month,
-      "Appetite": data.Appetite,
-      "Behaviour": data.Behaviour,
-      "Activity": data.Activity,
-      "Faeces": data?.Feces.length > 0 ? data.Feces : "-",
-      "Urine": data?.Feces.length > 0 ? data.Urine : "-",
-      "Ears": data?.Feces.length > 0 ? data.Ears : "-",
-      "Skin": data?.Feces.length > 0 ? data.Skin : "-",
-      "Faeces Comment": data.feces_comment,
-      "Urine Comment": data.urine_comment,
-      "Eyes": data.Eyes,
-      "Mucous": data.Mucous,
-      "Nose": data.Nose,
-      "Skin Comment": data.skin_comment,
-      "Gait": data.Gait,
-      "General Comment": data.general_comment
-    }
-    const arr = [];
-    for( const [key, value] of Object.entries(constructedPetProbs)) {
-      let val = value;
-      if(!val) {
-        val = "-"
-      }
-      if(val instanceof Array) {
-        val = val.join();
-        val = val.replace(/\[|\]|"/g, "");
-      }
-      arr.push({ key, val })
-    }
-    return arr.map((c, i) => (
-      <>
-        <AppText key={`${c.key}-${i}`}>
-          <Text style={{fontWeight: "bold"}}>
-            {c.key}:
-          </Text>
-          <Text>
-            &nbsp;{c.val}
-          </Text>
-        </AppText>
-      </>
-    ))
-  }
 
   return (
     <>
@@ -288,13 +234,6 @@ const Room = ({ navigation, route }) => {
             elevation: 5,
           }}
         />
-        {active === "problem" && petProblems ? 
-          <ScrollView>
-            <View style={{padding: 10}}>
-              {renderText(petProblems)}
-            </View>
-          </ScrollView>
-        : null}
         {active === "videocall" && (
           <View>
             {!isvideo ? (
@@ -395,7 +334,7 @@ const Room = ({ navigation, route }) => {
             )}
           </View>
         )}
-        {active === "chat" && <ChatScreen pat={roomDet} />}
+        {active === "chat" && <ChatScreen />}
         {active === "sharableassets" && <MedicalHistory />}
       </View>
     </>

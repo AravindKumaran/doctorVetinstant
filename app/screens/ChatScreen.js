@@ -359,18 +359,15 @@ const ChatScreen = ({ navigation, route, pat }) => {
       <View
         style={{
           flexDirection: "column",
-          top: didKeyboardShow ? 20 : 20,
-          alignItems: "center",
-          alignContent: "center",
-          alignSelf: "center",
+          top: didKeyboardShow ? 30 : 30,
           justifyContent: "center",
         }}
       >
         <TouchableOpacity
           style={{
             position: "absolute",
-            right: 110,
             zIndex: 1,
+            alignSelf: "flex-start",
           }}
           onPress={selectFile}
         >
@@ -378,7 +375,7 @@ const ChatScreen = ({ navigation, route, pat }) => {
         </TouchableOpacity>
         <TextInput
           style={{
-            width: "90%",
+            width: "92.5%",
             borderColor: "#B9C4CF",
             borderWidth: 1.5,
             borderRadius: 30,
@@ -391,8 +388,12 @@ const ChatScreen = ({ navigation, route, pat }) => {
           onChangeText={handleTextInput}
         />
         <TouchableOpacity
-          style={{ position: "absolute", left: 110 }}
-          onPress={() => onSend(text)}
+          style={{
+            position: "absolute",
+            zIndex: 1,
+            alignSelf: "flex-end",
+          }}
+          onPress={onSend}
         >
           <IconButton icon="send-circle" size={45} color="#4AC4F1" />
         </TouchableOpacity>
@@ -401,7 +402,15 @@ const ChatScreen = ({ navigation, route, pat }) => {
   };
 
   return (
-    <View style={[styles.container, { bottom: didKeyboardShow ? 10 : 90 }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          bottom: didKeyboardShow ? 20 : 100,
+          marginTop: didKeyboardShow ? 20 : 100,
+        },
+      ]}
+    >
       <LoadingIndicator visible={loading} />
       <GiftedChat
         messages={messages}
@@ -499,6 +508,7 @@ const ChatScreen = ({ navigation, route, pat }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#FFFFFF",
   },
 });
 

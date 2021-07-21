@@ -1,26 +1,10 @@
-import React, { useContext, useEffect } from "react";
+import React from "react";
 import { StyleSheet, View, Text, Image, ImageBackground } from "react-native";
 
 import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
-import usersApi from "../api/users";
-import authStorage from '../components/utils/authStorage'
-import reminderStorage from '../components/utils/reminderStorage'
-import auth from "../api/auth";
 
 const WelcomeScreen = ({ navigation }) => {
-  useEffect(() => {
-    const checkUser = async() => {
-      const res = await usersApi.checkRegisteredUser();
-      if(res.ok) {
-        console.log('res ok', res.data);
-        if(res.data.isRegistered && !res.data.isVerified) {
-          navigation.navigate("VerificationCode")
-        }
-      }
-    }
-    checkUser();
-  },[]);
   return (
     // <>
     //   <View style={styles.container}>
