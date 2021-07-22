@@ -9,8 +9,6 @@ import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 import DoctorScreen from "../screens/DoctorScreen";
 import VerificationScreen from "../screens/VerificationScreen";
 import VerificationCodeScreen from "../screens/VerificationCodeScreen";
-import ProfileSetup from "../screens/ProfileSetup";
-import HomeScreen from "../screens/HomeScreen";
 
 const Stack = createStackNavigator();
 
@@ -111,23 +109,6 @@ const AuthNavigator = () => (
       name="VerificationCode"
       component={VerificationCodeScreen}
     />
-    <Stack.Screen name="ProfileSetup" 
-      options={{
-        title: "Setting Up Your Profile",
-        headerTitleStyle: {
-          color: "#476880",
-        },
-        headerTitleAlign: "center",
-      }}
-      component={ProfileSetup}
-    />
-    <Stack.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          headerShown: false,
-        }}
-      />
   </Stack.Navigator>
 );
 

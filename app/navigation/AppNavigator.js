@@ -23,7 +23,6 @@ import PetMedication from "../screens/PetMedication";
 import ProfileSetup from "../screens/ProfileSetup";
 import PrescriptionPreview from "../screens/PrescriptionPreview";
 import { Feather } from "@expo/vector-icons";
-import VerificationCodeScreen from "../screens/VerificationCodeScreen";
 
 const Stack = createStackNavigator();
 
@@ -70,28 +69,7 @@ const AppNavigator = ({ navigation }) => {
       <Stack.Screen name="WalletScreen" component={WalletScreen} />
       <Stack.Screen name="Prescriptionnnnn" component={Prescription} />
       <Stack.Screen name="PetMedication" component={PetMedication} />
-      <Stack.Screen
-        name="ProfileSetup"
-        options={{
-          title: "Setting Up Your Profile",
-          headerTitleStyle: {
-            color: "#476880",
-          },
-          headerTitleAlign: "center",
-        }}
-        component={ProfileSetup}
-      />
-      <Stack.Screen
-        options={{
-          title: "Verification",
-          headerTitleStyle: {
-            color: "#476880",
-          },
-          headerTitleAlign: "center",
-        }}
-        name="VerificationCode"
-        component={VerificationCodeScreen}
-      />
+      <Stack.Screen name="ProfileSetup" component={ProfileSetup} />
       <Stack.Screen
         name="PrescriptionPreview"
         component={PrescriptionPreview}

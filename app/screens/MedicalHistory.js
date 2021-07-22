@@ -15,7 +15,6 @@ import Feather from "react-native-vector-icons/Feather";
 import ChoosePicker from "../components/forms/ChoosePicker";
 import { Formik } from "formik";
 import Searchbar from "../components/searchbar";
-import petsApi from "../api/pets";
 
 const pet = [
   { label: "Bruno", value: "Bruno" },
@@ -29,29 +28,8 @@ const type = [
   { label: "General Checkup", value: "General Checkup" },
 ];
 
-const MedicalHistory = ({ petId }) => {
+const MedicalHistory = () => {
   const navigation = useNavigation();
-  const [loading, setLoading] = useState(false);
-  const [prescriptions, setPrescriptions] = useState([]);
-
-  useEffect(() => {
-    try {
-      const changePetAndProblem = async () => {
-        setLoading(true);
-        const pres = await petsApi.getSinglePet(petId);
-        if (!pres.ok) {
-          console.log("Error", pres);
-          setLoading(false);
-          return;
-        }
-        console.log("prescriptions", pres.data.exPet.prescriptions);
-        setPrescriptions(pres.data.exPet.prescriptions);
-      };
-      changePetAndProblem();
-    } catch (error) {
-      console.log("err", error);
-    }
-  }, []);
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -95,82 +73,71 @@ const MedicalHistory = ({ petId }) => {
             />
           </TouchableOpacity>
         </View>
-        {prescriptions &&
-          prescriptions.map((pres, i) => (
-            <View
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            height: 105,
+            width: "95%",
+            alignSelf: "center",
+            borderRadius: 20,
+            padding: 10,
+            elevation: 10,
+            backgroundColor: "#FFFFFF",
+            marginBottom: 10,
+          }}
+        >
+          <View
+            style={{
+              height: 75,
+              width: 75,
+              borderRadius: 20,
+              backgroundColor: "rgba(81, 215, 244, 0.21)",
+              justifyContent: "center",
+            }}
+          >
+            <Text
               style={{
-                flexDirection: "row",
-                alignItems: "center",
-                height: 105,
-                width: "95%",
                 alignSelf: "center",
-                borderRadius: 20,
-                padding: 10,
-                elevation: 10,
-                backgroundColor: "#FFFFFF",
-                marginBottom: 10,
               }}
             >
-              <View
-                style={{
-                  height: 75,
-                  width: 75,
-                  borderRadius: 20,
-                  backgroundColor: "rgba(81, 215, 244, 0.21)",
-                  justifyContent: "center",
-                }}
+              15 May
+            </Text>
+          </View>
+          <View style={{ marginRight: 150, marginHorizontal: 20 }}>
+            <Text style={{ color: "#47687F", fontSize: 14, fontWeight: "700" }}>
+              Digestion problem
+            </Text>
+            <Text
+              style={{
+                color: "#B9C4CF",
+                fontSize: 12,
+                fontWeight: "400",
+                marginVertical: 5,
+              }}
+            >
+              Treated by Dr. Kumar at Global Veteneriary Hospitals
+            </Text>
+          </View>
+          <View style={{ right: 120 }}>
+            <TouchableOpacity
+              // onPress={() => navigation.navigate("MedicalHistoryPets")}
+              // onPress={() => navigation.navigate("Notification")}
+              // onPress={() => navigation.navigate("ChatNotification")}
+              // onPress={() => navigation.navigate("MenuScreen")}
+              // onPress={() => navigation.navigate("WalletScreen")}
+              // onPress={() => navigation.navigate("Prescriptionnnnn")}
+              // onPress={() => navigation.navigate("PetMedication")}
+              onPress={() => navigation.navigate("ProfileSetup")}
+            >
+              <Text
+                style={{ color: "#4AC4F1", fontWeight: "700", fontSize: 14 }}
               >
-                <Text
-                  style={{
-                    alignSelf: "center",
-                  }}
-                >
-                  {new Date(pres.date).toLocaleDateString("default", {
-                    month: "short",
-                  })}
-                </Text>
-              </View>
-              <View style={{ marginRight: 150, marginHorizontal: 20 }}>
-                <Text
-                  style={{ color: "#47687F", fontSize: 14, fontWeight: "700" }}
-                >
-                  {pres.prescription} problem
-                </Text>
-                <Text
-                  style={{
-                    color: "#B9C4CF",
-                    fontSize: 12,
-                    fontWeight: "400",
-                    marginVertical: 5,
-                  }}
-                >
-                  Treated by Dr.{pres.docname} at Global Veteneriary Hospitals
-                </Text>
-              </View>
-              <View style={{ right: 120 }}>
-                <TouchableOpacity
-                  // onPress={() => navigation.navigate("MedicalHistoryPets")}
-                  // onPress={() => navigation.navigate("Notification")}
-                  // onPress={() => navigation.navigate("ChatNotification")}
-                  // onPress={() => navigation.navigate("MenuScreen")}
-                  // onPress={() => navigation.navigate("WalletScreen")}
-                  // onPress={() => navigation.navigate("Prescriptionnnnn")}
-                  // onPress={() => navigation.navigate("PetMedication")}
-                  onPress={() => navigation.navigate("ProfileSetup")}
-                >
-                  <Text
-                    style={{
-                      color: "#4AC4F1",
-                      fontWeight: "700",
-                      fontSize: 14,
-                    }}
-                  >
-                    VIEW
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))}
+                VIEW
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
     </ScrollView>
   );

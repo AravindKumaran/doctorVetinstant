@@ -7,16 +7,11 @@ import {
   useBlurOnFulfill,
   useClearByFocusCell,
 } from "react-native-confirmation-code-field";
-import LoadingIndicator from "../components/LoadingIndicator";
 import SubmitButton from "../components/SubmitButton";
-import ErrorMessage from "../components/ErrorMessage";
-import authApi from "../api/auth";
 
 const CELL_COUNT = 4;
 
-const VerificationCodeScreen = ({ navigation }) => {
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+const VerificationCodeScreen = () => {
   const [value, setValue] = useState("");
   const ref = useBlurOnFulfill({ value, cellCount: CELL_COUNT });
   const [props, getCellOnLayoutHandler] = useClearByFocusCell({
@@ -24,35 +19,10 @@ const VerificationCodeScreen = ({ navigation }) => {
     setValue,
   });
 
-  const handleSubmit = async() => {
-    setLoading(true);
-
-    if(!value) {
-      setError("Invalid OTP!");
-    }
-
-    const data = {
-      otp: value
-    }
-    const otpres = await authApi.verifyOtp(data);
-
-    if(!otpres.ok) {
-      setLoading(false);
-      console.log("otpres not ok", otpres);
-      setError(otpres.data?.msg ? otpres.data.msg : "Invalid OTP!");
-      return;
-    }
-    setLoading(false);
-    alert('Verified')
-    navigation.navigate('ProfileSetup')
-  }
-
   return (
     <SafeAreaView style={styles.container}>
-      <Formik initialValues={{ name: "", hospital: "", address: "" }} onSubmit={handleSubmit}>
+      <Formik initialValues={{ name: "", hospital: "", address: "" }}>
         <>
-        <LoadingIndicator visible={loading} />
-        {error && <ErrorMessage error={error} visible={!loading} />}
           <View style={styles.container1}>
             <Text style={styles.text1}>
               Please enter the verification code here

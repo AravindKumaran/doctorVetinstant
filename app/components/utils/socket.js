@@ -7,7 +7,7 @@ import IO from 'socket.io-client'
 //   transports: ['websocket'],
 // })
 
-const socket = IO('http://192.168.0.167:8000', {
+const socket = IO('http://ec2-3-109-48-3.ap-south-1.compute.amazonaws.com:8000', {
   transports: ['websocket'],
 })
 

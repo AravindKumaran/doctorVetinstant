@@ -13,12 +13,10 @@ import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
 import AuthContext from "../context/authContext";
 import authStorage from "../components/utils/authStorage";
-import reminderStorage from "../components/utils/reminderStorage";
 import LoadingIndicator from "../components/LoadingIndicator";
 import usersApi from "../api/users";
 import doctorsApi from "../api/doctors";
 import hospitalsApi from "../api/hospitals";
-import callPendingApi from "../api/callPending";
 import * as Notifications from "expo-notifications";
 import * as Permissions from "expo-permissions";
 import { Header } from "react-native-elements";
@@ -69,39 +67,30 @@ const doctors = [
 ];
 
 
-const HomeScreen = ({ navigation, route }) => {
+const HomeScreen = () => {
   const isFocused = useIsFocused();
   const { user, setUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
-  const [doctor, setDoctor] = useState(user?.name);
+  const [doctor, setDoctor] = useState(user.name);
   const [qlf, setQual] = useState();
   const [profile, setProfile] = useState(user.profile_image);
   const [contact, setContact] = useState();
   const [teleConsultationFee, setTeleConsultationFee] = useState();
   const [hospital, setHosp] = useState();
   const [hospitalContact, setHospContact] = useState();
-  const [discountAmount, setDiscountAmount] = useState(); 
+  const [discountAmount, setDiscountAmount] = useState();
   const [todaysAppointments, setTodaysAppointments] = useState(0);
   const [pendingAppointments, setPendingAppointments] = useState(0);
   const [completedAppointments, setCompletedAppointments] = useState(0);
   const [nextAppointment, setNextAppointment] = useState(false);
-  const [calls, setCalls] = useState(false);
-  const [callers, setCallers] = useState([]);
-  const [requestedCalls, setRequestedCalls] = useState([]);
-  const [scheduledCalls, setScheduledCalls] = useState([]);
-  let [userId, setUserID] = useState();
-  let [refresh, setReload] = useState();
-
-  // if(route?.params?.fromScreen) {
-  //   setReload(true)
-  // }
+  const [notifications, setNotifications] = useState(false);
 
   const handleLogout = () => {
     setUser();
     authStorage.removeToken();
   };
 
-  // const navigation = useNavigation();
+  const navigation = useNavigation();
 
   const MyCustomLeftComponent = () => {
     return (
@@ -134,36 +123,7 @@ const HomeScreen = ({ navigation, route }) => {
     );
   };
 
-  const formatTime = (hour, min) => {
-    let minutes = min;
-    if(min < 10) {
-      minutes = '0' + min;
-    }
-    if(hour > 12) {
-      hour = hour % 12;
-      return `${hour}:${minutes}PM`
-    }
-    return `${hour}:${minutes}AM`
-  }
-
-  const formatDate = (date, scheduled) => {
-    let day, hh, mm;
-    const week = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-    day = week[date.getDay()];
-    hh = date.getHours();
-    mm = date.getMinutes();
-    if(scheduled) {
-      const currentDate = new Date();
-      if(currentDate.getDay() == date.getDay()) {
-        day = 'today';
-      }
-      return `${formatTime(hh, mm)} ${day}`
-    }
-    return `${day} ${formatTime(hh, mm)}`;
-  }
-
   useEffect(() => {
-    //navigation.navigate('VerificationCode');
     const getDoctor = async() => {
       setDoctor(`Dr.${user.name}`);
       const doctorRes = await doctorsApi.getLoggedInDoctor(user._id);
@@ -181,46 +141,15 @@ const HomeScreen = ({ navigation, route }) => {
       const userRes = await usersApi.getLoggedInUser();
       if(userRes.ok) {
         const user = userRes.data.user;
-        //await reminderStorage.storeObjectData('user', user);
-        setUserID(user._id);
         setDoctor(`Dr.${user.name}`);
         if(user.profile_image) {
           setProfile(user.profile_image)
         };
-
-        if(user.isRegistered) navigation.navigate('VerificationCode');
-      }
-    }
-    const getCallNotifications = async() => {
-      const res = await callPendingApi.getCallPendingByDoctor(user._id);
-      if(res.ok) {
-        const calls = res.data.calls;
-        if(calls.length > 0) {
-          setCalls(true)
-          let requested = calls.filter(call => call.status === 'requested')
-          requested = requested.map(call => {
-            const date = new Date(requested[0].createdAt);
-            call.date = formatDate(date);
-            return call;
-          })
-          setCallers(calls);
-          setRequestedCalls(requested);
-
-          let scheduled = calls.filter(call => call.status === 'scheduled')
-          scheduled = scheduled.map(call => {
-            const date = new Date(scheduled[0]?.extraInfo); 
-            call.date = formatDate(date, true);
-            return call;
-          })
-          setScheduledCalls(scheduled);
-          console.log('callers list', callers);
-        }
       }
     }
     getUser();
     getDoctor();
-    getCallNotifications();
-  },[isFocused]);
+  },[isFocused])
 
   useEffect(() => {
     const saveNotificationToken = async () => {
@@ -411,16 +340,13 @@ const HomeScreen = ({ navigation, route }) => {
               Notifications
           </Text>
         </View>
-        {requestedCalls.length > 0 ? 
+        {notifications ? 
         <View style={{ margin: 20, marginBottom: 20 }}>
-        {requestedCalls.map((c, i) => (
+        {doctors.map((c, i) => (
           <>
-            <View key={c._id} style={styles.catItem}>
+            <View key={`${c.name}-${Date.now()}`} style={styles.catItem}>
               <Image
-                key={`${Math.random()}-${i}`}
-                source={{
-                  uri: c.userId?.profile_image
-                }}
+                source={c.src}
                 size={15}
                 style={{
                   height: 100,
@@ -430,71 +356,20 @@ const HomeScreen = ({ navigation, route }) => {
                   borderColor: "#FFFFFF",
                 }}
               />
-              <Text key={`${Math.random()}-${i}`} style={[styles.catItemText, { marginTop: -10 }]}>
-              Video call request from <Text key={`${Math.random()}-${i}`} style={{fontWeight: "bold"}}>{c.userName}</Text> on <Text key={`${Math.random()}-${i}`} style={{fontWeight: "bold"}}>{c.date}</Text>
+              <Text style={[styles.catItemText, { marginTop: -10 }]}>
+                {c.name}
               </Text>
-              <View key={`${Math.random()}-${i}`} style={styles.Rectangle}>
+              <View style={styles.Rectangle}>
                 <TouchableOpacity
-                  key={`${Math.random()}-${i}`}
                   onPress={() => {
                     navigation.navigate("VetProfile");
                   }}
                 >
-                  <Text key={`${Math.random()}-${i}`} style={styles.text6}>View</Text>
+                  <Text style={styles.text6}>View</Text>
                 </TouchableOpacity>
               </View>
             </View>
             <View
-              key={`${Math.random()}-${(new Date())}`}
-              style={{
-                height: 1,
-                width: "95%",
-                borderWidth: 1,
-                borderColor: "#DCE1E7",
-                alignSelf: "center",
-                marginVertical: 15,
-                bottom: 20,
-              }}
-            />
-          </>
-        ))}
-      </View>: null}
-
-      {scheduledCalls.length > 0 ? 
-        <View style={{ margin: 20, marginBottom: 20 }}>
-        {scheduledCalls.map((c, i) => (
-          <>
-            <View key={c._id} style={styles.catItem}>
-              <Image
-                key={`${Math.random()}-${i}`}
-                source={{
-                  uri: c.userId?.profile_image
-                }}
-                size={15}
-                style={{
-                  height: 100,
-                  width: 100,
-                  borderRadius: 50,
-                  borderWidth: 10,
-                  borderColor: "#FFFFFF",
-                }}
-              />
-              <Text key={`${Math.random()}-${i}`} style={[styles.catItemText, { marginTop: -10 }]}>
-                Video call from <Text style={{fontWeight: "bold"}}>{c.userName}</Text> has been scheduled at <Text style={{fontWeight: "bold"}}>{c.date}</Text>
-              </Text>
-              <View key={`${Math.random()}-${i}`} style={styles.Rectangle}>
-                <TouchableOpacity
-                  key={`${Math.random()}-${i}`}
-                  onPress={() => {
-                    navigation.navigate("VetProfile");
-                  }}
-                >
-                  <Text key={`${Math.random()}-${i}`} style={styles.text6}>View</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-            <View
-              key={`${Math.random()}-${(new Date())}`}
               style={{
                 height: 1,
                 width: "95%",
