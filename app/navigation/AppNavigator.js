@@ -10,6 +10,7 @@ import PatientListScreen from "../screens/PatientListScreen";
 import PatientDetailsScreen from "../screens/PatientDetailsScreen";
 import VideoCallScreen from "../screens/VideoCallScreen";
 import PrescriptionScreen from "../screens/PrescriptionScreen";
+import ViewPrescription from "../screens/ViewPrescription";
 import VetProfile from "../screens/VetProfile";
 import EditVetProfile from "../screens/EditVetProfile";
 import MedicalHistoryPets from "../screens/MedicalHistoryPets";
@@ -50,6 +51,7 @@ const AppNavigator = ({ navigation }) => {
       <Stack.Screen name="DoctorDetails" component={DoctorDetailsScreen} />
       <Stack.Screen name="Patient" component={PatientScreen} />
       <Stack.Screen name="PatientDetails" component={PatientDetailsScreen} />
+      <Stack.Screen name="ViewPrescription" component={ViewPrescription} />
       <Stack.Screen
         name="PrescriptionScreen"
         component={PrescriptionScreen}
@@ -68,26 +70,28 @@ const AppNavigator = ({ navigation }) => {
       <Stack.Screen name="WalletScreen" component={WalletScreen} />
       <Stack.Screen name="Prescriptionnnnn" component={Prescription} />
       <Stack.Screen name="PetMedication" component={PetMedication} />
-      <Stack.Screen name="ProfileSetup" 
-      options={{
-        title: "Setting Up Your Profile",
-        headerTitleStyle: {
-          color: "#476880",
-        },
-        headerTitleAlign: "center",
-      }}
-      component={ProfileSetup} />
       <Stack.Screen
-      options={{
-        title: "Verification",
-        headerTitleStyle: {
-          color: "#476880",
-        },
-        headerTitleAlign: "center",
-      }}
-      name="VerificationCode"
-      component={VerificationCodeScreen}
-    />
+        name="ProfileSetup"
+        options={{
+          title: "Setting Up Your Profile",
+          headerTitleStyle: {
+            color: "#476880",
+          },
+          headerTitleAlign: "center",
+        }}
+        component={ProfileSetup}
+      />
+      <Stack.Screen
+        options={{
+          title: "Verification",
+          headerTitleStyle: {
+            color: "#476880",
+          },
+          headerTitleAlign: "center",
+        }}
+        name="VerificationCode"
+        component={VerificationCodeScreen}
+      />
       <Stack.Screen
         name="PrescriptionPreview"
         component={PrescriptionPreview}

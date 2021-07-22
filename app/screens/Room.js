@@ -41,8 +41,16 @@ const Room = ({ navigation, route }) => {
   const [isvideo, setVideo] = useState(true);
   const [petProblems, setPetProblems] = useState();
   const [petName, setPetName] = useState();
-  const { petId, docName, userName, docId, userId, petname } = route?.params
-    ?.petId
+  const {
+    petId,
+    docName,
+    userName,
+    docId,
+    userId,
+    petname,
+    prescriptionAdded,
+    pdfUri,
+  } = route?.params?.petId
     ? route.params
     : { petId: null, docName: null, userName: null };
   const [room, setRoom] = useState();
@@ -375,9 +383,22 @@ const Room = ({ navigation, route }) => {
                   onPress={() => setVideo(false)}
                 />
                 <AppButton
-                  title="Generate Prescription"
-                  onPress={() => navigation.navigate("Video")}
-                  onPress={() => setVideo(false)}
+                  title={
+                    prescriptionAdded
+                      ? "View Prescription"
+                      : "Generate Prescription"
+                  }
+                  onPress={() => {
+                    if (pdfUri) {
+                      navigation.navigate("ViewPrescription", {
+                        pdfUri: pdfUri,
+                      });
+                    } else {
+                      navigation.navigate("Prescriptionnnnn", {
+                        details: route.params,
+                      });
+                    }
+                  }}
                 />
               </View>
             )}

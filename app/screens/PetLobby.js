@@ -137,6 +137,7 @@ const PetLobby = () => {
   };
 
   const getExpiryTime = (createdTime) => {
+    createdTime.setDate(19);
     const currentTime = new Date();
     const expiryTime = new Date();
     const expiryTimeInMs = createdTime.getTime() + 72 * 60 * 60 * 1000;
@@ -258,6 +259,8 @@ const PetLobby = () => {
               userName,
               docId: docId._id,
               userId: userId._id,
+              prescriptionAdded: false,
+              pdfUri: null,
             })
           }
         />

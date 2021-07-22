@@ -23,6 +23,8 @@ import { Formik } from "formik";
 import RBSheet from "react-native-raw-bottom-sheet";
 import PetMedication from "./PetMedication";
 import ToggleSwitch from "toggle-switch-react-native";
+import RNHTMLtoPDF from "react-native-html-to-pdf";
+import petsApi from "../api/pets";
 
 const pet = [
   { label: "Bruno", value: "Bruno" },
@@ -30,36 +32,142 @@ const pet = [
   { label: "Drogon", value: "Drogon" },
 ];
 
-const Prescription = ({ navigation }) => {
+const Prescription = ({ navigation, route }) => {
   const [todayReminders, setTodayReminders] = useState([]);
   const [upcomingReminders, setUpcomingReminders] = useState([]);
+  const [medication, setMedication] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [petDetails, setPetDetails] = useState({});
+  const [petAge, setPetAge] = useState(null);
+  const [diagnosis, onChangeDiagnosis] = useState("");
+  const [prescription, onChangePrescription] = useState("");
+  const [advice, onChangeAdvice] = useState("");
   const refRBSheet = useRef();
+  const { details } = route.params;
 
-  const getReminders = async () => {
-    const data = await getAllKeys();
-    // console.log(data)
-
-    if (data.length > 0) {
-      data.forEach(async (dateTime) => {
-        console.log("Dateime", dateTime);
-        const date = dateTime.split("-")[0];
-        if (date === new Date().toLocaleDateString()) {
-          const rmr = await getObjectData(dateTime);
-          todayReminders.push(rmr);
-        } else {
-          const rmr = await getObjectData(dateTime);
-          upcomingReminders.push(rmr);
-        }
-
-        setTodayReminders([...Array.from(new Set(todayReminders))]);
-        setUpcomingReminders([...new Set(upcomingReminders)]);
-      });
+  const petDetail = async () => {
+    setLoading(true);
+    const res = await petsApi.getSinglePet(details?.petId);
+    if (!res.ok) {
+      setLoading(false);
+      console.log(res);
+      return;
     }
+
+    console.log("ResPEt", res.data.exPet);
+    setPetDetails(res.data.exPet);
+
+    let year = res?.data?.exPet?.dob.substr(0, 4);
+    let month = res?.data?.exPet?.dob.substr(5, 2) - 1;
+    let day = res?.data?.exPet?.dob.substr(8, 2);
+    let today = new Date();
+    let age = today.getFullYear() - year;
+    if (
+      today.getMonth() < month ||
+      (today.getMonth() == month && today.getDate() < day)
+    ) {
+      age--;
+    }
+    setPetAge(age);
+
+    setLoading(false);
+  };
+  useEffect(() => {
+    petDetail();
+    console.log("age", petAge);
+  }, []);
+
+  // const [pdfUri, setPdfUri] = useState("");
+
+  const pdfstylings = {
+    display: "inline",
+    padding: "0px 20px",
   };
 
-  useEffect(() => {
-    getReminders();
-  }, []);
+  const createPDF = async () => {
+    const generateHTML = (petDetails, petAge, pdfstylings) =>
+      `<div>
+      <h1>Diagnosis :${diagnosis} </h1>
+      
+          <h2>Pet Name : ${petDetails.name}</h2>
+          <h2>Breed: ${petDetails.breed}</h2>
+          <h2>Gender: ${petDetails.gender}</h2>
+          <h2>Age : ${petAge}</h2>
+       <table style="width:100%;text-align:center; border-collapse: separate;
+       border-spacing: 0 0.6em;">
+          <tr>
+            <th style="width:10%;border: 1px solid black;">Sr.No.</th>
+            <th style="border: 1px solid black;">Medicine</th>
+            <th style="border: 1px solid black;">Dose</th>
+            <th style="border: 1px solid black;">timing-Duration</th>
+          </tr>
+      ${medication.map(
+        (med, index) =>
+          `   <tr >
+               <td style="border: 1px solid black;">${index}</td>
+              <td style="border: 1px solid black;">${med.medicine_Name}</td>
+              <td style="border: 1px solid black;">${med.doze}</td>
+              <td style="border: 1px solid black;">
+              ${med.isSelected}- ${med.duration}
+              </td>
+          </tr>`
+      )}
+          </tr>
+        </table>
+      <br />
+    <h3>Advice</h3>
+    <p>${advice}</p>
+    <br />
+     <h2>Diagnostic prescription :</h2>
+      <p>${prescription}</p>
+    </div>`;
+
+    const html = generateHTML(petDetails, petAge, pdfstylings);
+    let options = {
+      html,
+      fileName: diagnosis.substr(0, 10),
+      directory: "Documents",
+    };
+    let file = await RNHTMLtoPDF.convert(options);
+    // console.log(file.filePath);
+
+    console.log("file", file.filePath);
+    navigation.navigate("PrescriptionPreview", {
+      pdfUri: file.filePath,
+      prescription: prescription,
+      details: details,
+    });
+  };
+
+  // const getReminders = async () => {
+  //   const data = await getAllKeys();
+  //   // console.log(data)
+
+  //   if (data.length > 0) {
+  //     data.forEach(async (dateTime) => {
+  //       console.log("Dateime", dateTime);
+  //       const date = dateTime.split("-")[0];
+  //       if (date === new Date().toLocaleDateString()) {
+  //         const rmr = await getObjectData(dateTime);
+  //         todayReminders.push(rmr);
+  //       } else {
+  //         const rmr = await getObjectData(dateTime);
+  //         upcomingReminders.push(rmr);
+  //       }
+
+  //       setTodayReminders([...Array.from(new Set(todayReminders))]);
+  //       setUpcomingReminders([...new Set(upcomingReminders)]);
+  //     });
+  //   }
+  // };
+
+  const onClose = (data) => {
+    setMedication([...medication, data]);
+  };
+
+  // useEffect(() => {
+  //   getReminders();
+  // }, []);
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
@@ -83,189 +191,201 @@ const Prescription = ({ navigation }) => {
                 }}
               />
               <Text style={styles.text5}>Doctor Notes/Diagnosis</Text>
-              <TextInput style={styles.textinput1} numberOfLines={4} />
+              <TextInput
+                style={styles.textinput1}
+                numberOfLines={4}
+                onChangeText={onChangeDiagnosis}
+                value={diagnosis}
+              />
             </View>
             <View style={{ margin: 20 }}>
               <Text style={styles.text5}>Medications</Text>
             </View>
-            <View
-              style={{
-                flexDirection: "row",
-                alignSelf: "center",
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: "column",
-                  alignSelf: "center",
-                }}
-              >
-                <View
+            {medication.length !== 0 &&
+              medication.map((med) => (
+                <View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignSelf: "center",
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "column",
+                        alignSelf: "center",
+                      }}
+                    >
+                      <View
+                        style={{
+                          backgroundColor: "#41BFE2",
+                          borderRadius: 50,
+                          height: 25,
+                          width: 25,
+                          justifyContent: "center",
+                          elevation: 10,
+                          borderWidth: 5,
+                          borderColor: "#FFFFFF",
+                          alignSelf: "center",
+                          margin: 5,
+                        }}
+                      />
+                      <Text
+                        style={{
+                          color: "#47687F",
+                          fontSize: 14,
+                          fontWeightL: "400",
+                          alignSelf: "center",
+                        }}
+                      >
+                        {med.duration}
+                      </Text>
+                    </View>
+                    <View
+                      style={{
+                        borderColor: "#FFFFFF",
+                        borderWidth: 1,
+                        marginBottom: 18,
+                        borderRadius: 20,
+                        height: 70,
+                        width: 250,
+                        alignSelf: "center",
+                        justifyContent: "center",
+                        backgroundColor: "#FFFFFF",
+                        margin: 10,
+                        elevation: 10,
+                      }}
+                    >
+                      <View style={{ flexDirection: "row" }}>
+                        <View
+                          style={{ flexDirection: "column", marginLeft: 15 }}
+                        >
+                          <Text
+                            style={{
+                              color: "#47687F",
+                              fontSize: 14,
+                              fontWeightL: "400",
+                            }}
+                          >
+                            {med.medicine_Name}
+                          </Text>
+                          <Text
+                            style={{
+                              color: "#B9C4CF",
+                              fontSize: 11,
+                              fontWeightL: "400",
+                            }}
+                          >
+                            {med.isSelected}
+                          </Text>
+                        </View>
+
+                        <Text
+                          style={{
+                            color: "#41BFE2",
+                            fontSize: 18,
+                            fontWeight: "700",
+                            flex: 1,
+                            textAlign: "right",
+                            marginRight: 15,
+                          }}
+                        >
+                          {med.doze}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                  {/* <View
                   style={{
-                    backgroundColor: "#41BFE2",
-                    borderRadius: 50,
-                    height: 25,
-                    width: 25,
-                    justifyContent: "center",
-                    elevation: 10,
-                    borderWidth: 5,
-                    borderColor: "#FFFFFF",
-                    alignSelf: "center",
-                    margin: 5,
-                  }}
-                />
-                <Text
-                  style={{
-                    color: "#47687F",
-                    fontSize: 14,
-                    fontWeightL: "400",
+                    flexDirection: "row",
                     alignSelf: "center",
                   }}
                 >
-                  10:00 am
-                </Text>
-              </View>
-              <View
-                style={{
-                  borderColor: "#FFFFFF",
-                  borderWidth: 1,
-                  marginBottom: 18,
-                  borderRadius: 20,
-                  height: 70,
-                  width: 250,
-                  alignSelf: "center",
-                  justifyContent: "center",
-                  backgroundColor: "#FFFFFF",
-                  margin: 10,
-                  elevation: 10,
-                }}
-              >
-                <View style={{ flexDirection: "row" }}>
-                  <View style={{ flexDirection: "column", marginLeft: 15 }}>
+                  <View
+                    style={{
+                      flexDirection: "column",
+                      alignSelf: "center",
+                    }}
+                  >
+                    <View
+                      style={{
+                        backgroundColor: "#41BFE2",
+                        borderRadius: 50,
+                        height: 25,
+                        width: 25,
+                        justifyContent: "center",
+                        elevation: 10,
+                        borderWidth: 5,
+                        borderColor: "#FFFFFF",
+                        alignSelf: "center",
+                        margin: 5,
+                      }}
+                    />
                     <Text
                       style={{
                         color: "#47687F",
                         fontSize: 14,
                         fontWeightL: "400",
+                        alignSelf: "center",
                       }}
                     >
-                      Intas Eazypet
-                    </Text>
-                    <Text
-                      style={{
-                        color: "#B9C4CF",
-                        fontSize: 11,
-                        fontWeightL: "400",
-                      }}
-                    >
-                      After Breakfast
+                      09:30 pm
                     </Text>
                   </View>
-
-                  <Text
+                  <View
                     style={{
-                      color: "#41BFE2",
-                      fontSize: 18,
-                      fontWeight: "700",
-                      flex: 1,
-                      textAlign: "right",
-                      marginRight: 15,
+                      borderColor: "#FFFFFF",
+                      borderWidth: 1,
+                      marginBottom: 18,
+                      borderRadius: 20,
+                      height: 70,
+                      width: 250,
+                      alignSelf: "center",
+                      justifyContent: "center",
+                      backgroundColor: "#FFFFFF",
+                      margin: 10,
+                      elevation: 10,
                     }}
                   >
-                    1 No.
-                  </Text>
-                </View>
-              </View>
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                alignSelf: "center",
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: "column",
-                  alignSelf: "center",
-                }}
-              >
-                <View
-                  style={{
-                    backgroundColor: "#41BFE2",
-                    borderRadius: 50,
-                    height: 25,
-                    width: 25,
-                    justifyContent: "center",
-                    elevation: 10,
-                    borderWidth: 5,
-                    borderColor: "#FFFFFF",
-                    alignSelf: "center",
-                    margin: 5,
-                  }}
-                />
-                <Text
-                  style={{
-                    color: "#47687F",
-                    fontSize: 14,
-                    fontWeightL: "400",
-                    alignSelf: "center",
-                  }}
-                >
-                  09:30 pm
-                </Text>
-              </View>
-              <View
-                style={{
-                  borderColor: "#FFFFFF",
-                  borderWidth: 1,
-                  marginBottom: 18,
-                  borderRadius: 20,
-                  height: 70,
-                  width: 250,
-                  alignSelf: "center",
-                  justifyContent: "center",
-                  backgroundColor: "#FFFFFF",
-                  margin: 10,
-                  elevation: 10,
-                }}
-              >
-                <View style={{ flexDirection: "row" }}>
-                  <View style={{ flexDirection: "column", marginLeft: 15 }}>
-                    <Text
-                      style={{
-                        color: "#47687F",
-                        fontSize: 14,
-                        fontWeightL: "400",
-                      }}
-                    >
-                      Himalaya Digyton Drop
-                    </Text>
-                    <Text
-                      style={{
-                        color: "#B9C4CF",
-                        fontSize: 11,
-                        fontWeightL: "400",
-                      }}
-                    >
-                      After Breakfast
-                    </Text>
+                    <View style={{ flexDirection: "row" }}>
+                      <View style={{ flexDirection: "column", marginLeft: 15 }}>
+                        <Text
+                          style={{
+                            color: "#47687F",
+                            fontSize: 14,
+                            fontWeightL: "400",
+                          }}
+                        >
+                          Himalaya Digyton Drop
+                        </Text>
+                        <Text
+                          style={{
+                            color: "#B9C4CF",
+                            fontSize: 11,
+                            fontWeightL: "400",
+                          }}
+                        >
+                          After Breakfast
+                        </Text>
+                      </View>
+
+                      <Text
+                        style={{
+                          color: "#41BFE2",
+                          fontSize: 18,
+                          fontWeight: "700",
+                          flex: 1,
+                          textAlign: "right",
+                          marginRight: 15,
+                        }}
+                      >
+                        10ml
+                      </Text>
+                    </View>
                   </View>
-
-                  <Text
-                    style={{
-                      color: "#41BFE2",
-                      fontSize: 18,
-                      fontWeight: "700",
-                      flex: 1,
-                      textAlign: "right",
-                      marginRight: 15,
-                    }}
-                  >
-                    10ml
-                  </Text>
+                </View> */}
                 </View>
-              </View>
-            </View>
+              ))}
           </View>
         </View>
 
@@ -316,18 +436,28 @@ const Prescription = ({ navigation }) => {
               },
             }}
           >
-            <PetMedication />
+            <PetMedication onclose={onClose} />
           </RBSheet>
           <Text style={styles.text1}>Add Medication</Text>
           <Text style={styles.text5}>Diagnostic prescription</Text>
-          <TextInput style={styles.textinput1} numberOfLines={4} />
+          <TextInput
+            style={styles.textinput1}
+            numberOfLines={4}
+            value={prescription}
+            onChangeText={onChangePrescription}
+          />
           <Text style={styles.text5}>Advice/Remarks</Text>
-          <TextInput style={styles.textinput1} numberOfLines={4} />
+          <TextInput
+            style={styles.textinput1}
+            numberOfLines={4}
+            value={advice}
+            onChangeText={onChangeAdvice}
+          />
         </View>
         <View style={{ margin: 25 }}>
           <AppButton
             title="Generate Prescription"
-            onPress={() => navigation.navigate("PrescriptionPreview")}
+            onPress={() => createPDF()}
           />
         </View>
       </View>
