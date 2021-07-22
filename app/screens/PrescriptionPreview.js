@@ -54,6 +54,8 @@ const PrescriptionPreview = ({ navigation, route }) => {
           userId: details.userId,
           prescriptionAdded: true,
           pdfUri: pdfUri,
+          callId: details.callId,
+          petowner: details.petowner,
         });
         setLoading(false);
       }
